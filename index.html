@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="es" ng-app="agroTechApp">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgroTech - Dashboard de Gestión de Ganado</title>
+  
+  <!-- Google Fonts - Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- CSS Styles -->
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- AngularJS -->
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  
+  <!-- Chart.js and DataLabels Plugin -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+</head>
+<body ng-controller="DashboardController">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-menu">
+      <div class="sidebar-item" ng-class="{active: activeMenu === 'dashboard'}" ng-click="setActiveMenu('dashboard')" data-tooltip="Dashboard">
+        <!-- Dashboard Grid Icon -->
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <rect x="3" y="3" width="7" height="7" rx="1.5" stroke-linejoin="round"/>
+          <rect x="14" y="3" width="7" height="7" rx="1.5" stroke-linejoin="round"/>
+          <rect x="14" y="14" width="7" height="7" rx="1.5" stroke-linejoin="round"/>
+          <rect x="3" y="14" width="7" height="7" rx="1.5" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="sidebar-item" ng-class="{active: activeMenu === 'tags'}" ng-click="setActiveMenu('tags')" data-tooltip="Animales">
+        <!-- Tag Icon -->
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9.5 20.5L19 11c1.5-1.5 1.5-3.5 0-5s-3.5-1.5-5 0L4.5 15.5V20h5z"/>
+          <circle cx="9.5" cy="9.5" r="1.5" fill="currentColor"/>
+        </svg>
+      </div>
+      <div class="sidebar-item" ng-class="{active: activeMenu === 'calendar'}" ng-click="setActiveMenu('calendar')" data-tooltip="Centro de Eventos">
+        <!-- Calendar Icon -->
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <rect x="3" y="4" width="18" height="16" rx="2" stroke-linejoin="round"/>
+          <path stroke-linecap="round" d="M16 2v4M8 2v4M3 10h18"/>
+          <circle cx="8" cy="14" r="1" fill="currentColor"/>
+          <circle cx="12" cy="14" r="1" fill="currentColor"/>
+          <circle cx="16" cy="14" r="1" fill="currentColor"/>
+          <circle cx="8" cy="17" r="1" fill="currentColor"/>
+          <circle cx="12" cy="17" r="1" fill="currentColor"/>
+        </svg>
+      </div>
+      <div class="sidebar-item" ng-class="{active: activeMenu === 'reports'}" ng-click="setActiveMenu('reports')" data-tooltip="Centro de Reportes">
+        <!-- Reports Icon -->
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 20V8m6 12V4m6 12v-6m6 6v-3"/>
+        </svg>
+      </div>
+      <div class="sidebar-item" ng-class="{active: activeMenu === 'settings'}" ng-click="setActiveMenu('settings')" data-tooltip="Configuración">
+        <!-- Sliders / Config Icon -->
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+          <circle cx="8" cy="6" r="2.5" fill="#ffffff" stroke="currentColor"/>
+          <circle cx="16" cy="12" r="2.5" fill="#ffffff" stroke="currentColor"/>
+          <circle cx="10" cy="18" r="2.5" fill="#ffffff" stroke="currentColor"/>
+        </svg>
+      </div>
+    </div>
+  </aside>
+
+  <!-- App Container -->
+  <div class="app-container">
+    
+    <!-- Topbar -->
+    <header class="topbar">
+      <!-- Left Logo & Herd Name -->
+      <div class="topbar-left">
+        <div class="logo-container">
+          <!-- Customized Cow Head Logo -->
+          <svg viewBox="0 0 100 100" width="32" height="32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 30C20 18 32 10 50 18C68 10 80 18 80 30C80 42 75 52 70 58C65 62 60 78 50 78C40 78 35 62 30 58C25 52 20 42 20 30Z" stroke="#52b788" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M22 35C15 35 12 40 15 45C18 50 24 45 25 43" stroke="#52b788" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M78 35C85 35 88 40 85 45C82 50 76 45 75 43" stroke="#52b788" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M30 20C28 12 20 8 18 8" stroke="#52b788" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M70 20C72 12 80 8 82 8" stroke="#52b788" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+            <circle cx="40" cy="64" r="3" fill="#2d6a4f" />
+            <circle cx="60" cy="64" r="3" fill="#2d6a4f" />
+          </svg>
+          <span class="logo-text">AgroTech</span>
+        </div>
+        <div class="topbar-divider"></div>
+        <span class="scope-text">Rebaño de Prueba</span>
+      </div>
+      
+      <!-- Center Search Bar -->
+      <div class="topbar-center">
+        <div class="search-wrapper">
+          <input type="text" class="search-input" ng-model="searchQuery" placeholder="Buscar animales...">
+          <!-- Search Magnifying Glass Icon -->
+          <svg class="search-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </div>
+      </div>
+      
+      <!-- Right Profile Avatar and Dropdown -->
+      <div class="topbar-right">
+        <div class="profile-container" id="profile-container" ng-click="toggleProfile()" ng-class="{active: isProfileOpen}">
+          <img class="avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="Usuario">
+          <!-- Chevron Icon -->
+          <svg class="chevron-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </div>
+        
+        <!-- Dropdown Menu -->
+        <div class="profile-dropdown" ng-show="isProfileOpen">
+          <a class="dropdown-item">Mi Perfil</a>
+          <a class="dropdown-item">Configuración</a>
+          <div style="border-top: 1px solid var(--border-gray); margin: 4px 0;"></div>
+          <a class="dropdown-item" style="color: #ef4444;">Cerrar Sesión</a>
+        </div>
+      </div>
+    </header>
+    
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- Dashboard View -->
+      <div ng-if="activeMenu === 'dashboard'" style="display: flex; flex-direction: column; gap: 24px; width: 100%;">
+        <!-- Row 1: KPI Cards -->
+        <section class="kpi-grid">
+          <div class="kpi-card" ng-repeat="card in kpiCards">
+            <div class="kpi-icon-container">
+              
+              <!-- Icon 1: Milk Bucket -->
+              <svg ng-if="card.iconType === 'milk-bucket'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21H7a2 2 0 0 1-1.99-1.8L4 8h16l-1.01 11.2A2 2 0 0 1 17 21Z" />
+                <path d="M6 8V6a6 6 0 0 1 12 0v2" />
+                <path d="M4 8h16" />
+              </svg>
+              
+              <!-- Icon 2: Female Cow Weighing Scale -->
+              <svg ng-if="card.iconType === 'scale-female'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 6h16M5 8h14M7 8v10h10V8" />
+                <rect x="9" y="10" width="6" height="5" rx="1" />
+                <!-- Small cow head silhouette -->
+                <path d="M11 11.5c.3-.3.7-.5 1-.5s.7.2 1 .5v.8c0 .3-.3.4-.5.4h-1c-.2 0-.5-.1-.5-.4v-.8Z" fill="currentColor" stroke="none" />
+                <path d="M3 20h18" />
+              </svg>
+              
+              <!-- Icon 3: Male Cow Weighing Scale -->
+              <svg ng-if="card.iconType === 'scale-male'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 6h16M5 8h14M7 8v10h10V8" />
+                <rect x="9" y="10" width="6" height="5" rx="1" />
+                <path d="M11 11.5c.3-.3.7-.5 1-.5s.7.2 1 .5v.8c0 .3-.3.4-.5.4h-1c-.2 0-.5-.1-.5-.4v-.8Z" fill="currentColor" stroke="none" />
+                <path d="M3 20h18" />
+              </svg>
+              
+              <!-- Icon 4: Weight Bag/Block (Maute) -->
+              <svg ng-if="card.iconType === 'weight-maute'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 7a3 3 0 0 1 6 0v1H9V7z" />
+                <path d="M5 8h14l1 3v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-9l1-3z" />
+                <!-- Arrow Up inside -->
+                <path d="M12 17v-5M9 14l3-3 3 3" />
+              </svg>
+              
+            </div>
+            <div class="kpi-details">
+              <span class="kpi-value" ng-bind="card.value"></span>
+              <span class="kpi-subtitle" ng-bind="card.subtitle" title="{{card.subtitle}}"></span>
+            </div>
+          </div>
+        </section>
+        
+        <!-- Row 2: Charts -->
+        <section class="charts-grid">
+          
+          <!-- Chart 1: Inventario Actual -->
+          <div class="chart-card">
+            <h3 class="chart-title" ng-bind="chart1.title"></h3>
+            <div class="chart-wrapper">
+              <doughnut-chart labels="chart1.labels" data="chart1.data" colors="chart1.colors"></doughnut-chart>
+              <div class="chart-center-text">
+                <span class="center-subtitle" ng-bind="chart1.centerLabel"></span>
+                <span class="center-value" ng-bind="chart1.centerValue"></span>
+              </div>
+            </div>
+            <div class="chart-legend">
+              <div class="legend-item" ng-repeat="item in chart1.legend">
+                <span class="legend-color" ng-style="{'background-color': item.color}"></span>
+                <span class="legend-label" ng-bind="item.label"></span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Chart 2: Situación reproductiva actual -->
+          <div class="chart-card">
+            <h3 class="chart-title" ng-bind="chart2.title"></h3>
+            <div class="chart-wrapper">
+              <doughnut-chart labels="chart2.labels" data="chart2.data" colors="chart2.colors"></doughnut-chart>
+              <div class="chart-center-text">
+                <span class="center-subtitle" ng-bind="chart2.centerLabel"></span>
+                <span class="center-value" ng-bind="chart2.centerValue"></span>
+              </div>
+            </div>
+            <div class="chart-legend">
+              <div class="legend-item" ng-repeat="item in chart2.legend">
+                <span class="legend-color" ng-style="{'background-color': item.color}"></span>
+                <span class="legend-label" ng-bind="item.label"></span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Chart 3: Situación productiva actual -->
+          <div class="chart-card">
+            <h3 class="chart-title" ng-bind="chart3.title"></h3>
+            <div class="chart-wrapper">
+              <doughnut-chart labels="chart3.labels" data="chart3.data" colors="chart3.colors"></doughnut-chart>
+              <div class="chart-center-text">
+                <span class="center-subtitle" ng-bind="chart3.centerLabel"></span>
+                <span class="center-value" ng-bind="chart3.centerValue"></span>
+              </div>
+            </div>
+            <div class="chart-legend">
+              <div class="legend-item" ng-repeat="item in chart3.legend">
+                <span class="legend-color" ng-style="{'background-color': item.color}"></span>
+                <span class="legend-label" ng-bind="item.label"></span>
+              </div>
+            </div>
+          </div>
+          
+        </section>
+      </div>
+
+      <!-- Animales View -->
+      <div ng-if="activeMenu === 'tags'" ng-controller="AnimalesController" style="display: flex; flex-direction: column; gap: 20px; width: 100%;">
+        
+        <!-- Toolbar -->
+        <div class="animals-toolbar">
+          <div class="toolbar-left">
+            <h2 class="toolbar-title">Animales</h2>
+            
+            <!-- Selector Dropdown -->
+            <div class="selector-dropdown">
+              <span>Todos los animales</span>
+              <!-- Star Icon Outline in Green -->
+              <svg class="star-icon" viewBox="0 0 24 24" width="16" height="16">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+              <!-- Down Chevron -->
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </div>
+            
+            <!-- Filter Button Group (Blue) -->
+            <div class="filter-btn-group">
+              <button class="filter-main-btn" title="Filtrar">
+                <!-- Funnel Icon -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/>
+                </svg>
+              </button>
+              <button class="filter-chevron-btn">
+                <!-- Down Chevron -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          
+          <div class="toolbar-right">
+            <!-- Action Icons -->
+            <button class="action-icon-btn" title="Nuevo Documento">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+              </svg>
+            </button>
+            <button class="action-icon-btn" title="Eliminar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              </svg>
+            </button>
+            <button class="action-icon-btn" title="Recargar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+              </svg>
+            </button>
+            <button class="action-icon-btn" title="Exportar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+              </svg>
+            </button>
+            
+            <!-- Green Plus Circle Button -->
+            <button class="add-circle-btn" title="Agregar Animal">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+            </button>
+            
+            <!-- Vertical Options Dots -->
+            <button class="action-icon-btn" title="Opciones">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="5" r="1"/>
+                <circle cx="12" cy="12" r="1"/>
+                <circle cx="12" cy="19" r="1"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Data Table Container -->
+        <div class="data-table-container">
+          <div class="table-wrapper">
+            <table class="animals-table">
+              <thead>
+                <tr>
+                  <th class="checkbox-cell">
+                    <input type="checkbox" class="custom-checkbox" ng-model="selectAll" ng-change="toggleSelectAll()">
+                  </th>
+                  <th>
+                    <div class="th-inner">
+                      <span class="th-title">
+                        Práctico
+                        <!-- Funnel icon for Practical -->
+                        <svg class="th-filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/>
+                        </svg>
+                      </span>
+                      <span class="th-subtitle">Único</span>
+                    </div>
+                  </th>
+                  <th>
+                    <div class="th-inner">
+                      <span class="th-title">Categoría</span>
+                      <span class="th-subtitle">Estatus</span>
+                    </div>
+                  </th>
+                  <th>
+                    <div class="th-inner">
+                      <span class="th-title">Fecha nacimiento</span>
+                      <span class="th-subtitle">Edad</span>
+                    </div>
+                  </th>
+                  <th>
+                    <div class="th-inner">
+                      <span class="th-title">Lote</span>
+                      <span class="th-subtitle">Descripción</span>
+                    </div>
+                  </th>
+                  <th>
+                    <div class="th-inner">
+                      <span class="th-title">Composición</span>
+                      <span class="th-subtitle">Racial</span>
+                    </div>
+                  </th>
+                  <th>
+                    <div class="th-inner">
+                      <span class="th-title">Etiquetas</span>
+                      <span class="th-subtitle">Activos</span>
+                    </div>
+                  </th>
+                  <th>
+                    <div class="th-inner">
+                      <span class="th-title">Padre</span>
+                      <span class="th-subtitle">Madre</span>
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="animal in animals | startFrom:(currentPage-1)*itemsPerPage | limitTo:itemsPerPage">
+                  <td class="checkbox-cell">
+                    <input type="checkbox" class="custom-checkbox" ng-model="selectedAnimals[animal.practico]">
+                  </td>
+                  <td>
+                    <div class="td-inner">
+                      <span class="td-line1" ng-bind="animal.practico"></span>
+                      <span class="td-line2" ng-bind="animal.unico"></span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="td-inner">
+                      <span class="td-line1" ng-bind="animal.categoria"></span>
+                      <span class="td-line2" ng-bind="animal.estatus"></span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="td-inner">
+                      <span class="td-line1" ng-bind="animal.fechaNacimiento || '&nbsp;'"></span>
+                      <span class="td-line2" ng-bind="animal.edad || '&nbsp;'"></span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="td-inner">
+                      <span class="td-line1" ng-bind="animal.lote"></span>
+                      <span class="td-line2" ng-bind="animal.descripcion"></span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="td-inner">
+                      <span class="td-line1" ng-bind="animal.composicion"></span>
+                      <span class="td-line2" ng-bind="animal.racial || '&nbsp;'"></span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="td-inner">
+                      <span class="td-line1" ng-bind="animal.etiquetas || '&nbsp;'"></span>
+                      <span class="td-line2" ng-bind="animal.activos || '&nbsp;'"></span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="td-inner">
+                      <span class="td-line1" ng-bind="animal.padre || '&nbsp;'"></span>
+                      <span class="td-line2" ng-bind="animal.madre || '&nbsp;'"></span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <!-- Table Footer / Pagination -->
+          <div class="table-footer">
+            <div class="pagination-controls">
+              <button class="pagination-btn" ng-class="{disabled: currentPage === 1}" ng-click="setPage(1)" title="Primera Página">|&lt;</button>
+              <button class="pagination-btn" ng-class="{disabled: currentPage === 1}" ng-click="setPage(currentPage - 1)" title="Página Anterior">&lt;</button>
+              <button class="pagination-btn" ng-repeat="p in pages" ng-class="{active: p === currentPage}" ng-click="setPage(p)" ng-bind="p"></button>
+              <button class="pagination-btn" ng-class="{disabled: currentPage === totalPages}" ng-click="setPage(currentPage + 1)" title="Página Siguiente">&gt;</button>
+              <button class="pagination-btn" ng-class="{disabled: currentPage === totalPages}" ng-click="setPage(totalPages)" title="Última Página">&gt;|</button>
+            </div>
+            <div class="pagination-summary">
+              Página {{currentPage}} de {{totalPages}} ({{animals.length}} registros)
+            </div>
+          </div>
+        </div>
+        
+      </div>
+
+      <!-- Centro de Eventos View -->
+      <div ng-if="activeMenu === 'calendar'" ng-controller="EventosController" style="display: flex; flex-direction: column; gap: 20px; width: 100%;">
+        
+        <!-- Header -->
+        <div class="events-header">
+          <div class="events-header-left">
+            <h2 class="toolbar-title">Centro de Eventos</h2>
+          </div>
+          <div class="events-header-right">
+            <!-- Gear Dropdown Button -->
+            <button class="btn-blue-dark">
+              <!-- Gear Icon -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+              </svg>
+              <!-- Down Chevron -->
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </button>
+            <!-- Sliders Settings Button -->
+            <button class="btn-green-sliders">
+              <!-- Sliders Icon -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="4" y1="21" x2="4" y2="14"/>
+                <line x1="4" y1="10" x2="4" y2="3"/>
+                <line x1="12" y1="21" x2="12" y2="12"/>
+                <line x1="12" y1="8" x2="12" y2="3"/>
+                <line x1="20" y1="21" x2="20" y2="16"/>
+                <line x1="20" y1="12" x2="20" y2="3"/>
+                <line x1="1" y1="14" x2="7" y2="14"/>
+                <line x1="9" y1="8" x2="15" y2="8"/>
+                <line x1="17" y1="16" x2="23" y2="16"/>
+              </svg>
+              <span>Ajustes</span>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Empty State Table -->
+        <div>
+          <div class="events-table-container">
+            <table class="events-table">
+              <thead>
+                <tr>
+                  <th style="width: 25%;">Fecha</th>
+                  <th style="width: 25%;">Código</th>
+                  <th style="width: 25%;">Tipo</th>
+                  <th style="width: 25%;">Vencimiento</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td colspan="4" style="text-align: left; color: var(--text-secondary);">
+                    Ningún registro encontrado
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="events-table-footer-text">
+            0 registros
+          </div>
+        </div>
+        
+        <!-- Grid of Event Categories -->
+        <div class="events-categories-grid">
+          <div class="category-card" ng-repeat="cat in categories">
+            <div class="category-card-header">
+              
+              <!-- Icon 1: Reproductivos (Brown cow head) -->
+              <svg ng-if="cat.iconoType === 'reproductivos'" viewBox="0 0 100 100" width="28" height="28" style="flex-shrink: 0;">
+                <path d="M25 35c0-10 10-15 25-10 15-5 25 0 25 10c0 10-5 18-10 22c-3 3-5 12-15 12s-12-9-15-12c-5-4-10-12-10-22z" fill="#5c3d2e" stroke="#2d6a4f" stroke-width="4" />
+                <path d="M26 38c-5 0-8 3-6 7c2 4 6 0 7-1" fill="#5c3d2e" stroke="#2d6a4f" stroke-width="4" />
+                <path d="M74 38c5 0 8 3 6 7c-2 4-6 0-7-1" fill="#5c3d2e" stroke="#2d6a4f" stroke-width="4" />
+                <path d="M32 27c-2-6-8-9-10-9" stroke="#2d6a4f" stroke-width="4" stroke-linecap="round" fill="none" />
+                <path d="M68 27c2-6 8-9 10-9" stroke="#2d6a4f" stroke-width="4" stroke-linecap="round" fill="none" />
+              </svg>
+              
+              <!-- Icon 2: Productivos (Beige/Yellowish cow head) -->
+              <svg ng-if="cat.iconoType === 'productivos'" viewBox="0 0 100 100" width="28" height="28" style="flex-shrink: 0;">
+                <path d="M25 35c0-10 10-15 25-10 15-5 25 0 25 10c0 10-5 18-10 22c-3 3-5 12-15 12s-12-9-15-12c-5-4-10-12-10-22z" fill="#f0e6d2" stroke="#2d6a4f" stroke-width="4" />
+                <path d="M26 38c-5 0-8 3-6 7c2 4 6 0 7-1" fill="#f0e6d2" stroke="#2d6a4f" stroke-width="4" />
+                <path d="M74 38c5 0 8 3 6 7c-2 4-6 0-7-1" fill="#f0e6d2" stroke="#2d6a4f" stroke-width="4" />
+                <path d="M32 27c-2-6-8-9-10-9" stroke="#2d6a4f" stroke-width="4" stroke-linecap="round" fill="none" />
+                <path d="M68 27c2-6 8-9 10-9" stroke="#2d6a4f" stroke-width="4" stroke-linecap="round" fill="none" />
+              </svg>
+              
+              <!-- Icon 3: Inventarios (Clipboard) -->
+              <svg ng-if="cat.iconoType === 'inventarios'" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#2d6a4f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
+                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                <rect x="8" y="2" width="8" height="4" rx="1" fill="#e8f5e9" />
+                <path d="M9 12h6M9 16h6" />
+              </svg>
+              
+              <!-- Icon 4: Veterinarios (Red circular shield/cross) -->
+              <svg ng-if="cat.iconoType === 'veterinarios'" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#ef4444" stroke-width="2" style="flex-shrink: 0;">
+                <circle cx="12" cy="12" r="10" fill="#fee2e2" />
+                <path d="M12 8v8M8 12h8" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" />
+              </svg>
+              
+              <!-- Icon 5: Otros (Green badge with 3 dots) -->
+              <svg ng-if="cat.iconoType === 'otros'" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#2d6a4f" stroke-width="2" style="flex-shrink: 0;">
+                <circle cx="12" cy="12" r="10" fill="#e8f5e9" />
+                <circle cx="8" cy="12" r="1" fill="#2d6a4f" stroke="#2d6a4f" />
+                <circle cx="12" cy="12" r="1" fill="#2d6a4f" stroke="#2d6a4f" />
+                <circle cx="16" cy="12" r="1" fill="#2d6a4f" stroke="#2d6a4f" />
+              </svg>
+              
+              <span class="category-card-title" ng-bind="cat.titulo"></span>
+            </div>
+            
+            <div class="category-links-list">
+              <a class="category-link" ng-repeat="link in cat.enlaces">
+                <span class="category-link-chevron">&gt;</span>
+                <span ng-bind="link"></span>
+              </a>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+
+      <!-- Centro de Reportes View -->
+      <div ng-if="activeMenu === 'reports'" ng-controller="ReportesController" style="display: flex; flex-direction: column; gap: 20px; width: 100%;">
+        
+        <!-- Header -->
+        <div class="events-header">
+          <div class="events-header-left">
+            <h2 class="toolbar-title">Centro de Reportes</h2>
+          </div>
+          <div class="events-header-right">
+            <!-- Green Split Button -->
+            <div class="split-button-container">
+              <button class="split-button-main" title="Agregar Reporte">
+                <!-- Plus Icon -->
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"/>
+                  <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                <span>Agregar</span>
+              </button>
+              <button class="split-button-arrow">
+                <!-- Down Chevron -->
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Empty State Table -->
+        <div>
+          <div class="events-table-container">
+            <table class="events-table">
+              <thead>
+                <tr>
+                  <th style="width: 25%;">
+                    Código
+                    <svg class="th-filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="float: right; margin-top: 3px;">
+                      <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/>
+                    </svg>
+                  </th>
+                  <th style="width: 30%;">
+                    Nombre
+                    <svg class="th-filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="float: right; margin-top: 3px;">
+                      <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/>
+                    </svg>
+                  </th>
+                  <th style="width: 35%;">
+                    Descripción
+                    <svg class="th-filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="float: right; margin-top: 3px;">
+                      <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/>
+                    </svg>
+                  </th>
+                  <th style="width: 10%;"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td colspan="4" style="text-align: left; color: var(--text-secondary);">
+                    Ningún registro encontrado
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <!-- Grid of Report Categories (4 Cards) -->
+        <div class="reports-categories-grid">
+          <div class="category-card" ng-repeat="cat in categories">
+            <div class="category-card-header">
+              
+              <!-- Icon 1: Gestión (Clipboard) -->
+              <svg ng-if="cat.iconoType === 'gestion'" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#2d6a4f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
+                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                <rect x="8" y="2" width="8" height="4" rx="1" fill="#e8f5e9" />
+                <path d="M9 12h6M9 16h6" />
+              </svg>
+              
+              <!-- Icon 2: Animales (Cow head) -->
+              <svg ng-if="cat.iconoType === 'animales'" viewBox="0 0 100 100" width="28" height="28" style="flex-shrink: 0;">
+                <path d="M25 35c0-10 10-15 25-10 15-5 25 0 25 10c0 10-5 18-10 22c-3 3-5 12-15 12s-12-9-15-12c-5-4-10-12-10-22z" fill="#2d6a4f" stroke="#2d6a4f" stroke-width="4" fill-opacity="0.1" />
+                <path d="M26 38c-5 0-8 3-6 7c2 4 6 0 7-1" fill="#2d6a4f" stroke="#2d6a4f" stroke-width="4" />
+                <path d="M74 38c5 0 8 3 6 7c-2 4-6 0-7-1" fill="#2d6a4f" stroke="#2d6a4f" stroke-width="4" />
+                <path d="M32 27c-2-6-8-9-10-9" stroke="#2d6a4f" stroke-width="4" stroke-linecap="round" fill="none" />
+                <path d="M68 27c2-6 8-9 10-9" stroke="#2d6a4f" stroke-width="4" stroke-linecap="round" fill="none" />
+              </svg>
+              
+              <!-- Icon 3: Históricos (Clock) -->
+              <svg ng-if="cat.iconoType === 'historicos'" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#2d6a4f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
+                <circle cx="12" cy="12" r="10" fill="#e8f5e9" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+              
+              <!-- Icon 4: Multirebaños (Barns/Houses) -->
+              <svg ng-if="cat.iconoType === 'multirebanos'" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#2d6a4f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
+                <path d="M3 20V11l5-4 5 4v9" fill="#fce8e6" />
+                <path d="M3 20V11l5-4 5 4v9" />
+                <path d="M8 20v-5h3v5" />
+                <path d="M12 20v-4l4-3 5 3v4" fill="#fee2e2" />
+                <path d="M12 20v-4l4-3 5 3v4" />
+              </svg>
+              
+              <span class="category-card-title" ng-bind="cat.titulo"></span>
+            </div>
+            
+            <div class="category-links-list">
+              <a class="category-link" ng-repeat="link in cat.reportes">
+                <span class="category-link-chevron">&gt;</span>
+                <span ng-bind="link"></span>
+              </a>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+
+      <!-- Ajustes View -->
+      <div ng-if="activeMenu === 'settings'" ng-controller="AjustesController" style="display: flex; flex-direction: column; gap: 20px; width: 100%;">
+        
+        <!-- Header -->
+        <div class="events-header">
+          <div class="events-header-left">
+            <h2 class="toolbar-title">Ajustes</h2>
+          </div>
+          <div class="events-header-right">
+            <!-- Orange Reset Button -->
+            <button class="btn-orange-reset" ng-click="restablecer()" title="Restablecer valores por defecto">
+              <!-- circular arrow / reset icon -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+              </svg>
+              <span>Restablecer</span>
+            </button>
+            <!-- Green Save Button -->
+            <button class="btn-green-sliders" ng-click="guardar()" title="Guardar configuración">
+              <!-- diskette / save icon -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                <polyline points="17 21 17 13 7 13 7 21"/>
+                <polyline points="7 3 7 8 15 8"/>
+              </svg>
+              <span>Guardar</span>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Main Card Container with Two Columns -->
+        <div class="settings-card">
+          <!-- Left Column (Menu) -->
+          <div class="settings-sidebar-menu">
+            <div class="settings-sidebar-item" ng-class="{active: menuActivo === 'configuracion'}" ng-click="menuActivo = 'configuracion'">Configuración</div>
+            <div class="settings-sidebar-item" ng-class="{active: menuActivo === 'lotes'}" ng-click="menuActivo = 'lotes'">Lotes</div>
+            <div class="settings-sidebar-item" ng-class="{active: menuActivo === 'colores'}" ng-click="menuActivo = 'colores'">Colores</div>
+            <div class="settings-sidebar-item" ng-class="{active: menuActivo === 'propietarios'}" ng-click="menuActivo = 'propietarios'">Propietarios</div>
+            <div class="settings-sidebar-item" ng-class="{active: menuActivo === 'diagnosticos'}" ng-click="menuActivo = 'diagnosticos'">Diagnósticos</div>
+            <div class="settings-sidebar-item" ng-class="{active: menuActivo === 'tratamientos'}" ng-click="menuActivo = 'tratamientos'">Tratamientos</div>
+            <div class="settings-sidebar-item" ng-class="{active: menuActivo === 'clasificaciones'}" ng-click="menuActivo = 'clasificaciones'">Clasificaciones</div>
+          </div>
+          
+          <!-- Right Column (Form & Tabs) -->
+          <div class="settings-main-area">
+            <!-- Tabs -->
+            <div class="settings-tabs">
+              <div class="settings-tab" ng-class="{active: tabActivo === 'general'}" ng-click="tabActivo = 'general'">General</div>
+              <div class="settings-tab" ng-class="{active: tabActivo === 'parametros'}" ng-click="tabActivo = 'parametros'">Parámetros</div>
+              <div class="settings-tab" ng-class="{active: tabActivo === 'alertas'}" ng-click="tabActivo = 'alertas'">Alertas</div>
+              <div class="settings-tab" ng-class="{active: tabActivo === 'automatizacion'}" ng-click="tabActivo = 'automatizacion'">Automatización</div>
+            </div>
+            
+            <!-- Tab Content: General -->
+            <div ng-show="tabActivo === 'general'">
+              <form class="settings-form-grid" ng-submit="guardar()">
+                <!-- Propietario -->
+                <div class="form-field">
+                  <label class="form-label" for="propietario">Propietario</label>
+                  <input class="form-input" type="text" id="propietario" ng-model="configuracionGeneral.propietario" required>
+                </div>
+                
+                <!-- Nombre -->
+                <div class="form-field">
+                  <label class="form-label" for="nombre">Nombre</label>
+                  <input class="form-input" type="text" id="nombre" ng-model="configuracionGeneral.nombre" required>
+                </div>
+                
+                <!-- País -->
+                <div class="form-field">
+                  <label class="form-label" for="pais">País</label>
+                  <select class="form-select" id="pais" ng-model="configuracionGeneral.pais" ng-options="p for p in paises" required></select>
+                </div>
+                
+                <!-- Especie -->
+                <div class="form-field">
+                  <label class="form-label" for="especie">Especie</label>
+                  <select class="form-select" id="especie" ng-model="configuracionGeneral.especie" ng-options="e for e in especies" required></select>
+                </div>
+                
+                <!-- Tipo de Explotación -->
+                <div class="form-field">
+                  <label class="form-label" for="tipoExplotacion">Tipo de Explotación</label>
+                  <select class="form-select" id="tipoExplotacion" ng-model="configuracionGeneral.tipoExplotacion" ng-options="te for te in tiposExplotacion" required></select>
+                </div>
+                
+                <!-- Tipo de Manejo -->
+                <div class="form-field">
+                  <label class="form-label" for="tipoManejo">Tipo de Manejo</label>
+                  <select class="form-select" id="tipoManejo" ng-model="configuracionGeneral.tipoManejo" ng-options="tm for tm in tiposManejo" required></select>
+                </div>
+                
+                <!-- Zona Agroecológica (spans left column only) -->
+                <div class="form-field span-full">
+                  <label class="form-label" for="zonaAgroecologica">Zona Agroecológica</label>
+                  <select class="form-select" id="zonaAgroecologica" ng-model="configuracionGeneral.zonaAgroecologica" ng-options="za for za in zonasAgroecologicas" required></select>
+                </div>
+              </form>
+            </div>
+            
+            <!-- Other Tabs Placeholders -->
+            <div ng-show="tabActivo === 'parametros'" style="padding: 20px 0; color: var(--text-secondary);">
+              <h4>Parámetros de Configuración</h4>
+              <p style="margin-top: 10px; font-size: 14px;">Aquí se definen los límites, rangos de peso y lactancia del rebaño.</p>
+            </div>
+            <div ng-show="tabActivo === 'alertas'" style="padding: 20px 0; color: var(--text-secondary);">
+              <h4>Alertas y Notificaciones</h4>
+              <p style="margin-top: 10px; font-size: 14px;">Definición de alertas tempranas para celos, vacunas y chequeos sanitarios.</p>
+            </div>
+            <div ng-show="tabActivo === 'automatizacion'" style="padding: 20px 0; color: var(--text-secondary);">
+              <h4>Reglas de Automatización</h4>
+              <p style="margin-top: 10px; font-size: 14px;">Configurar triggers automáticos para cambios de lote y estatus.</p>
+            </div>
+            
+          </div>
+        </div>
+        
+      </div>
+    </main>
+
+  <!-- App Logic script -->
+  <script type="module" src="app.ts"></script>
+</body>
+</html>

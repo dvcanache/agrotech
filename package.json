@@ -1,0 +1,15 @@
+{
+  "name": "agrotech-dashboard",
+  "version": "1.0.0",
+  "description": "Dashboard administrativo para la gestión de ganado AgroTech",
+  "scripts": {
+    "dev": "vite",
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "typescript": "^5.2.0"
+  }
+}
