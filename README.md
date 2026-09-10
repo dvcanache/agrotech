@@ -1,9 +1,8 @@
 # AgroTech — Plataforma de Gestión Ganadera Inteligente
 
+[![React](https://img.shields.io/badge/React-19.x-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-5.x-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)](https://developer.mozilla.org/)
-[![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)](https://developer.mozilla.org/)
 [![Chart.js](https://img.shields.io/badge/Chart.js-FF6384?style=for-the-badge&logo=chartdotjs&logoColor=white)](https://www.chartjs.org/)
 
 **AgroTech** es una solución integral de software administrativo y analítico diseñada para el sector agropecuario (AgTech). Permite a productores, veterinarios y administradores de fincas gestionar eficientemente semovientes (bovinos, bufalinos, caprinos, ovinos), monitorear indicadores clave de rendimiento (KPIs), supervisar eventos reproductivos y sanitarios, y administrar maquinaria e insumos en tiempo real.
@@ -74,10 +73,12 @@
 
 | Capa | Tecnología | Descripción |
 | :--- | :--- | :--- |
+| **Framework Frontend** | [React 19](https://react.dev/) | Arquitectura basada en componentes funcionales, hooks y estado reactivo. |
+| **Enrutamiento** | [React Router 7](https://reactrouter.com/) | Enrutamiento declarativo para SPAs (`/dashboard`, `/animales`, etc.). |
 | **Bundler & Build Tool** | [Vite 5](https://vitejs.dev/) | Entorno de compilación ultra-rápido con Hot Module Replacement (HMR). |
 | **Lenguaje** | [TypeScript 5](https://www.typescriptlang.org/) | Tipado estático y robustez para la lógica del cliente y modelos de datos. |
-| **Framework Frontend** | [AngularJS](https://angularjs.org/) | Arquitectura MVC/MVVM para control de vistas, directivas y binding bidireccional. |
-| **Visualización** | [Chart.js](https://www.chartjs.org/) | Gráficos vectoriales interactivos integrados mediante directivas personalizadas. |
+| **Visualización** | [Chart.js 4](https://www.chartjs.org/) + [React-Chartjs-2](https://react-chartjs-2.js.org/) | Gráficos vectoriales interactivos integrados mediante componentes de React. |
+| **Iconos** | [Lucide React](https://lucide.dev/) | Iconografía consistente, accesible y estilizada. |
 | **Estilos** | CSS3 Moderno | Diseño responsive con Flexbox, CSS Grid, variables CSS y paleta orgánica moderna. |
 | **Tipografía** | Google Fonts | Familia tipográfica *Outfit* (pesos 300, 400, 500, 600, 700). |
 
@@ -87,14 +88,26 @@
 
 ```text
 agrotech/
-├── app.ts               # Lógica principal de controladores, directivas y modelos TypeScript
-├── index.html           # Plantilla principal del Dashboard y vistas modulares
-├── styles.css           # Estilos globales, paleta de colores AgTech y componentes UI
-├── package.json         # Configuración del paquete, dependencias y scripts
-├── package-lock.json    # Árbol de dependencias bloqueado
-├── tsconfig.json        # Configuración del compilador TypeScript
-├── .gitignore           # Archivos y carpetas excluidos del control de versiones
-└── README.md            # Documentación técnica completa del proyecto
+├── src/
+│   ├── components/          # Componentes compartidos y de layout
+│   │   ├── charts/          # Wrapper reutilizable de DoughnutChart
+│   │   └── layout/          # AppLayout, Sidebar, Topbar
+│   ├── context/             # Contexto global (AppContext)
+│   ├── features/            # Módulos organizados por dominio
+│   │   ├── ajustes/         # Vistas, constantes y formulario de configuración
+│   │   ├── animales/        # Tabla, toolbar, paginación y hook useAnimales
+│   │   ├── dashboard/       # Tarjetas KPI, gráficos y dashboardData
+│   │   ├── eventos/         # Categorías operativas y EventCategoryCard
+│   │   └── reportes/        # Catálogo zootécnico y ReportCategoryCard
+│   ├── styles/              # Variables CSS y estilos globales (main.css)
+│   ├── types/               # Definiciones e interfaces TypeScript
+│   ├── App.tsx              # Configuración de enrutamiento con React Router
+│   └── main.tsx             # Punto de entrada de React (ReactDOM.createRoot)
+├── index.html               # Punto de montaje minimalista de la SPA
+├── package.json             # Dependencias y scripts de ejecución
+├── tsconfig.json            # Configuración de TypeScript con soporte JSX
+├── vite.config.ts           # Configuración de Vite con @vitejs/plugin-react
+└── README.md                # Documentación técnica completa del proyecto
 ```
 
 ---

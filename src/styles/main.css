@@ -22,14 +22,32 @@ body {
   font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   background-color: var(--bg-gray);
   color: var(--text-primary);
-  display: flex;
+  margin: 0;
+  padding: 0;
   height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+#root {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.app-layout {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
 }
 
 /* Sidebar Styling */
 .sidebar {
   width: 70px;
+  height: 100%;
   background-color: #ffffff;
   border-right: 1px solid var(--border-gray);
   display: flex;
