@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Dna, Award, CheckCircle, Package, HeartHandshake } from 'lucide-react';
+import { X, Dna } from 'lucide-react';
 import { ReproductorDetalladoEntity } from '../gestionMockData';
 
 interface FichaReproductorModalProps {

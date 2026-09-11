@@ -1,0 +1,873 @@
+import {
+  VientreEntity,
+  ProximaSecarEntity,
+  ProximaParirEntity,
+  ProximaRevisarEntity,
+  AnimalSecoEntity,
+  AnimalLactandoEntity,
+  AnimalCriandoEntity,
+  NoVientreEntity
+} from '../../../types2/entities';
+
+/* =========================================================================
+ * 1. DATOS DE VIENTRES (/reports/dams)
+ * Basado en los semovientes del rebaño de prueba de GanSoft
+ * ========================================================================= */
+
+export const MOCK_VIENTRES: VientreEntity[] = [
+  {
+    practico: '0001',
+    unico: '0001',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    estatusReproductivo: 'Vacía',
+    estatusProductivo: 'Criando',
+    lote: '01',
+    edadAnos: 17.91,
+    partos: 6,
+    ultimoPartoAborto: '2026-05-10',
+    ultimoServicio: '2026-07-15',
+    reproductor: 'BL001 - Sultán del Valle'
+  },
+  {
+    practico: '0002',
+    unico: '0002',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    estatusReproductivo: 'Vacía',
+    estatusProductivo: 'Ordeño',
+    lote: '01',
+    edadAnos: 16.90,
+    partos: 5,
+    ultimoPartoAborto: '2026-03-22',
+    ultimoServicio: '2026-06-18',
+    reproductor: 'SM01 - Gyr Lechero'
+  },
+  {
+    practico: 'CW002',
+    unico: 'CW002',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    estatusReproductivo: 'En espera',
+    estatusProductivo: 'Ordeño',
+    lote: 'ESCT',
+    edadAnos: 11.90,
+    partos: 4,
+    ultimoPartoAborto: '2025-11-14',
+    ultimoServicio: '2026-08-02',
+    reproductor: 'SM02 - Brahman Rojo'
+  },
+  {
+    practico: 'CW003',
+    unico: 'CW003',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    estatusReproductivo: 'Preñada',
+    estatusProductivo: 'Seca',
+    lote: 'SEC1',
+    edadAnos: 12.57,
+    partos: 4,
+    ultimoPartoAborto: '2025-08-30',
+    ultimoServicio: '2025-12-10',
+    reproductor: 'BL001 - Sultán del Valle'
+  },
+  {
+    practico: 'CW004',
+    unico: 'CW004',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    estatusReproductivo: 'Preñada',
+    estatusProductivo: 'Criando',
+    lote: 'ESCT',
+    edadAnos: 12.90,
+    partos: 3,
+    ultimoPartoAborto: '2026-01-20',
+    ultimoServicio: '2026-04-12',
+    reproductor: 'SM01 - Gyr Lechero'
+  },
+  {
+    practico: 'CW005',
+    unico: 'CW005',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    estatusReproductivo: 'Vacía',
+    estatusProductivo: 'Criando',
+    lote: 'ESCT',
+    edadAnos: 12.90,
+    partos: 3,
+    ultimoPartoAborto: '2026-02-18',
+    ultimoServicio: '2026-06-25',
+    reproductor: 'BL002 - Rey Criollo'
+  },
+  {
+    practico: 'CW006',
+    unico: 'CW006',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    estatusReproductivo: 'En espera',
+    estatusProductivo: 'Criando',
+    lote: 'ESCT',
+    edadAnos: 11.82,
+    partos: 3,
+    ultimoPartoAborto: '2026-03-05',
+    ultimoServicio: '2026-07-28',
+    reproductor: 'SM02 - Brahman Rojo'
+  },
+  {
+    practico: 'CW007',
+    unico: 'CW007',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    estatusReproductivo: 'Vacía',
+    estatusProductivo: 'Seca',
+    lote: 'SEC1',
+    edadAnos: 11.47,
+    partos: 3,
+    ultimoPartoAborto: '2025-06-12',
+    ultimoServicio: '2026-05-14',
+    reproductor: 'BL001 - Sultán del Valle'
+  },
+  {
+    practico: 'CW008',
+    unico: 'CW008',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    estatusReproductivo: 'Vacía',
+    estatusProductivo: 'Ordeño',
+    lote: 'ESCT',
+    edadAnos: 12.39,
+    partos: 4,
+    ultimoPartoAborto: '2025-10-08',
+    ultimoServicio: '2026-07-02',
+    reproductor: 'SM01 - Gyr Lechero'
+  },
+  {
+    practico: 'CW009',
+    unico: 'CW009',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    estatusReproductivo: 'Vacía',
+    estatusProductivo: 'Ordeño',
+    lote: 'ESCT',
+    edadAnos: 11.90,
+    partos: 3,
+    ultimoPartoAborto: '2026-01-15',
+    ultimoServicio: '2026-06-10',
+    reproductor: 'BL002 - Rey Criollo'
+  },
+  {
+    practico: 'CW010',
+    unico: 'CW010',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    estatusReproductivo: 'Preñada',
+    estatusProductivo: 'Ordeño',
+    lote: 'ESCT',
+    edadAnos: 10.50,
+    partos: 2,
+    ultimoPartoAborto: '2025-12-05',
+    ultimoServicio: '2026-03-15',
+    reproductor: 'BL001 - Sultán del Valle'
+  },
+  {
+    practico: 'CW011',
+    unico: 'CW011',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    estatusReproductivo: 'Vacía',
+    estatusProductivo: 'Criando',
+    lote: 'ESCT',
+    edadAnos: 10.20,
+    partos: 2,
+    ultimoPartoAborto: '2026-04-10',
+    ultimoServicio: '2026-08-11',
+    reproductor: 'SM02 - Brahman Rojo'
+  },
+  {
+    practico: 'CW012',
+    unico: 'CW012',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    estatusReproductivo: 'Vacía',
+    estatusProductivo: 'Seca',
+    lote: 'SEC1',
+    edadAnos: 11.10,
+    partos: 3,
+    ultimoPartoAborto: '2025-05-18',
+    ultimoServicio: '2026-04-20',
+    reproductor: 'BL001 - Sultán del Valle'
+  },
+  {
+    practico: 'CW013',
+    unico: 'CW013',
+    categoria: 'Novilla',
+    estatus: 'Activo',
+    estatusReproductivo: 'En espera',
+    estatusProductivo: 'Seca',
+    lote: 'ESCT',
+    edadAnos: 2.80,
+    partos: 0,
+    ultimoPartoAborto: undefined,
+    ultimoServicio: '2026-08-15',
+    reproductor: 'SM01 - Gyr Lechero'
+  },
+  {
+    practico: 'CW014',
+    unico: 'CW014',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    estatusReproductivo: 'Vacía',
+    estatusProductivo: 'Criando',
+    lote: 'ESCT',
+    edadAnos: 9.80,
+    partos: 2,
+    ultimoPartoAborto: '2026-04-28',
+    ultimoServicio: '2026-07-20',
+    reproductor: 'BL002 - Rey Criollo'
+  },
+  {
+    practico: 'CW015',
+    unico: 'CW015',
+    categoria: 'Novilla',
+    estatus: 'Activo',
+    estatusReproductivo: 'Preñada',
+    estatusProductivo: 'Seca',
+    lote: 'ESCT',
+    edadAnos: 2.95,
+    partos: 0,
+    ultimoPartoAborto: undefined,
+    ultimoServicio: '2026-02-10',
+    reproductor: 'BL001 - Sultán del Valle'
+  },
+  {
+    practico: 'CW001BBB',
+    unico: 'CW001BBB',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    estatusReproductivo: 'Vacía',
+    estatusProductivo: 'Seca',
+    lote: 'SEC1',
+    edadAnos: 13.10,
+    partos: 4,
+    ultimoPartoAborto: '2025-07-22',
+    ultimoServicio: '2026-05-30',
+    reproductor: 'SM02 - Brahman Rojo'
+  },
+  {
+    practico: 'NV-201',
+    unico: 'NV-201',
+    categoria: 'Novilla',
+    estatus: 'Activo',
+    estatusReproductivo: 'Vacía',
+    estatusProductivo: 'Seca',
+    lote: 'ESCT',
+    edadAnos: 2.45,
+    partos: 0,
+    ultimoPartoAborto: undefined,
+    ultimoServicio: '2026-06-12',
+    reproductor: 'SM01 - Gyr Lechero'
+  },
+  {
+    practico: 'VC-88',
+    unico: 'VC-88',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    estatusReproductivo: 'Preñada',
+    estatusProductivo: 'Ordeño',
+    lote: '01',
+    edadAnos: 8.50,
+    partos: 3,
+    ultimoPartoAborto: '2025-11-20',
+    ultimoServicio: '2026-02-25',
+    reproductor: 'BL001 - Sultán del Valle'
+  },
+  {
+    practico: 'VC-92',
+    unico: 'VC-92',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    estatusReproductivo: 'Vacía',
+    estatusProductivo: 'Ordeño',
+    lote: '01',
+    edadAnos: 7.90,
+    partos: 2,
+    ultimoPartoAborto: '2026-02-01',
+    ultimoServicio: '2026-05-18',
+    reproductor: 'BL002 - Rey Criollo'
+  }
+];
+
+/* =========================================================================
+ * 2. PRÓXIMAS A SECAR (/reports/nexttodry)
+ * ========================================================================= */
+
+export const MOCK_PROXIMAS_SECAR: ProximaSecarEntity[] = [
+  {
+    practico: 'CW010',
+    unico: 'CW010',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    lote: 'ESCT',
+    ultimoPartoAborto: '2025-12-05',
+    ultimoTipoPartoAborto: 'Normal',
+    ultimoServicio: '2026-03-15',
+    reproductor: 'BL001 - Sultán del Valle',
+    fechaProximoSecado: '2026-10-20',
+    fechaProximoParto: '2026-12-20',
+    diasProximoSecado: 39,
+    diasProximoParto: 100,
+    ultimoPesajeLecheKg: 9.4,
+    fechaUltimoPesajeLeche: '2026-09-01'
+  },
+  {
+    practico: 'VC-88',
+    unico: 'VC-88',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    lote: '01',
+    ultimoPartoAborto: '2025-11-20',
+    ultimoTipoPartoAborto: 'Normal',
+    ultimoServicio: '2026-02-25',
+    reproductor: 'BL001 - Sultán del Valle',
+    fechaProximoSecado: '2026-09-30',
+    fechaProximoParto: '2026-11-30',
+    diasProximoSecado: 19,
+    diasProximoParto: 80,
+    ultimoPesajeLecheKg: 8.2,
+    fechaUltimoPesajeLeche: '2026-09-01'
+  },
+  {
+    practico: 'CW004',
+    unico: 'CW004',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    lote: 'ESCT',
+    ultimoPartoAborto: '2026-01-20',
+    ultimoTipoPartoAborto: 'Normal',
+    ultimoServicio: '2026-04-12',
+    reproductor: 'SM01 - Gyr Lechero',
+    fechaProximoSecado: '2026-11-15',
+    fechaProximoParto: '2027-01-15',
+    diasProximoSecado: 65,
+    diasProximoParto: 126,
+    ultimoPesajeLecheKg: 11.5,
+    fechaUltimoPesajeLeche: '2026-08-25'
+  }
+];
+
+/* =========================================================================
+ * 3. PRÓXIMAS A PARIR (/reports/nexttobirth)
+ * ========================================================================= */
+
+export const MOCK_PROXIMAS_PARIR: ProximaParirEntity[] = [
+  {
+    practico: 'CW003',
+    unico: 'CW003',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    lote: 'SEC1',
+    ultimoPartoAborto: '2025-08-30',
+    partos: 4,
+    montas: 0,
+    inseminaciones: 1,
+    transplantes: 0,
+    ultimoServicio: '2025-12-10',
+    reproductor: 'BL001 - Sultán del Valle',
+    fechaProximoParto: '2026-09-18',
+    diasProximoParto: 7,
+    ultimoPesoKg: 520,
+    fechaUltimoPeso: '2026-08-15',
+    fechaSecado: '2026-07-18',
+    diasSeca: 55
+  },
+  {
+    practico: 'CW015',
+    unico: 'CW015',
+    categoria: 'Novilla',
+    estatus: 'Activo',
+    lote: 'ESCT',
+    ultimoPartoAborto: undefined,
+    partos: 0,
+    montas: 1,
+    inseminaciones: 0,
+    transplantes: 0,
+    ultimoServicio: '2026-02-10',
+    reproductor: 'BL001 - Sultán del Valle',
+    fechaProximoParto: '2026-11-17',
+    diasProximoParto: 67,
+    ultimoPesoKg: 440,
+    fechaUltimoPeso: '2026-08-20',
+    fechaSecado: undefined,
+    diasSeca: undefined
+  },
+  {
+    practico: 'VC-88',
+    unico: 'VC-88',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    lote: '01',
+    ultimoPartoAborto: '2025-11-20',
+    partos: 3,
+    montas: 0,
+    inseminaciones: 1,
+    transplantes: 0,
+    ultimoServicio: '2026-02-25',
+    reproductor: 'BL001 - Sultán del Valle',
+    fechaProximoParto: '2026-11-30',
+    diasProximoParto: 80,
+    ultimoPesoKg: 495,
+    fechaUltimoPeso: '2026-08-10',
+    fechaSecado: '2026-09-30',
+    diasSeca: 0
+  }
+];
+
+/* =========================================================================
+ * 4. PRÓXIMAS A REVISAR (/reports/nexttocheck)
+ * ========================================================================= */
+
+export const MOCK_PROXIMAS_REVISAR: ProximaRevisarEntity[] = [
+  {
+    practico: 'CW002',
+    unico: 'CW002',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    lote: 'ESCT',
+    ultimoPartoAborto: '2025-11-14',
+    partos: 4,
+    montas: 0,
+    inseminaciones: 1,
+    transplantes: 0,
+    ultimoServicio: '2026-08-02',
+    reproductor: 'SM02 - Brahman Rojo',
+    ultimaRevision: '2026-07-15',
+    revisiones: 2,
+    ultimoDiagnostico: 'Cuerpo lúteo funcional',
+    ultimoTratamiento: 'Inseminación a celo detectado',
+    proximaRevision: '2026-09-15',
+    diasProximaRevision: 4
+  },
+  {
+    practico: 'CW006',
+    unico: 'CW006',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    lote: 'ESCT',
+    ultimoPartoAborto: '2026-03-05',
+    partos: 3,
+    montas: 1,
+    inseminaciones: 0,
+    transplantes: 0,
+    ultimoServicio: '2026-07-28',
+    reproductor: 'SM02 - Brahman Rojo',
+    ultimaRevision: '2026-07-10',
+    revisiones: 1,
+    ultimoDiagnostico: 'Revisión postparto favorable',
+    ultimoTratamiento: undefined,
+    proximaRevision: '2026-09-12',
+    diasProximaRevision: 1
+  },
+  {
+    practico: 'CW013',
+    unico: 'CW013',
+    categoria: 'Novilla',
+    estatus: 'Activo',
+    lote: 'ESCT',
+    ultimoPartoAborto: undefined,
+    partos: 0,
+    montas: 0,
+    inseminaciones: 1,
+    transplantes: 0,
+    ultimoServicio: '2026-08-15',
+    reproductor: 'SM01 - Gyr Lechero',
+    ultimaRevision: '2026-08-01',
+    revisiones: 1,
+    ultimoDiagnostico: 'Tracto reproductivo clase 5',
+    ultimoTratamiento: 'Protocolo IATF',
+    proximaRevision: '2026-09-25',
+    diasProximaRevision: 14
+  }
+];
+
+/* =========================================================================
+ * 5. ANIMALES SECOS (/reports/drycows)
+ * ========================================================================= */
+
+export const MOCK_ANIMALES_SECOS: AnimalSecoEntity[] = [
+  {
+    practico: 'CW003',
+    unico: 'CW003',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    estatusReproductivo: 'Preñada',
+    estatusProductivo: 'Seca',
+    lote: 'SEC1',
+    ultimoParto: '2025-08-30',
+    ultimoServicio: '2025-12-10',
+    diasServidaActual: 275,
+    fechaProximoParto: '2026-09-18',
+    diasSeca: 55,
+    diasEnProduccion: 290
+  },
+  {
+    practico: 'CW007',
+    unico: 'CW007',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    estatusReproductivo: 'Vacía',
+    estatusProductivo: 'Seca',
+    lote: 'SEC1',
+    ultimoParto: '2025-06-12',
+    ultimoServicio: '2026-05-14',
+    diasServidaActual: 120,
+    fechaProximoParto: undefined,
+    diasSeca: 92,
+    diasEnProduccion: 270
+  },
+  {
+    practico: 'CW012',
+    unico: 'CW012',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    estatusReproductivo: 'Vacía',
+    estatusProductivo: 'Seca',
+    lote: 'SEC1',
+    ultimoParto: '2025-05-18',
+    ultimoServicio: '2026-04-20',
+    diasServidaActual: 144,
+    fechaProximoParto: undefined,
+    diasSeca: 115,
+    diasEnProduccion: 265
+  },
+  {
+    practico: 'CW001BBB',
+    unico: 'CW001BBB',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    estatusReproductivo: 'Vacía',
+    estatusProductivo: 'Seca',
+    lote: 'SEC1',
+    ultimoParto: '2025-07-22',
+    ultimoServicio: '2026-05-30',
+    diasServidaActual: 104,
+    fechaProximoParto: undefined,
+    diasSeca: 75,
+    diasEnProduccion: 280
+  }
+];
+
+/* =========================================================================
+ * 6. ANIMALES LACTANDO (/reports/cowsinproduction)
+ * ========================================================================= */
+
+export const MOCK_ANIMALES_LACTANDO: AnimalLactandoEntity[] = [
+  {
+    practico: '0002',
+    unico: '0002',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    situacionReproductivaActual: 'Vacía',
+    situacionProductivaActual: 'Ordeño',
+    lote: '01',
+    ultimoParto: '2026-03-22',
+    numeroParto: 5,
+    ultimoServicio: '2026-06-18',
+    reproductor: 'SM01 - Gyr Lechero',
+    diasEnProduccion: 173,
+    diasParida: 173,
+    diasServida: 85,
+    proximoParto: undefined,
+    fechaProximoSecado: '2026-12-15'
+  },
+  {
+    practico: 'CW002',
+    unico: 'CW002',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    situacionReproductivaActual: 'En espera',
+    situacionProductivaActual: 'Ordeño',
+    lote: 'ESCT',
+    ultimoParto: '2025-11-14',
+    numeroParto: 4,
+    ultimoServicio: '2026-08-02',
+    reproductor: 'SM02 - Brahman Rojo',
+    diasEnProduccion: 301,
+    diasParida: 301,
+    diasServida: 40,
+    proximoParto: undefined,
+    fechaProximoSecado: '2026-10-30'
+  },
+  {
+    practico: 'CW008',
+    unico: 'CW008',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    situacionReproductivaActual: 'Vacía',
+    situacionProductivaActual: 'Ordeño',
+    lote: 'ESCT',
+    ultimoParto: '2025-10-08',
+    numeroParto: 4,
+    ultimoServicio: '2026-07-02',
+    reproductor: 'SM01 - Gyr Lechero',
+    diasEnProduccion: 338,
+    diasParida: 338,
+    diasServida: 71,
+    proximoParto: undefined,
+    fechaProximoSecado: '2026-11-01'
+  },
+  {
+    practico: 'CW009',
+    unico: 'CW009',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    situacionReproductivaActual: 'Vacía',
+    situacionProductivaActual: 'Ordeño',
+    lote: 'ESCT',
+    ultimoParto: '2026-01-15',
+    numeroParto: 3,
+    ultimoServicio: '2026-06-10',
+    reproductor: 'BL002 - Rey Criollo',
+    diasEnProduccion: 239,
+    diasParida: 239,
+    diasServida: 93,
+    proximoParto: undefined,
+    fechaProximoSecado: '2026-12-01'
+  },
+  {
+    practico: 'CW010',
+    unico: 'CW010',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    situacionReproductivaActual: 'Preñada',
+    situacionProductivaActual: 'Ordeño',
+    lote: 'ESCT',
+    ultimoParto: '2025-12-05',
+    numeroParto: 2,
+    ultimoServicio: '2026-03-15',
+    reproductor: 'BL001 - Sultán del Valle',
+    diasEnProduccion: 280,
+    diasParida: 280,
+    diasServida: 180,
+    proximoParto: '2026-12-20',
+    fechaProximoSecado: '2026-10-20'
+  },
+  {
+    practico: 'VC-88',
+    unico: 'VC-88',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    situacionReproductivaActual: 'Preñada',
+    situacionProductivaActual: 'Ordeño',
+    lote: '01',
+    ultimoParto: '2025-11-20',
+    numeroParto: 3,
+    ultimoServicio: '2026-02-25',
+    reproductor: 'BL001 - Sultán del Valle',
+    diasEnProduccion: 295,
+    diasParida: 295,
+    diasServida: 198,
+    proximoParto: '2026-11-30',
+    fechaProximoSecado: '2026-09-30'
+  },
+  {
+    practico: 'VC-92',
+    unico: 'VC-92',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    situacionReproductivaActual: 'Vacía',
+    situacionProductivaActual: 'Ordeño',
+    lote: '01',
+    ultimoParto: '2026-02-01',
+    numeroParto: 2,
+    ultimoServicio: '2026-05-18',
+    reproductor: 'BL002 - Rey Criollo',
+    diasEnProduccion: 222,
+    diasParida: 222,
+    diasServida: 116,
+    proximoParto: undefined,
+    fechaProximoSecado: '2026-12-10'
+  }
+];
+
+/* =========================================================================
+ * 7. ANIMALES CRIANDO (/reports/cowsraising)
+ * ========================================================================= */
+
+export const MOCK_ANIMALES_CRIANDO: AnimalCriandoEntity[] = [
+  {
+    practico: '0001',
+    unico: '0001',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    lote: '01',
+    ultimoParto: '2026-05-10',
+    codigosCriasUltimoParto: 'BC-101',
+    diasParidaActual: 124
+  },
+  {
+    practico: 'CW004',
+    unico: 'CW004',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    lote: 'ESCT',
+    ultimoParto: '2026-01-20',
+    codigosCriasUltimoParto: 'BR-01',
+    diasParidaActual: 234
+  },
+  {
+    practico: 'CW005',
+    unico: 'CW005',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    lote: 'ESCT',
+    ultimoParto: '2026-02-18',
+    codigosCriasUltimoParto: 'BC-102',
+    diasParidaActual: 205
+  },
+  {
+    practico: 'CW006',
+    unico: 'CW006',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    lote: 'ESCT',
+    ultimoParto: '2026-03-05',
+    codigosCriasUltimoParto: 'BC-103',
+    diasParidaActual: 190
+  },
+  {
+    practico: 'CW011',
+    unico: 'CW011',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    lote: 'ESCT',
+    ultimoParto: '2026-04-10',
+    codigosCriasUltimoParto: 'BR-02',
+    diasParidaActual: 154
+  },
+  {
+    practico: 'CW014',
+    unico: 'CW014',
+    categoria: 'Vaca',
+    estatus: 'Activo',
+    lote: 'ESCT',
+    ultimoParto: '2026-04-28',
+    codigosCriasUltimoParto: 'BC-104',
+    diasParidaActual: 136
+  }
+];
+
+/* =========================================================================
+ * 8. NO VIENTRES (/reports/nodams)
+ * Machos de cualquier edad y hembras antes del servicio (becerras/mautas)
+ * ========================================================================= */
+
+export const MOCK_NO_VIENTRES: NoVientreEntity[] = [
+  {
+    practico: 'BC-101',
+    unico: 'VE-2026-101',
+    categoria: 'Becerro',
+    estatus: 'Activo',
+    lote: '01',
+    fechaNacimiento: '2026-05-10',
+    edadMeses: 4.0,
+    composicion: 'Carora 75% / Brahman 25%',
+    penultimoPesoKg: 78,
+    fechaPenultimoPeso: '2026-07-10',
+    ultimoPesoKg: 118,
+    fechaUltimoPeso: '2026-09-05',
+    gananciaParcialGramosDia: 701,
+    gananciaGlobalGramosDia: 685,
+    pesoIngresoKg: 36,
+    fechaPesoIngreso: '2026-05-10'
+  },
+  {
+    practico: 'BC-104',
+    unico: 'VE-2026-104',
+    categoria: 'Becerro',
+    estatus: 'Activo',
+    lote: 'POT1',
+    fechaNacimiento: '2026-08-14',
+    edadMeses: 0.9,
+    composicion: 'Carora Puro',
+    penultimoPesoKg: 35,
+    fechaPenultimoPeso: '2026-08-14',
+    ultimoPesoKg: 52,
+    fechaUltimoPeso: '2026-09-08',
+    gananciaParcialGramosDia: 680,
+    gananciaGlobalGramosDia: 680,
+    pesoIngresoKg: 35,
+    fechaPesoIngreso: '2026-08-14'
+  },
+  {
+    practico: 'BR-01',
+    unico: 'VE-2026-BR01',
+    categoria: 'Becerra',
+    estatus: 'Activo',
+    lote: 'POT1',
+    fechaNacimiento: '2026-01-20',
+    edadMeses: 7.7,
+    composicion: 'Gyr Lechero 50% / Holstein 50%',
+    penultimoPesoKg: 145,
+    fechaPenultimoPeso: '2026-06-20',
+    ultimoPesoKg: 198,
+    fechaUltimoPeso: '2026-08-30',
+    gananciaParcialGramosDia: 746,
+    gananciaGlobalGramosDia: 710,
+    pesoIngresoKg: 32,
+    fechaPesoIngreso: '2026-01-20'
+  },
+  {
+    practico: 'MT-01',
+    unico: 'VE-2025-MT01',
+    categoria: 'Maute',
+    estatus: 'Activo',
+    lote: 'ESCT',
+    fechaNacimiento: '2025-06-15',
+    edadMeses: 14.8,
+    composicion: 'Brahman Blanco',
+    penultimoPesoKg: 285,
+    fechaPenultimoPeso: '2026-05-15',
+    ultimoPesoKg: 345,
+    fechaUltimoPeso: '2026-08-20',
+    gananciaParcialGramosDia: 618,
+    gananciaGlobalGramosDia: 690,
+    pesoIngresoKg: 38,
+    fechaPesoIngreso: '2025-06-15'
+  },
+  {
+    practico: 'MA-05',
+    unico: 'VE-2025-MA05',
+    categoria: 'Mauta',
+    estatus: 'Activo',
+    lote: 'ESCT',
+    fechaNacimiento: '2025-05-10',
+    edadMeses: 16.0,
+    composicion: 'Carora 100%',
+    penultimoPesoKg: 260,
+    fechaPenultimoPeso: '2026-04-10',
+    ultimoPesoKg: 322,
+    fechaUltimoPeso: '2026-08-15',
+    gananciaParcialGramosDia: 488,
+    gananciaGlobalGramosDia: 595,
+    pesoIngresoKg: 34,
+    fechaPesoIngreso: '2025-05-10'
+  },
+  {
+    practico: 'NV-02',
+    unico: 'VE-2024-NV02',
+    categoria: 'Novillo',
+    estatus: 'Activo',
+    lote: 'ESCT',
+    fechaNacimiento: '2024-09-12',
+    edadMeses: 24.0,
+    composicion: 'Guzerá F1',
+    penultimoPesoKg: 410,
+    fechaPenultimoPeso: '2026-05-12',
+    ultimoPesoKg: 468,
+    fechaUltimoPeso: '2026-08-25',
+    gananciaParcialGramosDia: 552,
+    gananciaGlobalGramosDia: 590,
+    pesoIngresoKg: 37,
+    fechaPesoIngreso: '2024-09-12'
+  }
+];

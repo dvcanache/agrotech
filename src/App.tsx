@@ -15,6 +15,16 @@ import { DistribucionNormalView } from './features/reportes/gestion/distribucion
 import { TecnicosView } from './features/reportes/gestion/tecnicos/TecnicosView';
 import { ReproductoresView } from './features/reportes/gestion/reproductores/ReproductoresView';
 
+// Reportes - Sección Animales
+import { VientresView } from './features/reportes/animales/vientres/VientresView';
+import { ProximasSecarView } from './features/reportes/animales/proximas-secar/ProximasSecarView';
+import { ProximasParirView } from './features/reportes/animales/proximas-parir/ProximasParirView';
+import { ProximasRevisarView } from './features/reportes/animales/proximas-revisar/ProximasRevisarView';
+import { AnimalesSecosView } from './features/reportes/animales/secos/AnimalesSecosView';
+import { AnimalesLactandoView } from './features/reportes/animales/lactando/AnimalesLactandoView';
+import { AnimalesCriandoView } from './features/reportes/animales/criando/AnimalesCriandoView';
+import { NoVientresView } from './features/reportes/animales/no-vientres/NoVientresView';
+
 export const App: React.FC = () => {
   return (
     <AppProvider>
@@ -47,6 +57,31 @@ export const App: React.FC = () => {
 
             <Route path="reports/breeders" element={<ReproductoresView />} />
             <Route path="reportes/reproductores" element={<ReproductoresView />} />
+
+            {/* Rutas Reportes - Sección Animales */}
+            <Route path="reports/dams" element={<VientresView />} />
+            <Route path="reportes/vientres" element={<VientresView />} />
+
+            <Route path="reports/nexttodry" element={<ProximasSecarView />} />
+            <Route path="reportes/proximas-secar" element={<ProximasSecarView />} />
+
+            <Route path="reports/nexttobirth" element={<ProximasParirView />} />
+            <Route path="reportes/proximas-parir" element={<ProximasParirView />} />
+
+            <Route path="reports/nexttocheck" element={<ProximasRevisarView />} />
+            <Route path="reportes/proximas-revisar" element={<ProximasRevisarView />} />
+
+            <Route path="reports/drycows" element={<AnimalesSecosView />} />
+            <Route path="reportes/animales-secos" element={<AnimalesSecosView />} />
+
+            <Route path="reports/cowsinproduction" element={<AnimalesLactandoView />} />
+            <Route path="reportes/animales-lactando" element={<AnimalesLactandoView />} />
+
+            <Route path="reports/cowsraising" element={<AnimalesCriandoView />} />
+            <Route path="reportes/animales-criando" element={<AnimalesCriandoView />} />
+
+            <Route path="reports/nodams" element={<NoVientresView />} />
+            <Route path="reportes/no-vientres" element={<NoVientresView />} />
 
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Route>

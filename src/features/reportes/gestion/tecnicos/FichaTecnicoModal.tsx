@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, User, Award, CheckCircle, TrendingUp, Calendar, Zap } from 'lucide-react';
+import { X } from 'lucide-react';
 import { TecnicoEntity } from '../../../../types2/entities';
 
 interface FichaTecnicoModalProps {
