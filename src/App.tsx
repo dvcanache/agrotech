@@ -31,6 +31,14 @@ import { HistoriaLactanciasView } from './features/reportes/historicos/lactancia
 import { HistoriaPesajesLecheView } from './features/reportes/historicos/pesajes-leche/HistoriaPesajesLecheView';
 import { HistoriaCrecimientosView } from './features/reportes/historicos/crecimientos/HistoriaCrecimientosView';
 
+// Reportes - Sección Multirebaños
+import { MultirebanoInventarioView } from './features/reportes/multirebanos/inventario/MultirebanoInventarioView';
+import { MultirebanoReproduccionView } from './features/reportes/multirebanos/reproduccion/MultirebanoReproduccionView';
+import { MultirebanoDistribucionPrenezView } from './features/reportes/multirebanos/distribucion-prenez/MultirebanoDistribucionPrenezView';
+import { MultirebanoProduccionView } from './features/reportes/multirebanos/produccion/MultirebanoProduccionView';
+import { MultirebanoTransaccionesView } from './features/reportes/multirebanos/transacciones/MultirebanoTransaccionesView';
+import { MultirebanoProduccionDiariaView } from './features/reportes/multirebanos/produccion-diaria/MultirebanoProduccionDiariaView';
+
 export const App: React.FC = () => {
   return (
     <AppProvider>
@@ -101,6 +109,25 @@ export const App: React.FC = () => {
 
             <Route path="reports/historics/weighings" element={<HistoriaCrecimientosView />} />
             <Route path="reportes/historicos/crecimientos" element={<HistoriaCrecimientosView />} />
+
+            {/* Rutas Reportes - Sección Multirebaños */}
+            <Route path="reports/multiherds/inventories" element={<MultirebanoInventarioView />} />
+            <Route path="reportes/multirebanos/inventarios" element={<MultirebanoInventarioView />} />
+
+            <Route path="reports/multiherds/reproduction" element={<MultirebanoReproduccionView />} />
+            <Route path="reportes/multirebanos/reproduccion" element={<MultirebanoReproduccionView />} />
+
+            <Route path="reports/multiherds/pregnancy-distribution" element={<MultirebanoDistribucionPrenezView />} />
+            <Route path="reportes/multirebanos/distribucion-prenez" element={<MultirebanoDistribucionPrenezView />} />
+
+            <Route path="reports/multiherds/production-status" element={<MultirebanoProduccionView />} />
+            <Route path="reportes/multirebanos/situacion-productiva" element={<MultirebanoProduccionView />} />
+
+            <Route path="reports/multiherds/transactions" element={<MultirebanoTransaccionesView />} />
+            <Route path="reportes/multirebanos/transacciones" element={<MultirebanoTransaccionesView />} />
+
+            <Route path="reports/multiherds/daily-production" element={<MultirebanoProduccionDiariaView />} />
+            <Route path="reportes/multirebanos/produccion-diaria" element={<MultirebanoProduccionDiariaView />} />
 
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Route>
