@@ -25,6 +25,12 @@ import { AnimalesLactandoView } from './features/reportes/animales/lactando/Anim
 import { AnimalesCriandoView } from './features/reportes/animales/criando/AnimalesCriandoView';
 import { NoVientresView } from './features/reportes/animales/no-vientres/NoVientresView';
 
+// Reportes - Sección Históricos
+import { HistoriaReproduccionesView } from './features/reportes/historicos/reproducciones/HistoriaReproduccionesView';
+import { HistoriaLactanciasView } from './features/reportes/historicos/lactancias/HistoriaLactanciasView';
+import { HistoriaPesajesLecheView } from './features/reportes/historicos/pesajes-leche/HistoriaPesajesLecheView';
+import { HistoriaCrecimientosView } from './features/reportes/historicos/crecimientos/HistoriaCrecimientosView';
+
 export const App: React.FC = () => {
   return (
     <AppProvider>
@@ -82,6 +88,19 @@ export const App: React.FC = () => {
 
             <Route path="reports/nodams" element={<NoVientresView />} />
             <Route path="reportes/no-vientres" element={<NoVientresView />} />
+
+            {/* Rutas Reportes - Sección Históricos */}
+            <Route path="reports/historics/reproductions" element={<HistoriaReproduccionesView />} />
+            <Route path="reportes/historicos/reproducciones" element={<HistoriaReproduccionesView />} />
+
+            <Route path="reports/historics/lactations" element={<HistoriaLactanciasView />} />
+            <Route path="reportes/historicos/lactancias" element={<HistoriaLactanciasView />} />
+
+            <Route path="reports/historics/milks" element={<HistoriaPesajesLecheView />} />
+            <Route path="reportes/historicos/pesajes-leche" element={<HistoriaPesajesLecheView />} />
+
+            <Route path="reports/historics/weighings" element={<HistoriaCrecimientosView />} />
+            <Route path="reportes/historicos/crecimientos" element={<HistoriaCrecimientosView />} />
 
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Route>
