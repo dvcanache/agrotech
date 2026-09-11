@@ -1,11 +1,56 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ReportCategory } from '../../../types/reports';
 
 interface ReportCategoryCardProps {
   category: ReportCategory;
 }
 
+const REPORT_ROUTES_MAP: Record<string, string> = {
+  // Gestión
+  'Inventarios': '/reports/inventories',
+  'Movimientos': '/reports/movements',
+  'Distribución normal': '/reports/historics/normaldistribution',
+  'Técnicos': '/reports/technicians',
+  'Reproductores': '/reports/breeders',
+
+  // Animales (preparados para la siguiente fase)
+  'Vientres': '/reports/dams',
+  'Próximas a secar': '/reports/nexttodry',
+  'Próximas a parir': '/reports/nexttobirth',
+  'Próximas a revisar': '/reports/nexttocheck',
+  'Animales secos': '/reports/drycows',
+  'Animales lactando': '/reports/cowsinproduction',
+  'Animales criando': '/reports/cowsraising',
+  'No Vientres': '/reports/nodams',
+
+  // Históricos
+  'Historia de reproducciones': '/reports/historics/reproductions',
+  'Historia de lactancias': '/reports/historics/lactations',
+  'Historia de pesajes de leche': '/reports/historics/milks',
+  'Historia de crecimientos': '/reports/historics/weighings',
+
+  // Multirebaños
+  'Inventario multirebaño': '/reports/multiherds/inventories',
+  'Situación reproductiva actual': '/reports/multiherds/reproduction',
+  'Distribución por preñez': '/reports/multiherds/pregnancy-distribution',
+  'Situación productiva actual': '/reports/multiherds/production-status',
+  'Transacciones': '/reports/multiherds/transactions',
+  'Producciones diarias': '/reports/multiherds/daily-production'
+};
+
 export const ReportCategoryCard: React.FC<ReportCategoryCardProps> = ({ category }) => {
+  const navigate = useNavigate();
+
+  const handleReportClick = (rep: string) => {
+    const route = REPORT_ROUTES_MAP[rep];
+    if (route) {
+      navigate(route);
+    } else {
+      alert(`Generando reporte: ${rep}`);
+    }
+  };
+
   const renderIcon = (type: ReportCategory['iconoType']) => {
     switch (type) {
       case 'gestion':
@@ -60,7 +105,7 @@ export const ReportCategoryCard: React.FC<ReportCategoryCardProps> = ({ category
             type="button"
             className="category-link"
             style={{ background: 'none', border: 'none', textAlign: 'left', font: 'inherit', cursor: 'pointer', padding: 0 }}
-            onClick={() => alert(`Generando reporte: ${rep}`)}
+            onClick={() => handleReportClick(rep)}
           >
             <span className="category-link-chevron">&gt;</span>
             <span>{rep}</span>
