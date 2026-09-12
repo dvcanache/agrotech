@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Search, Plus, Filter, ArrowUpDown } from 'lucide-react';
 import { ReportViewHeader } from '../../components/ReportViewHeader';
 import { ReportPagination } from '../../components/ReportPagination';
@@ -117,12 +117,18 @@ export const MovimientosView: React.FC = () => {
       });
   }, [movimientos, searchQuery, filters, sortField, sortAsc]);
 
+  // Reset to page 1 on filter or search change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters, searchQuery]);
+
   // Paginación
   const totalPages = Math.ceil(filteredMovimientos.length / pageSize) || 1;
   const paginatedMovimientos = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
+    const safePage = Math.min(currentPage, totalPages);
+    const start = (safePage - 1) * pageSize;
     return filteredMovimientos.slice(start, start + pageSize);
-  }, [filteredMovimientos, currentPage, pageSize]);
+  }, [filteredMovimientos, currentPage, totalPages, pageSize]);
 
   // Exportar XLSX
   const handleExportXLSX = () => {

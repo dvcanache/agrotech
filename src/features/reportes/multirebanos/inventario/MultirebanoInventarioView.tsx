@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Search, Filter, Layers } from 'lucide-react';
 import { ReportViewHeader } from '../../components/ReportViewHeader';
 import { ReportPagination } from '../../components/ReportPagination';
@@ -126,11 +126,16 @@ export const MultirebanoInventarioView: React.FC = () => {
     );
   }, [filteredInventarios]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedHerds, searchQuery]);
+
   const totalPages = Math.ceil(filteredInventarios.length / pageSize) || 1;
   const paginatedInventarios = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
+    const safePage = Math.min(currentPage, totalPages);
+    const start = (safePage - 1) * pageSize;
     return filteredInventarios.slice(start, start + pageSize);
-  }, [filteredInventarios, currentPage, pageSize]);
+  }, [filteredInventarios, currentPage, totalPages, pageSize]);
 
   const handleExportXLSX = () => {
     const headers = [

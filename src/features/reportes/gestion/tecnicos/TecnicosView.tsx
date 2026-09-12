@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Search, UserPlus, Filter, ArrowUpDown } from 'lucide-react';
 import { ReportViewHeader } from '../../components/ReportViewHeader';
 import { ReportPagination } from '../../components/ReportPagination';
@@ -113,12 +113,18 @@ export const TecnicosView: React.FC = () => {
       });
   }, [tecnicos, searchQuery, filters, sortField, sortAsc]);
 
+  // Reset page to 1 when filters or search query change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters, searchQuery]);
+
   // Paginación
   const totalPages = Math.ceil(filteredTecnicos.length / pageSize) || 1;
   const paginatedTecnicos = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
+    const safePage = Math.min(currentPage, totalPages);
+    const start = (safePage - 1) * pageSize;
     return filteredTecnicos.slice(start, start + pageSize);
-  }, [filteredTecnicos, currentPage, pageSize]);
+  }, [filteredTecnicos, currentPage, totalPages, pageSize]);
 
   // Exportar XLSX
   const handleExportXLSX = () => {

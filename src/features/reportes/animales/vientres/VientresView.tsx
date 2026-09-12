@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Search, Filter, ArrowUpDown } from 'lucide-react';
 import { ReportViewHeader } from '../../components/ReportViewHeader';
 import { ReportPagination } from '../../components/ReportPagination';
@@ -110,12 +110,18 @@ export const VientresView: React.FC = () => {
       });
   }, [vientres, searchQuery, filters, sortField, sortAsc]);
 
+  // Reset page to 1 on filter or search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters, searchQuery]);
+
   // Paginación
   const totalPages = Math.ceil(filteredVientres.length / pageSize) || 1;
   const paginatedVientres = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
+    const safePage = Math.min(currentPage, totalPages);
+    const start = (safePage - 1) * pageSize;
     return filteredVientres.slice(start, start + pageSize);
-  }, [filteredVientres, currentPage, pageSize]);
+  }, [filteredVientres, currentPage, totalPages, pageSize]);
 
   // Exportar XLSX
   const handleExportXLSX = () => {

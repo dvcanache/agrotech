@@ -41,6 +41,38 @@ export const EventosView: React.FC = () => {
   const [modalTipo, setModalTipo] = useState('Servicios');
   const [modalCategoria, setModalCategoria] = useState('Reproductivos');
 
+  // Filtros de eventos
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategoryTab, setSelectedCategoryTab] = useState('Todos');
+
+  const CATEGORY_TABS = ['Todos', 'Reproductivos', 'Productivos', 'Veterinarios', 'Sanitarios'];
+
+  const filteredEventos = useMemo(() => {
+    return eventos.filter(ev => {
+      // Filtro por tab de categoría
+      if (selectedCategoryTab !== 'Todos') {
+        if (selectedCategoryTab === 'Sanitarios') {
+          if (ev.categoria !== 'Sanitarios' && ev.categoria !== 'Veterinarios') return false;
+        } else if (ev.categoria !== selectedCategoryTab) {
+          return false;
+        }
+      }
+
+      // Filtro por término de búsqueda
+      if (searchTerm.trim()) {
+        const q = searchTerm.toLowerCase().trim();
+        const matchAnimal = ev.codigoAnimal.toLowerCase().includes(q);
+        const matchType = ev.tipoEvento.toLowerCase().includes(q);
+        const matchCategory = ev.categoria.toLowerCase().includes(q);
+        const matchTech = (ev.tecnico || '').toLowerCase().includes(q);
+        const matchVenc = ev.vencimiento.toLowerCase().includes(q);
+        if (!matchAnimal && !matchType && !matchCategory && !matchTech && !matchVenc) return false;
+      }
+
+      return true;
+    });
+  }, [eventos, selectedCategoryTab, searchTerm]);
+
   const handleSelectLink = (link: string, category: string) => {
     setModalTipo(link);
     setModalCategoria(category);
@@ -49,6 +81,11 @@ export const EventosView: React.FC = () => {
 
   const handleSaveEvento = (nuevo: EventoItem) => {
     setEventos(prev => [nuevo, ...prev]);
+  };
+
+  const handleResetFilters = () => {
+    setSearchTerm('');
+    setSelectedCategoryTab('Todos');
   };
 
   return (
@@ -80,6 +117,100 @@ export const EventosView: React.FC = () => {
         </div>
       </div>
 
+      {/* Filter and Search Bar */}
+      <div style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 12,
+        backgroundColor: '#ffffff',
+        padding: '12px 16px',
+        borderRadius: 10,
+        border: '1px solid var(--border-gray)',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
+      }}>
+        {/* Category Filter Pills */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginRight: 4 }}>
+            Categoría:
+          </span>
+          {CATEGORY_TABS.map(tab => (
+            <button
+              key={tab}
+              type="button"
+              className={`filter-pill-btn ${selectedCategoryTab === tab ? 'active' : ''}`}
+              onClick={() => setSelectedCategoryTab(tab)}
+              style={{
+                border: 'none',
+                borderRadius: 20,
+                padding: '6px 14px',
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: 'pointer',
+                backgroundColor: selectedCategoryTab === tab ? 'var(--primary-color)' : '#f1f5f9',
+                color: selectedCategoryTab === tab ? '#ffffff' : 'var(--text-secondary)',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        {/* Search Box */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          position: 'relative',
+          minWidth: 260
+        }}>
+          <input
+            type="text"
+            className="form-input"
+            placeholder="Buscar por animal, evento o técnico..."
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            style={{
+              paddingLeft: 34,
+              paddingRight: searchTerm ? 30 : 12,
+              height: 36,
+              fontSize: 13,
+              borderRadius: 6,
+              border: '1px solid #cbd5e1',
+              width: '100%'
+            }}
+          />
+          <span style={{ position: 'absolute', left: 10, color: '#94a3b8', display: 'flex', alignItems: 'center', pointerEvents: 'none' }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+          </span>
+          {searchTerm && (
+            <button
+              type="button"
+              onClick={() => setSearchTerm('')}
+              style={{
+                position: 'absolute',
+                right: 8,
+                background: 'none',
+                border: 'none',
+                color: '#94a3b8',
+                cursor: 'pointer',
+                padding: 4,
+                display: 'flex',
+                alignItems: 'center'
+              }}
+              title="Limpiar búsqueda"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Events Table (Recent & Scheduled Tasks) */}
       <div>
         <div className="events-table-container">
@@ -93,7 +224,7 @@ export const EventosView: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {eventos.map(ev => (
+              {filteredEventos.map(ev => (
                 <tr key={ev.id}>
                   <td style={{ fontWeight: 500 }}>{ev.fecha}</td>
                   <td>
@@ -121,10 +252,20 @@ export const EventosView: React.FC = () => {
                   </td>
                 </tr>
               ))}
-              {eventos.length === 0 && (
+              {filteredEventos.length === 0 && (
                 <tr>
-                  <td colSpan={4} style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '24px' }}>
-                    Ningún registro encontrado
+                  <td colSpan={4} style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '32px 16px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+                      <span>No se encontraron eventos con los filtros seleccionados</span>
+                      <button
+                        type="button"
+                        className="btn-secondary"
+                        onClick={handleResetFilters}
+                        style={{ fontSize: 12, padding: '4px 12px' }}
+                      >
+                        Restablecer filtros
+                      </button>
+                    </div>
                   </td>
                 </tr>
               )}
@@ -132,9 +273,10 @@ export const EventosView: React.FC = () => {
           </table>
         </div>
         <div className="events-table-footer-text">
-          {eventos.length} {eventos.length === 1 ? 'registro' : 'registros'}
+          Mostrando {filteredEventos.length} de {eventos.length} {eventos.length === 1 ? 'registro' : 'registros'}
         </div>
       </div>
+
 
       {/* Grid of Event Categories */}
       <div className="events-categories-grid">

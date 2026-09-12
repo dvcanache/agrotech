@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Search, Filter, ArrowUpDown } from 'lucide-react';
 import { ReportViewHeader } from '../../components/ReportViewHeader';
 import { ReportPagination } from '../../components/ReportPagination';
@@ -105,11 +105,16 @@ export const ProximasRevisarView: React.FC = () => {
       });
   }, [animales, searchQuery, filters, sortField, sortAsc]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters, searchQuery]);
+
   const totalPages = Math.ceil(filteredAnimales.length / pageSize) || 1;
   const paginatedAnimales = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
+    const safePage = Math.min(currentPage, totalPages);
+    const start = (safePage - 1) * pageSize;
     return filteredAnimales.slice(start, start + pageSize);
-  }, [filteredAnimales, currentPage, pageSize]);
+  }, [filteredAnimales, currentPage, totalPages, pageSize]);
 
   const handleExportXLSX = () => {
     const headers = [

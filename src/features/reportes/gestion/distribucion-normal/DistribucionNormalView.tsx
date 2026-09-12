@@ -64,6 +64,21 @@ export const DistribucionNormalView: React.FC = () => {
   const currentData = MOCK_DISTRIBUCIONES_POR_CRITERIO[selectedCriterio] ||
     MOCK_DISTRIBUCIONES_POR_CRITERIO['Producción - Promedio días producción'];
 
+  const filteredIntervalos = useMemo(() => {
+    return currentData.intervalosFrecuencia.filter(row => {
+      const parts = row.rango.split('-').map(s => parseFloat(s.trim()));
+      if (filters.min && !isNaN(parseFloat(filters.min))) {
+        const minVal = parseFloat(filters.min);
+        if (parts.length === 2 && !isNaN(parts[1]) && parts[1] < minVal) return false;
+      }
+      if (filters.max && !isNaN(parseFloat(filters.max))) {
+        const maxVal = parseFloat(filters.max);
+        if (parts.length === 2 && !isNaN(parts[0]) && parts[0] > maxVal) return false;
+      }
+      return true;
+    });
+  }, [currentData, filters.min, filters.max]);
+
   const handleProcesar = () => {
     setIsProcessed(true);
   };
@@ -78,7 +93,7 @@ export const DistribucionNormalView: React.FC = () => {
       '% Acumulado',
       'Z-Score'
     ];
-    const rows = currentData.intervalosFrecuencia.map(row => [
+    const rows = filteredIntervalos.map(row => [
       row.rango,
       row.frecuenciaObservada,
       `${row.porcentajeObservado}%`,
@@ -272,7 +287,7 @@ export const DistribucionNormalView: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {currentData.intervalosFrecuencia.map(int => (
+                  {filteredIntervalos.map(int => (
                     <tr key={int.rango}>
                       {isColVisible('rango') && (
                         <td style={{ fontWeight: 600, color: 'var(--text-primary)' }}>

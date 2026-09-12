@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Search, Plus, Filter, ArrowUpDown } from 'lucide-react';
 import { ReportViewHeader } from '../../components/ReportViewHeader';
 import { ReportPagination } from '../../components/ReportPagination';
@@ -99,7 +99,7 @@ export const ReproductoresView: React.FC = () => {
         // Filtro de drawer
         if (!filters.categorias.includes(r.categoriaActual)) return false;
         if (!filters.lotes.includes(r.loteActual)) return false;
-        if (r.eficiencia && r.eficiencia < filters.minEficiencia) return false;
+        if (filters.minEficiencia > 0 && (r.eficiencia === undefined || r.eficiencia < filters.minEficiencia)) return false;
 
         return true;
       })
@@ -115,12 +115,18 @@ export const ReproductoresView: React.FC = () => {
       });
   }, [reproductores, selectedCategoryTab, searchQuery, filters, sortField, sortAsc]);
 
+  // Reset page to 1 when filters, tabs or search query change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters, selectedCategoryTab, searchQuery]);
+
   // Paginación
   const totalPages = Math.ceil(filteredReproductores.length / pageSize) || 1;
   const paginatedReproductores = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
+    const safePage = Math.min(currentPage, totalPages);
+    const start = (safePage - 1) * pageSize;
     return filteredReproductores.slice(start, start + pageSize);
-  }, [filteredReproductores, currentPage, pageSize]);
+  }, [filteredReproductores, currentPage, totalPages, pageSize]);
 
   // Exportar XLSX
   const handleExportXLSX = () => {

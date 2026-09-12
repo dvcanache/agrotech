@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Search, Filter, Layers, ArrowUpDown } from 'lucide-react';
 import { ReportViewHeader } from '../../components/ReportViewHeader';
 import { ReportPagination } from '../../components/ReportPagination';
@@ -111,11 +111,16 @@ export const MultirebanoTransaccionesView: React.FC = () => {
     return { totalCount, totalAnimales, traslados, totalMonto };
   }, [filteredTransacciones]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters, searchQuery]);
+
   const totalPages = Math.ceil(filteredTransacciones.length / pageSize) || 1;
   const paginatedTransacciones = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
+    const safePage = Math.min(currentPage, totalPages);
+    const start = (safePage - 1) * pageSize;
     return filteredTransacciones.slice(start, start + pageSize);
-  }, [filteredTransacciones, currentPage, pageSize]);
+  }, [filteredTransacciones, currentPage, totalPages, pageSize]);
 
   const handleExportXLSX = () => {
     const headers = [

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Search, Filter, ArrowUpDown } from 'lucide-react';
 import { ReportViewHeader } from '../../components/ReportViewHeader';
 import { ReportPagination } from '../../components/ReportPagination';
@@ -113,11 +113,16 @@ export const HistoriaReproduccionesView: React.FC = () => {
       });
   }, [eventos, searchQuery, filters, sortField, sortAsc]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters, searchQuery]);
+
   const totalPages = Math.ceil(filteredEventos.length / pageSize) || 1;
   const paginatedEventos = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
+    const safePage = Math.min(currentPage, totalPages);
+    const start = (safePage - 1) * pageSize;
     return filteredEventos.slice(start, start + pageSize);
-  }, [filteredEventos, currentPage, pageSize]);
+  }, [filteredEventos, currentPage, totalPages, pageSize]);
 
   // KPIs
   const kpiStats = useMemo(() => {

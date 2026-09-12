@@ -60,6 +60,41 @@ export const InventariosView: React.FC = () => {
     setColumns(prev => prev.map(col => ({ ...col, visible: true })));
   };
 
+  // Mapeo de columnas a categorías zootécnicas
+  const CATEGORY_MAP: Record<string, CategoriaAnimal> = {
+    becerras: 'Becerra',
+    mautas: 'Mauta',
+    novillas: 'Novilla',
+    vacas: 'Vaca',
+    becerros: 'Becerro',
+    mautes: 'Maute',
+    novillos: 'Novillo',
+    toros: 'Toro'
+  };
+
+  const isColVisible = (key: string) => {
+    const col = columns.find(c => c.key === key);
+    if (col && !col.visible) return false;
+    if (CATEGORY_MAP[key]) {
+      return filters.categorias.includes(CATEGORY_MAP[key]);
+    }
+    return true;
+  };
+
+  // Helper para calcular total por fila considerando únicamente categorías visibles
+  const getRowTotal = (r: typeof MOCK_INVENTARIO_LOTES[0]) => {
+    let sum = 0;
+    if (filters.categorias.includes('Becerra')) sum += r.becerras;
+    if (filters.categorias.includes('Mauta')) sum += r.mautas;
+    if (filters.categorias.includes('Novilla')) sum += r.novillas;
+    if (filters.categorias.includes('Vaca')) sum += r.vacas;
+    if (filters.categorias.includes('Becerro')) sum += r.becerros;
+    if (filters.categorias.includes('Maute')) sum += r.mautes;
+    if (filters.categorias.includes('Novillo')) sum += r.novillos;
+    if (filters.categorias.includes('Toro')) sum += r.toros;
+    return sum;
+  };
+
   // Filtrado de filas de la matriz
   const filteredRows = useMemo(() => {
     return MOCK_INVENTARIO_LOTES.filter(lote =>
@@ -71,15 +106,15 @@ export const InventariosView: React.FC = () => {
   const totals = useMemo(() => {
     return filteredRows.reduce(
       (acc, r) => ({
-        becerras: acc.becerras + r.becerras,
-        mautas: acc.mautas + r.mautas,
-        novillas: acc.novillas + r.novillas,
-        vacas: acc.vacas + r.vacas,
-        becerros: acc.becerros + r.becerros,
-        mautes: acc.mautes + r.mautes,
-        novillos: acc.novillos + r.novillos,
-        toros: acc.toros + r.toros,
-        total: acc.total + r.total
+        becerras: acc.becerras + (filters.categorias.includes('Becerra') ? r.becerras : 0),
+        mautas: acc.mautas + (filters.categorias.includes('Mauta') ? r.mautas : 0),
+        novillas: acc.novillas + (filters.categorias.includes('Novilla') ? r.novillas : 0),
+        vacas: acc.vacas + (filters.categorias.includes('Vaca') ? r.vacas : 0),
+        becerros: acc.becerros + (filters.categorias.includes('Becerro') ? r.becerros : 0),
+        mautes: acc.mautes + (filters.categorias.includes('Maute') ? r.mautes : 0),
+        novillos: acc.novillos + (filters.categorias.includes('Novillo') ? r.novillos : 0),
+        toros: acc.toros + (filters.categorias.includes('Toro') ? r.toros : 0),
+        total: acc.total + getRowTotal(r)
       }),
       {
         becerras: 0,
@@ -93,7 +128,29 @@ export const InventariosView: React.FC = () => {
         total: 0
       }
     );
-  }, [filteredRows]);
+  }, [filteredRows, filters.categorias]);
+
+  // Gráfico filtrado por categorías activas
+  const categoryChartData = useMemo(() => {
+    const labels: string[] = [];
+    const data: number[] = [];
+    const colors: string[] = [];
+
+    MOCK_INVENTARIO_CATEGORIA_CHART.labels.forEach((lbl, idx) => {
+      const isIncluded = filters.categorias.some(c => lbl.toLowerCase().includes(c.toLowerCase()));
+      if (isIncluded) {
+        labels.push(lbl);
+        data.push(MOCK_INVENTARIO_CATEGORIA_CHART.data[idx]);
+        colors.push(MOCK_INVENTARIO_CATEGORIA_CHART.colors[idx]);
+      }
+    });
+
+    return {
+      labels: labels.length > 0 ? labels : ['Sin datos'],
+      data: data.length > 0 ? data : [0],
+      colors: colors.length > 0 ? colors : ['#cbd5e1']
+    };
+  }, [filters.categorias]);
 
   const handleExportXLSX = () => {
     const headers = [
@@ -110,15 +167,15 @@ export const InventariosView: React.FC = () => {
     ];
     const rows = filteredRows.map(r => [
       r.loteNombre,
-      r.becerras,
-      r.mautas,
-      r.novillas,
-      r.vacas,
-      r.becerros,
-      r.mautes,
-      r.novillos,
-      r.toros,
-      r.total
+      filters.categorias.includes('Becerra') ? r.becerras : 0,
+      filters.categorias.includes('Mauta') ? r.mautas : 0,
+      filters.categorias.includes('Novilla') ? r.novillas : 0,
+      filters.categorias.includes('Vaca') ? r.vacas : 0,
+      filters.categorias.includes('Becerro') ? r.becerros : 0,
+      filters.categorias.includes('Maute') ? r.mautes : 0,
+      filters.categorias.includes('Novillo') ? r.novillos : 0,
+      filters.categorias.includes('Toro') ? r.toros : 0,
+      getRowTotal(r)
     ]);
     rows.push([
       'Total activos',
@@ -146,8 +203,6 @@ export const InventariosView: React.FC = () => {
     ]);
     exportToCSV('reporte_inventarios', headers, rows);
   };
-
-  const isColVisible = (key: string) => columns.find(c => c.key === key)?.visible ?? true;
 
   return (
     <div className="report-view-container">
@@ -180,18 +235,18 @@ export const InventariosView: React.FC = () => {
           <div className="chart-card-title">Inventario por categoría</div>
           <div className="donut-wrapper-relative">
             <DoughnutChart
-              labels={MOCK_INVENTARIO_CATEGORIA_CHART.labels}
-              data={MOCK_INVENTARIO_CATEGORIA_CHART.data}
-              colors={MOCK_INVENTARIO_CATEGORIA_CHART.colors}
+              labels={categoryChartData.labels}
+              data={categoryChartData.data}
+              colors={categoryChartData.colors}
             />
             <div className="donut-center-metric">{totals.total}</div>
           </div>
           <div className="chart-custom-legend">
-            {MOCK_INVENTARIO_CATEGORIA_CHART.labels.map((lbl, idx) => (
+            {categoryChartData.labels.map((lbl, idx) => (
               <span key={lbl} className="legend-pill">
                 <span
                   className="legend-dot"
-                  style={{ backgroundColor: MOCK_INVENTARIO_CATEGORIA_CHART.colors[idx] }}
+                  style={{ backgroundColor: categoryChartData.colors[idx] }}
                 ></span>
                 {lbl}
               </span>
@@ -284,7 +339,7 @@ export const InventariosView: React.FC = () => {
                 {isColVisible('mautes') && <td>{row.mautes}</td>}
                 {isColVisible('novillos') && <td>{row.novillos}</td>}
                 {isColVisible('toros') && <td>{row.toros}</td>}
-                {isColVisible('total') && <td style={{ fontWeight: 700 }}>{row.total}</td>}
+                {isColVisible('total') && <td style={{ fontWeight: 700 }}>{getRowTotal(row)}</td>}
               </tr>
             ))}
 

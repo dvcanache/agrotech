@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   GIS_PADDOCKS,
   GIS_POINTS_OF_INTEREST,
@@ -30,6 +30,23 @@ export const MapasView: React.FC = () => {
   const [activeLayer, setActiveLayer] = useState<MapLayerType>('satelital');
   const [zoomLevel, setZoomLevel] = useState<number>(1);
   const [showPOIs, setShowPOIs] = useState<boolean>(true);
+  const [paddockSearch, setPaddockSearch] = useState('');
+  const [paddockStatusFilter, setPaddockStatusFilter] = useState('Todos');
+
+  const filteredPaddocks = useMemo(() => {
+    return GIS_PADDOCKS.filter(p => {
+      if (paddockStatusFilter !== 'Todos' && p.estatus !== paddockStatusFilter) {
+        return false;
+      }
+      if (paddockSearch.trim()) {
+        const q = paddockSearch.toLowerCase().trim();
+        const matchCode = p.codigo.toLowerCase().includes(q);
+        const matchName = p.nombre.toLowerCase().includes(q);
+        if (!matchCode && !matchName) return false;
+      }
+      return true;
+    });
+  }, [paddockStatusFilter, paddockSearch]);
 
   const handleZoomIn = () => setZoomLevel(prev => Math.min(prev + 0.2, 1.8));
   const handleZoomOut = () => setZoomLevel(prev => Math.max(prev - 0.2, 0.7));
@@ -564,12 +581,54 @@ export const MapasView: React.FC = () => {
           <div className="gis-panel-card" style={{ padding: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
               <h4 style={{ fontSize: 14, fontWeight: 600, margin: 0, color: 'var(--text-primary)' }}>
-                Directorio de Parcelas ({GIS_PADDOCKS.length})
+                Directorio de Parcelas ({filteredPaddocks.length})
               </h4>
               <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Clic para enfocar</span>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 240, overflowY: 'auto', width: '100%' }}>
-              {GIS_PADDOCKS.map(p => (
+
+            {/* Status Tabs and Search */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 10 }}>
+              <div style={{ display: 'flex', gap: 4 }}>
+                {['Todos', 'Activo', 'En descanso'].map(st => (
+                  <button
+                    key={st}
+                    type="button"
+                    onClick={() => setPaddockStatusFilter(st)}
+                    style={{
+                      border: 'none',
+                      borderRadius: 14,
+                      padding: '3px 10px',
+                      fontSize: 11,
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      backgroundColor: paddockStatusFilter === st ? 'var(--primary-color)' : '#f1f5f9',
+                      color: paddockStatusFilter === st ? '#ffffff' : 'var(--text-secondary)',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    {st}
+                  </button>
+                ))}
+              </div>
+              <input
+                type="text"
+                className="form-input"
+                placeholder="Buscar parcela por código o nombre..."
+                value={paddockSearch}
+                onChange={e => setPaddockSearch(e.target.value)}
+                style={{
+                  height: 30,
+                  fontSize: 12,
+                  padding: '4px 8px',
+                  borderRadius: 6,
+                  border: '1px solid #cbd5e1',
+                  width: '100%'
+                }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 220, overflowY: 'auto', width: '100%' }}>
+              {filteredPaddocks.map(p => (
                 <div
                   key={p.id}
                   style={{
@@ -594,8 +653,14 @@ export const MapasView: React.FC = () => {
                   </div>
                 </div>
               ))}
+              {filteredPaddocks.length === 0 && (
+                <div style={{ padding: '16px 8px', textAlign: 'center', fontSize: 12, color: 'var(--text-secondary)' }}>
+                  No se encontraron parcelas
+                </div>
+              )}
             </div>
           </div>
+
         </div>
       </div>
     </div>

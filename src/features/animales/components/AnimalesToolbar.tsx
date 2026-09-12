@@ -1,33 +1,135 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
-export const AnimalesToolbar: React.FC = () => {
+interface AnimalesToolbarProps {
+  quickFilter?: string;
+  onQuickFilterChange?: (filter: string) => void;
+  onOpenFilterDrawer?: () => void;
+  activeFilterCount?: number;
+}
+
+const QUICK_FILTER_OPTIONS = [
+  'Todos los animales',
+  'Vacas',
+  'Novillas',
+  'Mautas / Mautes',
+  'Becerros / Becerras',
+  'Toros',
+  'Activos',
+  'Inactivos'
+];
+
+export const AnimalesToolbar: React.FC<AnimalesToolbarProps> = ({
+  quickFilter = 'Todos los animales',
+  onQuickFilterChange,
+  onOpenFilterDrawer,
+  activeFilterCount = 0
+}) => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleSelectOption = (option: string) => {
+    onQuickFilterChange?.(option);
+    setIsDropdownOpen(false);
+  };
+
   return (
     <div className="animals-toolbar">
       <div className="toolbar-left">
         <h2 className="toolbar-title">Animales</h2>
 
         {/* Selector Dropdown */}
-        <div className="selector-dropdown">
-          <span>Todos los animales</span>
-          {/* Star Icon Outline in Green */}
-          <svg className="star-icon" viewBox="0 0 24 24" width="16" height="16">
-            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-          </svg>
-          {/* Down Chevron */}
-          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <path d="M6 9l6 6 6-6" />
-          </svg>
+        <div style={{ position: 'relative' }} ref={dropdownRef}>
+          <div
+            className="selector-dropdown"
+            onClick={() => setIsDropdownOpen(prev => !prev)}
+            role="button"
+            tabIndex={0}
+            title="Seleccionar filtro rápido"
+          >
+            <span>{quickFilter}</span>
+            {/* Star Icon Outline in Green */}
+            <svg className="star-icon" viewBox="0 0 24 24" width="16" height="16">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+            </svg>
+            {/* Down Chevron */}
+            <svg
+              viewBox="0 0 24 24"
+              width="12"
+              height="12"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              style={{
+                transform: isDropdownOpen ? 'rotate(180deg)' : 'none',
+                transition: 'transform 0.2s ease'
+              }}
+            >
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          </div>
+
+          {/* Floating Dropdown Menu */}
+          {isDropdownOpen && (
+            <div className="selector-dropdown-menu">
+              {QUICK_FILTER_OPTIONS.map(opt => (
+                <div
+                  key={opt}
+                  className={`selector-dropdown-item ${opt === quickFilter ? 'active' : ''}`}
+                  onClick={() => handleSelectOption(opt)}
+                >
+                  {opt}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Filter Button Group (Blue) */}
-        <div className="filter-btn-group">
-          <button className="filter-main-btn" title="Filtrar" type="button">
+        <div className="filter-btn-group" title="Filtros avanzados">
+          <button
+            className="filter-main-btn"
+            title="Filtros avanzados"
+            type="button"
+            onClick={onOpenFilterDrawer}
+          >
             {/* Funnel Icon */}
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
             </svg>
+            {activeFilterCount > 0 && (
+              <span
+                style={{
+                  marginLeft: 6,
+                  backgroundColor: '#2563eb',
+                  color: '#ffffff',
+                  borderRadius: 10,
+                  padding: '1px 6px',
+                  fontSize: 11,
+                  fontWeight: 700,
+                  lineHeight: '14px'
+                }}
+              >
+                {activeFilterCount}
+              </span>
+            )}
           </button>
-          <button className="filter-chevron-btn" type="button">
+          <button
+            className="filter-chevron-btn"
+            type="button"
+            title="Ver filtros"
+            onClick={onOpenFilterDrawer}
+          >
             {/* Down Chevron */}
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M6 9l6 6 6-6" />
@@ -84,3 +186,4 @@ export const AnimalesToolbar: React.FC = () => {
     </div>
   );
 };
+

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { POTREROS_MOCK_DATA, PotreroItem } from './potrerosData';
 import { PotrerosTable } from './components/PotrerosTable';
 import { PotrerosToolbar } from './components/PotrerosToolbar';
@@ -70,12 +70,18 @@ export const PotrerosView: React.FC = () => {
     });
   }, [potreros, searchTerm, filters]);
 
+  // Reset to first page when search or filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filters]);
+
   // Pagination
   const totalPages = Math.max(1, Math.ceil(filteredPotreros.length / pageSize));
   const currentItems = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
+    const safePage = Math.min(currentPage, totalPages);
+    const start = (safePage - 1) * pageSize;
     return filteredPotreros.slice(start, start + pageSize);
-  }, [filteredPotreros, currentPage]);
+  }, [filteredPotreros, currentPage, totalPages]);
 
   // Selection
   const isSelectAll =
