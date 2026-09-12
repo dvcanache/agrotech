@@ -407,7 +407,7 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
                 Registrar {tipoInicial}
               </h3>
               <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: 0 }}>
-                Categoría: <strong>{categoriaInicial}</strong> • Módulo Zootécnico AgroTech NextGen
+                Categoría: <strong>{categoriaInicial}</strong> • Módulo Zootécnico AgroGan NextGen
               </p>
             </div>
           </div>

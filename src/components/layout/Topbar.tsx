@@ -85,7 +85,7 @@ export const Topbar: React.FC = () => {
             <circle cx="40" cy="64" r="3" fill="#2d6a4f" />
             <circle cx="60" cy="64" r="3" fill="#2d6a4f" />
           </svg>
-          <span className="logo-text">AgroTech</span>
+          <span className="logo-text">AgroGan</span>
         </Link>
         <div className="topbar-divider"></div>
         <span className="scope-text">{config.nombre || 'Rebaño de Prueba'}</span>

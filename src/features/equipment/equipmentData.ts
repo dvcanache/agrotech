@@ -113,7 +113,7 @@ export const INITIAL_MAINTENANCE_LOG: MaintenanceRecord[] = [
     costoUsd: 380,
     repuestosReemplazados: ['Filtro Aceite Motor RE504836', 'Aceite 15W40 Diésel (16L)', 'Filtro Combustible Primario'],
     tecnicoResponsable: 'José Colmenares',
-    taller: 'Taller Central AgroTech',
+    taller: 'Taller Central AgroGan',
     observaciones: 'Servicio programado de 250 horas. Presión de aceite y compresión óptimas.'
   },
   {

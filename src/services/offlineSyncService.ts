@@ -1,5 +1,5 @@
 /**
- * AgroTech NextGen - Servicio Offline-First & Cola Outbox
+ * AgroGan NextGen - Servicio Offline-First & Cola Outbox
  * Gestiona la captura de eventos sin conexión en IndexedDB/LocalStorage y
  * sincronización en segundo plano con resolución determinista de conflictos.
  */
@@ -41,7 +41,7 @@ class OfflineSyncService {
   }
 
   private cargarCola(): void {
-    const raw = localStorage.getItem('agrotech_outbox_queue');
+    const raw = localStorage.getItem('agrogan_outbox_queue') || localStorage.getItem('agrotech_outbox_queue');
     if (raw) {
       try {
         this.queue = JSON.parse(raw);
@@ -52,7 +52,7 @@ class OfflineSyncService {
   }
 
   private guardarCola(): void {
-    localStorage.setItem('agrotech_outbox_queue', JSON.stringify(this.queue));
+    localStorage.setItem('agrogan_outbox_queue', JSON.stringify(this.queue));
     this.notificar();
   }
 

@@ -1,11 +1,11 @@
-# AgroTech — Plataforma de Gestión Ganadera Inteligente
+# AgroGan — Plataforma de Gestión Ganadera Inteligente
 
 [![React](https://img.shields.io/badge/React-19.x-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-5.x-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Chart.js](https://img.shields.io/badge/Chart.js-FF6384?style=for-the-badge&logo=chartdotjs&logoColor=white)](https://www.chartjs.org/)
 
-**AgroTech** es una solución integral de software administrativo y analítico diseñada para el sector agropecuario (AgTech). Permite a productores, veterinarios y administradores de fincas gestionar eficientemente semovientes (bovinos, bufalinos, caprinos, ovinos), monitorear indicadores clave de rendimiento (KPIs), supervisar eventos reproductivos y sanitarios, y administrar maquinaria e insumos en tiempo real.
+**AgroGan** es una solución integral de software administrativo y analítico diseñada para el sector agropecuario (AgTech). Permite a productores, veterinarios y administradores de fincas gestionar eficientemente semovientes (bovinos, bufalinos, caprinos, ovinos), monitorear indicadores clave de rendimiento (KPIs), supervisar eventos reproductivos y sanitarios, y administrar maquinaria e insumos en tiempo real.
 
 ---
 

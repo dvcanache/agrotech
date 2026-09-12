@@ -54,7 +54,7 @@ export const ReportesView: React.FC = () => {
   // Estados para lista de reportes con persistencia en localStorage
   const [reportes, setReportes] = useState<ReporteItem[]>(() => {
     try {
-      const saved = localStorage.getItem('agrotech_saved_reports');
+      const saved = localStorage.getItem('agrogan_saved_reports') || localStorage.getItem('agrotech_saved_reports');
       if (saved) {
         return JSON.parse(saved);
       }
@@ -78,7 +78,7 @@ export const ReportesView: React.FC = () => {
   // Guardar en localStorage al cambiar
   useEffect(() => {
     try {
-      localStorage.setItem('agrotech_saved_reports', JSON.stringify(reportes));
+      localStorage.setItem('agrogan_saved_reports', JSON.stringify(reportes));
     } catch {
       // Manejo silencioso en ambientes restringidos
     }

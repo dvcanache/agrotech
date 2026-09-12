@@ -1,5 +1,5 @@
 /**
- * AgroTech NextGen - Servicio Web Bluetooth & Hardware IoT
+ * AgroGan NextGen - Servicio Web Bluetooth & Hardware IoT
  * Soporta conexión Web Bluetooth API nativa con bastones RFID (Allflex, Tru-Test, Gallagher)
  * y básculas digitales de corral, con simulador integrado para trabajo en campo sin hardware físico.
  */
@@ -63,7 +63,7 @@ class BluetoothHardwareService {
   private statusListeners: Set<StatusListener> = new Set();
 
   constructor() {
-    const saved = localStorage.getItem('agrotech_ble_devices');
+    const saved = localStorage.getItem('agrogan_ble_devices') || localStorage.getItem('agrotech_ble_devices');
     if (saved) {
       try {
         this.dispositivos = JSON.parse(saved);
@@ -97,7 +97,7 @@ class BluetoothHardwareService {
   }
 
   private notifyStatus(): void {
-    localStorage.setItem('agrotech_ble_devices', JSON.stringify(this.dispositivos));
+    localStorage.setItem('agrogan_ble_devices', JSON.stringify(this.dispositivos));
     this.statusListeners.forEach(l => l([...this.dispositivos]));
   }
 

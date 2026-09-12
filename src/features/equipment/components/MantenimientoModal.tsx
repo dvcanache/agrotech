@@ -54,7 +54,7 @@ export const MantenimientoModal: React.FC<MantenimientoModalProps> = ({
     costoUsd: 280,
     repuestosTexto: 'Filtro Aceite Motor, Aceite Diésel 15W40 (16L), Filtro Combustible Primario',
     tecnicoResponsable: OPERATORS_OPTIONS[3] || 'José Colmenares (Mecánico / Operador)',
-    taller: 'Taller Central AgroTech',
+    taller: 'Taller Central AgroGan',
     observaciones: 'Servicio preventivo regular. Limpieza de radiador, chequeo de mangueras y engrase general.',
     resetNextService: true,
     setOperativo: true
@@ -289,7 +289,7 @@ export const MantenimientoModal: React.FC<MantenimientoModalProps> = ({
                 </label>
                 <input
                   type="text"
-                  placeholder="ej. Taller Central AgroTech"
+                  placeholder="ej. Taller Central AgroGan"
                   className="form-input"
                   value={formData.taller}
                   onChange={e => setFormData({ ...formData, taller: e.target.value })}

@@ -38,7 +38,7 @@ export const MOCK_REBANOS_CATALOGO: RebanoItem[] = [
   {
     id: 'HERD-03',
     nombre: 'Hacienda Santa Elena',
-    propietario: 'AgroTech Corp',
+    propietario: 'AgroGan Corp',
     especie: 'Vacunos',
     activo: true
   },
@@ -52,7 +52,7 @@ export const MOCK_REBANOS_CATALOGO: RebanoItem[] = [
   {
     id: 'HERD-05',
     nombre: 'Finca El Porvenir',
-    propietario: 'AgroTech Corp',
+    propietario: 'AgroGan Corp',
     especie: 'Vacunos',
     activo: true
   }

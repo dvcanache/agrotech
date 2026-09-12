@@ -1,5 +1,5 @@
 /**
- * AgroTech NextGen — Utilidades Zootécnicas y Agronómicas para Pastoreo Racional Voisin (PRV)
+ * AgroGan NextGen — Utilidades Zootécnicas y Agronómicas para Pastoreo Racional Voisin (PRV)
  * Basado en las 4 Leyes Fundamentales de André Voisin:
  * 1. Ley del Reposo (Punto Óptimo de Reposo).
  * 2. Ley de la Ocupación (1 a 2 días de permanencia máxima para evitar consumo del rebrote).

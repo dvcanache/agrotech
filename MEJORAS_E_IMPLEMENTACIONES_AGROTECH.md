@@ -1,8 +1,8 @@
-# AgroTech NextGen — Propuesta Integral de Mejoras, Innovación y Nuevas Funcionalidades
+# AgroGan NextGen — Propuesta Integral de Mejoras, Innovación y Nuevas Funcionalidades
 
 > **Documento:** Especificación Estratégica de Mejoras y Nuevas Implementaciones  
 > **Sistema Base de Análisis:** GanSoft v1.19.3.0 (`@reference/GanSoft.md`, `@reference/GANSOFT_SPECIFICATION.md`)  
-> **Plataforma Destino:** AgroTech (React 19 + TypeScript 5 + Vite 5 + Node.js / PostgreSQL / Offline-First)  
+> **Plataforma Destino:** AgroGan (React 19 + TypeScript 5 + Vite 5 + Node.js / PostgreSQL / Offline-First)  
 > **Fecha de Elaboración:** 12 de Septiembre de 2026  
 > **Estado:** Aprobado para Implementación Arquitectónica  
 

@@ -38,7 +38,7 @@ export const exportToPDF = (filename: string, title: string, headers: string[], 
     <html lang="es">
     <head>
       <meta charset="utf-8">
-      <title>${title} - AgroTech</title>
+      <title>${title} - AgroGan</title>
       <style>
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 24px; color: #1e293b; }
         h1 { font-size: 20px; color: #2d6a4f; margin-bottom: 4px; }
@@ -52,7 +52,7 @@ export const exportToPDF = (filename: string, title: string, headers: string[], 
     </head>
     <body>
       <h1>${title}</h1>
-      <div class="meta">Plataforma AgroTech | Generado: ${new Date().toLocaleDateString('es-VE')}</div>
+      <div class="meta">Plataforma AgroGan | Generado: ${new Date().toLocaleDateString('es-VE')}</div>
       <table>
         <thead>
           <tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>

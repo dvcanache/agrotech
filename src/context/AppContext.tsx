@@ -19,7 +19,7 @@ interface AppContextType {
 }
 
 const DEFAULT_CONFIG: GeneralConfig = {
-  propietario: "AgroTech LLC, 2026",
+  propietario: "AgroGan LLC, 2026",
   nombre: "Rebaño de Prueba",
   pais: "Venezuela",
   especie: "Vacunos",

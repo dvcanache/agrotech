@@ -123,7 +123,7 @@ export const DetalleReporteModal: React.FC<DetalleReporteModalProps> = ({
               justifyContent: 'space-between',
               gap: 10
             }}>
-              <span>Este reporte está sincronizado con la vista de datos en vivo de AgroTech.</span>
+              <span>Este reporte está sincronizado con la vista de datos en vivo de AgroGan.</span>
               <button
                 type="button"
                 className="btn-primary"

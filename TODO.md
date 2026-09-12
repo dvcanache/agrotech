@@ -1,6 +1,6 @@
-# AgroTech NextGen — Lista Maestra de Tareas (TODO List)
+# AgroGan NextGen — Lista Maestra de Tareas (TODO List)
 
-> **Objetivo:** Implementación sistemática de las mejoras e innovaciones zootécnicas, operativas y arquitectónicas para AgroTech, organizadas por fases de desarrollo para ejecución autónoma mediante subagentes.  
+> **Objetivo:** Implementación sistemática de las mejoras e innovaciones zootécnicas, operativas y arquitectónicas para AgroGan, organizadas por fases de desarrollo para ejecución autónoma mediante subagentes.  
 > **Fecha de Inicio:** 12 de Septiembre de 2026  
 > **Estado General:** En Ejecución  
 
@@ -10,7 +10,7 @@
 
 ```mermaid
 gantt
-    title Plan de Ejecución AgroTech NextGen
+    title Plan de Ejecución AgroGan NextGen
     dateFormat  YYYY-MM-DD
     section Fase 1: Semovientes 360
     Expediente 360 & Cabecera Dinámica          :done,    p1_1, 2026-09-12, 1d

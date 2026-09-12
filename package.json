@@ -1,7 +1,7 @@
 {
-  "name": "agrotech-dashboard",
+  "name": "agrogan-dashboard",
   "version": "1.0.0",
-  "description": "Dashboard administrativo para la gestión de ganado AgroTech",
+  "description": "Dashboard administrativo para la gestión de ganado AgroGan",
   "scripts": {
     "dev": "vite",
     "start": "vite",
