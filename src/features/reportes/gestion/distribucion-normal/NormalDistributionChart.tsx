@@ -165,6 +165,9 @@ export const NormalDistributionChart: React.FC<NormalDistributionChartProps> = (
       duration: 300
     },
     plugins: {
+      datalabels: {
+        display: false
+      },
       legend: {
         position: 'top',
         labels: {

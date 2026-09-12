@@ -13,7 +13,10 @@ import {
   Scale,
   Milk,
   Calendar,
-  Zap
+  Zap,
+  RefreshCw,
+  RotateCcw,
+  CheckCircle2
 } from 'lucide-react';
 import { ReportViewHeader } from '../../components/ReportViewHeader';
 import { NormalDistributionChart } from './NormalDistributionChart';
@@ -42,6 +45,16 @@ export const DistribucionNormalView: React.FC = () => {
   // Sliders de Selección Genética y Descarte (Culling)
   const [lowerPercent, setLowerPercent] = useState<number>(15);
   const [upperPercent, setUpperPercent] = useState<number>(15);
+
+  // Parámetros efectivamente aplicados en la simulación y gráficos
+  const [appliedLowerPercent, setAppliedLowerPercent] = useState<number>(15);
+  const [appliedUpperPercent, setAppliedUpperPercent] = useState<number>(15);
+
+  // Control de recálculo manual / automático
+  const [autoApply, setAutoApply] = useState<boolean>(true);
+  const [isRecalculating, setIsRecalculating] = useState<boolean>(false);
+  const [hasPendingChanges, setHasPendingChanges] = useState<boolean>(false);
+  const [updateFeedback, setUpdateFeedback] = useState<string | null>(null);
 
   // Semoviente seleccionado para vista rápida
   const [selectedAnimal, setSelectedAnimal] = useState<AnimalZootecnico | null>(null);
@@ -107,19 +120,66 @@ export const DistribucionNormalView: React.FC = () => {
     return calculateZootechStats(rawAnimals);
   }, [rawAnimals]);
 
-  // Simulación genética dinámica con sliders
+  // Simulación genética dinámica con parámetros aplicados
   const simulation = useMemo(() => {
     return calculateGeneticSimulation(
       rawAnimals,
       stats,
-      lowerPercent,
-      upperPercent,
+      appliedLowerPercent,
+      appliedUpperPercent,
       currentVarConfig.esMenorMejor
     );
-  }, [rawAnimals, stats, lowerPercent, upperPercent, currentVarConfig.esMenorMejor]);
+  }, [rawAnimals, stats, appliedLowerPercent, appliedUpperPercent, currentVarConfig.esMenorMejor]);
+
+  const handleLowerChange = (val: number) => {
+    const clamped = Math.max(0, Math.min(30, isNaN(val) ? 0 : val));
+    setLowerPercent(clamped);
+    if (autoApply) {
+      setAppliedLowerPercent(clamped);
+      setHasPendingChanges(false);
+    } else {
+      setHasPendingChanges(clamped !== appliedLowerPercent || upperPercent !== appliedUpperPercent);
+    }
+  };
+
+  const handleUpperChange = (val: number) => {
+    const clamped = Math.max(0, Math.min(30, isNaN(val) ? 0 : val));
+    setUpperPercent(clamped);
+    if (autoApply) {
+      setAppliedUpperPercent(clamped);
+      setHasPendingChanges(false);
+    } else {
+      setHasPendingChanges(lowerPercent !== appliedLowerPercent || clamped !== appliedUpperPercent);
+    }
+  };
+
+  const handleActualizarSimulador = () => {
+    setIsRecalculating(true);
+    setAppliedLowerPercent(lowerPercent);
+    setAppliedUpperPercent(upperPercent);
+    setHasPendingChanges(false);
+    setUpdateFeedback(`¡Parámetros actualizados! Descarte: ${lowerPercent}% | Élite: ${upperPercent}%`);
+    setTimeout(() => {
+      setUpdateFeedback(null);
+    }, 3500);
+    setTimeout(() => {
+      setIsRecalculating(false);
+    }, 300);
+  };
+
+  const handleResetParametros = () => {
+    setLowerPercent(15);
+    setUpperPercent(15);
+    setAppliedLowerPercent(15);
+    setAppliedUpperPercent(15);
+    setHasPendingChanges(false);
+    setUpdateFeedback('Parámetros restablecidos a los valores estándar (15% Descarte / 15% Élite).');
+    setTimeout(() => setUpdateFeedback(null), 3000);
+  };
 
   const handleProcesar = () => {
     setIsProcessed(true);
+    handleActualizarSimulador();
   };
 
   const handleExportXLSX = () => {
@@ -319,13 +379,88 @@ export const DistribucionNormalView: React.FC = () => {
             <div className="simulation-header-title">
               <Sliders size={18} color="var(--primary-color)" />
               <span>Simulador Zootécnico de Presión de Selección y Descarte Genético</span>
+              {hasPendingChanges && (
+                <span style={{
+                  fontSize: 11,
+                  fontWeight: 600,
+                  padding: '3px 9px',
+                  borderRadius: 12,
+                  backgroundColor: '#fef3c7',
+                  color: '#92400e',
+                  border: '1px solid #fde68a'
+                }}>
+                  ● Cambios pendientes por actualizar
+                </span>
+              )}
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text-secondary)' }}>
-              <Info size={14} />
-              <span>Ajuste los sliders para calcular el progreso genético y ver semovientes seleccionados en tiempo real</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={handleActualizarSimulador}
+                disabled={isRecalculating}
+                title="Actualizar y recalcular simulación zootécnica"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '7px 15px',
+                  fontSize: 12.5,
+                  fontWeight: 600,
+                  borderRadius: 8,
+                  backgroundColor: hasPendingChanges ? '#ea580c' : '#2d6a4f',
+                  color: '#fff',
+                  border: 'none',
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
+                }}
+              >
+                <RefreshCw size={14} className={isRecalculating ? 'spin-anim' : ''} />
+                <span>{isRecalculating ? 'Recalculando...' : 'Actualizar Simulación'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleResetParametros}
+                title="Restablecer a valores estándar (15% / 15%)"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 5,
+                  padding: '6px 12px',
+                  fontSize: 12,
+                  borderRadius: 8,
+                  border: '1px solid var(--border-gray)',
+                  backgroundColor: '#ffffff',
+                  color: 'var(--text-secondary)',
+                  cursor: 'pointer'
+                }}
+              >
+                <RotateCcw size={13} />
+                <span>Restablecer</span>
+              </button>
             </div>
           </div>
+
+          {/* Feedback banner al actualizar */}
+          {updateFeedback && (
+            <div style={{
+              backgroundColor: '#dcfce7',
+              border: '1px solid #86efac',
+              borderRadius: 8,
+              padding: '8px 14px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              color: '#166534',
+              fontSize: 12.5,
+              fontWeight: 600
+            }}>
+              <CheckCircle2 size={16} color="#16a34a" />
+              <span>{updateFeedback}</span>
+            </div>
+          )}
 
           {/* Banner de Ganancia Potencial del Rebaño */}
           <div className="simulation-gain-banner">
@@ -379,15 +514,61 @@ export const DistribucionNormalView: React.FC = () => {
                   {lowerPercent}% inferior ({simulation.cullingAnimals.length} animales)
                 </span>
               </div>
-              <input
-                type="range"
-                min="0"
-                max="30"
-                step="1"
-                className="modern-range-slider culling"
-                value={lowerPercent}
-                onChange={e => setLowerPercent(parseInt(e.target.value, 10))}
-              />
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <input
+                  type="range"
+                  min="0"
+                  max="30"
+                  step="1"
+                  className="modern-range-slider culling"
+                  value={lowerPercent}
+                  onChange={e => handleLowerChange(parseInt(e.target.value, 10) || 0)}
+                  style={{ flex: 1 }}
+                />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+                  <input
+                    type="number"
+                    min="0"
+                    max="30"
+                    value={lowerPercent}
+                    onChange={e => handleLowerChange(parseInt(e.target.value, 10) || 0)}
+                    style={{
+                      width: 52,
+                      padding: '4px 6px',
+                      border: '1.5px solid #fca5a5',
+                      borderRadius: 6,
+                      textAlign: 'center',
+                      fontWeight: 700,
+                      color: '#991b1b',
+                      fontSize: 13,
+                      background: '#fff'
+                    }}
+                  />
+                  <span style={{ fontSize: 12, fontWeight: 700, color: '#991b1b' }}>%</span>
+                </div>
+              </div>
+
+              {/* Presets rápidos */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 10.5, color: '#991b1b', fontWeight: 600 }}>Presets:</span>
+                {[5, 10, 15, 20, 25].map(p => (
+                  <button
+                    key={p}
+                    type="button"
+                    className="simulation-preset-btn"
+                    onClick={() => handleLowerChange(p)}
+                    style={{
+                      border: lowerPercent === p ? '1px solid #dc2626' : '1px solid #fecaca',
+                      background: lowerPercent === p ? '#dc2626' : '#fff',
+                      color: lowerPercent === p ? '#fff' : '#991b1b'
+                    }}
+                  >
+                    {p}%
+                  </button>
+                ))}
+              </div>
+
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11.5, color: '#991b1b', fontWeight: 600 }}>
                 <span>Corte: {!currentVarConfig.esMenorMejor ? `≤ ${simulation.lowerCutoffValue}` : `≥ ${simulation.lowerCutoffValue}`} {currentVarConfig.unidad}</span>
                 <span>Recomendación: Culling / Reemplazo</span>
@@ -405,20 +586,126 @@ export const DistribucionNormalView: React.FC = () => {
                   {upperPercent}% superior ({simulation.eliteAnimals.length} animales)
                 </span>
               </div>
-              <input
-                type="range"
-                min="0"
-                max="30"
-                step="1"
-                className="modern-range-slider elite"
-                value={upperPercent}
-                onChange={e => setUpperPercent(parseInt(e.target.value, 10))}
-              />
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <input
+                  type="range"
+                  min="0"
+                  max="30"
+                  step="1"
+                  className="modern-range-slider elite"
+                  value={upperPercent}
+                  onChange={e => handleUpperChange(parseInt(e.target.value, 10) || 0)}
+                  style={{ flex: 1 }}
+                />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+                  <input
+                    type="number"
+                    min="0"
+                    max="30"
+                    value={upperPercent}
+                    onChange={e => handleUpperChange(parseInt(e.target.value, 10) || 0)}
+                    style={{
+                      width: 52,
+                      padding: '4px 6px',
+                      border: '1.5px solid #bfdbfe',
+                      borderRadius: 6,
+                      textAlign: 'center',
+                      fontWeight: 700,
+                      color: '#1e40af',
+                      fontSize: 13,
+                      background: '#fff'
+                    }}
+                  />
+                  <span style={{ fontSize: 12, fontWeight: 700, color: '#1e40af' }}>%</span>
+                </div>
+              </div>
+
+              {/* Presets rápidos */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 10.5, color: '#1e40af', fontWeight: 600 }}>Presets:</span>
+                {[5, 10, 15, 20, 25].map(p => (
+                  <button
+                    key={p}
+                    type="button"
+                    className="simulation-preset-btn"
+                    onClick={() => handleUpperChange(p)}
+                    style={{
+                      border: upperPercent === p ? '1px solid #2563eb' : '1px solid #bfdbfe',
+                      background: upperPercent === p ? '#2563eb' : '#fff',
+                      color: upperPercent === p ? '#fff' : '#1e40af'
+                    }}
+                  >
+                    {p}%
+                  </button>
+                ))}
+              </div>
+
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11.5, color: '#1e40af', fontWeight: 600 }}>
                 <span>Corte: {!currentVarConfig.esMenorMejor ? `≥ ${simulation.upperCutoffValue}` : `≤ ${simulation.upperCutoffValue}`} {currentVarConfig.unidad}</span>
                 <span>Recomendación: Semen Sexado / TE</span>
               </div>
             </div>
+          </div>
+
+          {/* Barra de Acciones del Simulador */}
+          <div className="simulation-actions-bar">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                className="simulation-update-btn btn-primary"
+                onClick={handleActualizarSimulador}
+                disabled={isRecalculating}
+                style={{
+                  backgroundColor: hasPendingChanges ? '#ea580c' : '#2d6a4f',
+                  color: '#ffffff',
+                  border: 'none'
+                }}
+              >
+                <RefreshCw size={15} className={isRecalculating ? 'spin-anim' : ''} />
+                <span>
+                  {hasPendingChanges
+                    ? '⚠️ Aplicar y Actualizar Parámetros (Pendiente)'
+                    : 'Actualizar Parámetros en Campana de Gauss'}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleResetParametros}
+                style={{
+                  padding: '8px 14px',
+                  fontSize: 12.5,
+                  borderRadius: 8,
+                  border: '1px solid var(--border-gray)',
+                  background: '#fff',
+                  color: 'var(--text-primary)',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6
+                }}
+              >
+                <RotateCcw size={14} />
+                <span>Valores Estándar (15% / 15%)</span>
+              </button>
+            </div>
+
+            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-secondary)', cursor: 'pointer', userSelect: 'none' }}>
+              <input
+                type="checkbox"
+                checked={autoApply}
+                onChange={e => {
+                  setAutoApply(e.target.checked);
+                  if (e.target.checked) {
+                    setAppliedLowerPercent(lowerPercent);
+                    setAppliedUpperPercent(upperPercent);
+                    setHasPendingChanges(false);
+                  }
+                }}
+              />
+              <span>Recálculo automático en vivo al mover sliders</span>
+            </label>
           </div>
         </div>
 
@@ -482,19 +769,44 @@ export const DistribucionNormalView: React.FC = () => {
                   {currentVarConfig.descripcion}
                 </p>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontSize: 12, fontWeight: 600 }}>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: '#dc2626' }}>
-                  <span style={{ width: 10, height: 10, backgroundColor: 'rgba(239,68,68,0.4)', border: '1.5px solid #dc2626', borderRadius: 2 }} />
-                  Descarte Sugerido ({lowerPercent}%)
-                </span>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: '#15803d' }}>
-                  <span style={{ width: 10, height: 10, backgroundColor: 'rgba(82,183,136,0.4)', border: '1.5px solid #15803d', borderRadius: 2 }} />
-                  Rebaño Central
-                </span>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: '#2563eb' }}>
-                  <span style={{ width: 10, height: 10, backgroundColor: 'rgba(37,99,235,0.4)', border: '1.5px solid #2563eb', borderRadius: 2 }} />
-                  Donadoras Élite ({upperPercent}%)
-                </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontSize: 12, fontWeight: 600 }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: '#dc2626' }}>
+                    <span style={{ width: 10, height: 10, backgroundColor: 'rgba(239,68,68,0.4)', border: '1.5px solid #dc2626', borderRadius: 2 }} />
+                    Descarte Sugerido ({appliedLowerPercent}%)
+                  </span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: '#15803d' }}>
+                    <span style={{ width: 10, height: 10, backgroundColor: 'rgba(82,183,136,0.4)', border: '1.5px solid #15803d', borderRadius: 2 }} />
+                    Rebaño Central
+                  </span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: '#2563eb' }}>
+                    <span style={{ width: 10, height: 10, backgroundColor: 'rgba(37,99,235,0.4)', border: '1.5px solid #2563eb', borderRadius: 2 }} />
+                    Donadoras Élite ({appliedUpperPercent}%)
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleActualizarSimulador}
+                  title="Actualizar y recalcular curva Gaussiana"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    padding: '5px 12px',
+                    fontSize: 12,
+                    fontWeight: 600,
+                    borderRadius: 6,
+                    backgroundColor: hasPendingChanges ? '#ea580c' : '#f1f5f9',
+                    border: hasPendingChanges ? '1px solid #c2410c' : '1px solid #cbd5e1',
+                    color: hasPendingChanges ? '#ffffff' : '#334155',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <RefreshCw size={13} className={isRecalculating ? 'spin-anim' : ''} />
+                  <span>{hasPendingChanges ? 'Actualizar Cambios' : 'Actualizar Gráfico'}</span>
+                </button>
               </div>
             </div>
 
@@ -505,8 +817,8 @@ export const DistribucionNormalView: React.FC = () => {
               desviacionEstandar={stats.desviacionEstandar}
               lowerCutoffValue={simulation.lowerCutoffValue}
               upperCutoffValue={simulation.upperCutoffValue}
-              lowerPercent={lowerPercent}
-              upperPercent={upperPercent}
+              lowerPercent={appliedLowerPercent}
+              upperPercent={appliedUpperPercent}
               variableName={currentVarConfig.nombre}
               isLowerBetter={currentVarConfig.esMenorMejor}
             />
