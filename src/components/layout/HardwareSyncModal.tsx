@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   X,
   Bluetooth,
@@ -45,6 +46,17 @@ export const HardwareSyncModal: React.FC<HardwareSyncModalProps> = ({ isOpen, on
     };
   }, []);
 
+  // Cerrar con tecla Escape
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const handleSimulateRfid = () => {
@@ -72,9 +84,29 @@ export const HardwareSyncModal: React.FC<HardwareSyncModalProps> = ({ isOpen, on
     setTimeout(() => setLastNotification(null), 3000);
   };
 
-  return (
-    <div className="report-modal-overlay" style={{ zIndex: 10000 }}>
-      <div className="report-modal-content" style={{ maxWidth: 640, width: '92%', borderRadius: 16 }}>
+  return createPortal(
+    <div
+      className="report-modal-backdrop"
+      onClick={onClose}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.55)',
+        zIndex: 10050,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 20
+      }}
+    >
+      <div
+        className="report-modal-dialog"
+        onClick={e => e.stopPropagation()}
+        style={{ maxWidth: 640, width: '92%', borderRadius: 16 }}
+      >
         {/* Header */}
         <div className="report-modal-header" style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-gray)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -90,7 +122,16 @@ export const HardwareSyncModal: React.FC<HardwareSyncModalProps> = ({ isOpen, on
               </p>
             </div>
           </div>
-          <button onClick={onClose} style={{ cursor: 'pointer', padding: 6, color: 'var(--text-secondary)' }}>
+          <button
+            type="button"
+            className="report-modal-close-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
+            title="Cerrar ventana"
+            style={{ cursor: 'pointer', padding: 6, color: 'var(--text-secondary)' }}
+          >
             <X size={20} />
           </button>
         </div>
@@ -401,11 +442,16 @@ export const HardwareSyncModal: React.FC<HardwareSyncModalProps> = ({ isOpen, on
         {/* Footer */}
         <div style={{ padding: '12px 20px', borderTop: '1px solid var(--border-gray)', display: 'flex', justifyContent: 'flex-end' }}>
           <button
-            onClick={onClose}
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
             style={{
               padding: '8px 18px',
               background: '#2d6a4f',
               color: '#fff',
+              border: 'none',
               borderRadius: 8,
               fontSize: 12,
               fontWeight: 500,
@@ -416,6 +462,7 @@ export const HardwareSyncModal: React.FC<HardwareSyncModalProps> = ({ isOpen, on
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

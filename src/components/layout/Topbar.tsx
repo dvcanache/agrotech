@@ -110,7 +110,10 @@ export const Topbar: React.FC = () => {
         {/* Hardware & Offline Sync Pill Button */}
         <button
           type="button"
-          onClick={() => setIsHardwareOpen(true)}
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsHardwareOpen(prev => !prev);
+          }}
           style={{
             display: 'flex',
             alignItems: 'center',
