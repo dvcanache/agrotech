@@ -4,6 +4,10 @@ import { useApp } from '../../context/AppContext';
 import { GeneralConfig } from '../../types/config';
 import { SETTINGS_MENU, SETTINGS_TABS } from './ajustesConstants';
 import { GeneralConfigForm } from './components/GeneralConfigForm';
+import { ParametrosConfigForm } from './components/ParametrosConfigForm';
+import { AlertasConfigForm } from './components/AlertasConfigForm';
+import { AutomatizacionConfigForm } from './components/AutomatizacionConfigForm';
+import { CatalogView } from './components/CatalogView';
 
 export const AjustesView: React.FC = () => {
   const { config, updateConfig, resetConfig } = useApp();
@@ -39,7 +43,10 @@ export const AjustesView: React.FC = () => {
       {/* Header */}
       <div className="events-header">
         <div className="events-header-left">
-          <h2 className="toolbar-title">Ajustes</h2>
+          <h2 className="toolbar-title">Ajustes & Configuración</h2>
+          <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+            Parámetros zootécnicos, alertas y catálogos maestros del rebaño
+          </span>
         </div>
         <div className="events-header-right">
           {/* Orange Reset Button */}
@@ -80,57 +87,58 @@ export const AjustesView: React.FC = () => {
           ))}
         </div>
 
-        {/* Right Column (Form & Tabs) */}
+        {/* Right Column (Form & Tabs or Catalog) */}
         <div className="settings-main-area">
-          {/* Tabs */}
-          <div className="settings-tabs">
-            {SETTINGS_TABS.map(tab => (
-              <div
-                key={tab.id}
-                className={`settings-tab ${tabActivo === tab.id ? 'active' : ''}`}
-                onClick={() => setTabActivo(tab.id)}
-              >
-                {tab.label}
+          {menuActivo === 'configuracion' ? (
+            <>
+              {/* Tabs */}
+              <div className="settings-tabs">
+                {SETTINGS_TABS.map(tab => (
+                  <div
+                    key={tab.id}
+                    className={`settings-tab ${tabActivo === tab.id ? 'active' : ''}`}
+                    onClick={() => setTabActivo(tab.id)}
+                  >
+                    {tab.label}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
 
-          {/* Tab Content: General */}
-          {tabActivo === 'general' && (
+              {/* Tab Content: General */}
+              {tabActivo === 'general' && (
+                <div>
+                  <GeneralConfigForm
+                    formData={formData}
+                    onChange={handleFieldChange}
+                    onSubmit={handleSave}
+                  />
+                </div>
+              )}
+
+              {/* Tab Content: Parámetros */}
+              {tabActivo === 'parametros' && (
+                <div>
+                  <ParametrosConfigForm />
+                </div>
+              )}
+
+              {/* Tab Content: Alertas */}
+              {tabActivo === 'alertas' && (
+                <div>
+                  <AlertasConfigForm />
+                </div>
+              )}
+
+              {/* Tab Content: Automatización */}
+              {tabActivo === 'automatizacion' && (
+                <div>
+                  <AutomatizacionConfigForm />
+                </div>
+              )}
+            </>
+          ) : (
             <div>
-              <GeneralConfigForm
-                formData={formData}
-                onChange={handleFieldChange}
-                onSubmit={handleSave}
-              />
-            </div>
-          )}
-
-          {/* Other Tabs Placeholders */}
-          {tabActivo === 'parametros' && (
-            <div style={{ padding: '20px 0', color: 'var(--text-secondary)' }}>
-              <h4>Parámetros de Configuración</h4>
-              <p style={{ marginTop: 10, fontSize: 14 }}>
-                Aquí se definen los límites, rangos de peso y lactancia del rebaño.
-              </p>
-            </div>
-          )}
-
-          {tabActivo === 'alertas' && (
-            <div style={{ padding: '20px 0', color: 'var(--text-secondary)' }}>
-              <h4>Alertas y Notificaciones</h4>
-              <p style={{ marginTop: 10, fontSize: 14 }}>
-                Definición de alertas tempranas para celos, vacunas y chequeos sanitarios.
-              </p>
-            </div>
-          )}
-
-          {tabActivo === 'automatizacion' && (
-            <div style={{ padding: '20px 0', color: 'var(--text-secondary)' }}>
-              <h4>Reglas de Automatización</h4>
-              <p style={{ marginTop: 10, fontSize: 14 }}>
-                Configurar triggers automáticos para cambios de lote y estatus.
-              </p>
+              <CatalogView catalogType={menuActivo as any} />
             </div>
           )}
         </div>

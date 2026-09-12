@@ -1,4 +1,4 @@
-export type EventIconType = 'reproductivos' | 'productivos' | 'inventarios' | 'veterinarios' | 'otros';
+export type EventIconType = 'reproductivos' | 'productivos' | 'inventarios' | 'veterinarios' | 'potreros' | 'otros';
 
 export interface EventCategory {
   titulo: string;

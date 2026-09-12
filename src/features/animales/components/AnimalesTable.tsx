@@ -7,6 +7,7 @@ interface AnimalesTableProps {
   isSelectAll: boolean;
   onToggleSelectAll: () => void;
   onToggleSelect: (practico: string) => void;
+  onSelectAnimal?: (animal: Animal) => void;
 }
 
 export const AnimalesTable: React.FC<AnimalesTableProps> = ({
@@ -14,7 +15,8 @@ export const AnimalesTable: React.FC<AnimalesTableProps> = ({
   selectedAnimals,
   isSelectAll,
   onToggleSelectAll,
-  onToggleSelect
+  onToggleSelect,
+  onSelectAnimal
 }) => {
   return (
     <div className="table-wrapper">
@@ -80,8 +82,12 @@ export const AnimalesTable: React.FC<AnimalesTableProps> = ({
         </thead>
         <tbody>
           {items.map(animal => (
-            <tr key={animal.practico}>
-              <td className="checkbox-cell">
+            <tr
+              key={animal.practico}
+              style={{ cursor: 'pointer' }}
+              onClick={() => onSelectAnimal?.(animal)}
+            >
+              <td className="checkbox-cell" onClick={e => e.stopPropagation()}>
                 <input
                   type="checkbox"
                   className="custom-checkbox"

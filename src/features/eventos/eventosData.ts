@@ -22,6 +22,11 @@ export const EVENT_CATEGORIES: EventCategory[] = [
     enlaces: ["Mastitis", "Clínicos", "Planes sanitarios"]
   },
   {
+    titulo: "Potreros",
+    iconoType: "potreros",
+    enlaces: ["Labores", "Rotaciones", "Planificaciones"]
+  },
+  {
     titulo: "Otros",
     iconoType: "otros",
     enlaces: ["Comentarios", "Otros cambios", "Eliminación Eventos", "Afiliaciones", "Producciones diarias"]

@@ -39,6 +39,9 @@ import { MultirebanoProduccionView } from './features/reportes/multirebanos/prod
 import { MultirebanoTransaccionesView } from './features/reportes/multirebanos/transacciones/MultirebanoTransaccionesView';
 import { MultirebanoProduccionDiariaView } from './features/reportes/multirebanos/produccion-diaria/MultirebanoProduccionDiariaView';
 
+import { MapasView } from './features/mapas/MapasView';
+import { PotrerosView } from './features/potreros/PotrerosView';
+
 export const App: React.FC = () => {
   return (
     <AppProvider>
@@ -47,10 +50,19 @@ export const App: React.FC = () => {
           <Route path="/" element={<AppLayout />}>
             <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard" element={<DashboardView />} />
+            <Route path="mapas" element={<MapasView />} />
+            <Route path="maps" element={<MapasView />} />
             <Route path="animales" element={<AnimalesView />} />
+            <Route path="animals" element={<AnimalesView />} />
+            <Route path="records/animals" element={<AnimalesView />} />
+            <Route path="potreros" element={<PotrerosView />} />
+            <Route path="paddocks" element={<PotrerosView />} />
             <Route path="eventos" element={<EventosView />} />
+            <Route path="events" element={<EventosView />} />
             <Route path="reportes" element={<ReportesView />} />
             <Route path="ajustes" element={<AjustesView />} />
+            <Route path="settings" element={<AjustesView />} />
+            <Route path="settings/general" element={<AjustesView />} />
 
             {/* Rutas Centro de Reportes */}
             <Route path="reports" element={<ReportesView />} />

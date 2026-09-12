@@ -20,6 +20,7 @@ pnpm-debug.log*
 .idea/
 .vscode/
 
-# Ignorar archivos markdown de trabajo excepto README.md
+# Ignorar archivos markdown de trabajo excepto README.md y reference/
 *.md
 !README.md
+!reference/*.md

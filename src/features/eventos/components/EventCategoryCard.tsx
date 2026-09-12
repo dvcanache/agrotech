@@ -3,9 +3,10 @@ import { EventCategory } from '../../../types/events';
 
 interface EventCategoryCardProps {
   category: EventCategory;
+  onSelectLink?: (link: string, category: string) => void;
 }
 
-export const EventCategoryCard: React.FC<EventCategoryCardProps> = ({ category }) => {
+export const EventCategoryCard: React.FC<EventCategoryCardProps> = ({ category, onSelectLink }) => {
   const renderIcon = (type: EventCategory['iconoType']) => {
     switch (type) {
       case 'reproductivos':
@@ -43,6 +44,12 @@ export const EventCategoryCard: React.FC<EventCategoryCardProps> = ({ category }
             <path d="M12 8v8M8 12h8" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" />
           </svg>
         );
+      case 'potreros':
+        return (
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#2d6a4f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+            <path d="M12 10v12M12 10a5 5 0 0 1 5-5c3 0 5 2 5 5 0 6-7 12-10 12M12 10a5 5 0 0 0-5-5c-3 0-5 2-5 5 0 6 7 12 10 12" />
+          </svg>
+        );
       case 'otros':
         return (
           <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#2d6a4f" strokeWidth="2" style={{ flexShrink: 0 }}>
@@ -69,7 +76,7 @@ export const EventCategoryCard: React.FC<EventCategoryCardProps> = ({ category }
             type="button"
             className="category-link"
             style={{ background: 'none', border: 'none', textAlign: 'left', font: 'inherit', cursor: 'pointer', padding: 0 }}
-            onClick={() => alert(`Acción: Registrar evento ${link}`)}
+            onClick={() => onSelectLink?.(link, category.titulo)}
           >
             <span className="category-link-chevron">&gt;</span>
             <span>{link}</span>
