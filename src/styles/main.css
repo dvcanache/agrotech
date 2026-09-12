@@ -607,6 +607,9 @@ body {
   font-size: 24px;
   font-weight: 700;
   color: var(--text-primary);
+  margin: 0;
+  line-height: 1.25;
+  letter-spacing: -0.3px;
 }
 
 .selector-dropdown {
@@ -931,7 +934,23 @@ body {
 
 .events-header-left {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.events-header-left .toolbar-title {
+  margin: 0;
+  line-height: 1.25;
+}
+
+.events-header-left span,
+.events-header-left p,
+.events-header-subtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin: 0;
 }
 
 .events-header-right {

@@ -10,6 +10,9 @@ export const ReportesView: React.FC = () => {
       <div className="events-header">
         <div className="events-header-left">
           <h2 className="toolbar-title">Centro de Reportes</h2>
+          <span>
+            Reportes zootécnicos, reproductivos, productivos y de gestión
+          </span>
         </div>
         <div className="events-header-right">
           {/* Green Split Button */}

@@ -72,9 +72,9 @@ export const MapasView: React.FC = () => {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20, width: '100%' }}>
       {/* Header */}
       <div className="events-header" style={{ flexWrap: 'wrap', gap: 12 }}>
-        <div className="events-header-left" style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
-          <h2 className="toolbar-title" style={{ margin: 0 }}>Cartografía GIS & Potreros</h2>
-          <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+        <div className="events-header-left">
+          <h2 className="toolbar-title">Cartografía GIS & Potreros</h2>
+          <span>
             Visualizador satelital georreferenciado y delimitación de pasturas
           </span>
         </div>
