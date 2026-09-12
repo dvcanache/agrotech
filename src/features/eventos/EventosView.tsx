@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Settings, Sliders, ChevronDown, Plus, CheckCircle2 } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Sliders, Plus, CheckCircle2 } from 'lucide-react';
 import { EVENT_CATEGORIES } from './eventosData';
 import { EventCategoryCard } from './components/EventCategoryCard';
 import { NuevoEventoModal, EventoItem } from './components/NuevoEventoModal';

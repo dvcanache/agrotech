@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Play, LineChart, Table } from 'lucide-react';
 import { ReportViewHeader } from '../../components/ReportViewHeader';
 import { NormalDistributionChart } from './NormalDistributionChart';
