@@ -189,10 +189,11 @@ body {
 
 .logo-text {
   font-family: 'ITC Avant Garde Gothic Paneuropean Bold', 'ITC Avant Garde Gothic Paneuropean', 'ITC Avant Garde Gothic Std', 'ITC Avant Garde Gothic', 'Avant Garde Gothic', 'Avant Garde', 'Century Gothic', sans-serif;
-  font-size: 22px;
+  font-size: 21px;
   font-weight: 700;
-  color: #2596be;
-  letter-spacing: -0.3px;
+  color: #095431;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
 }
 
 .topbar-divider {

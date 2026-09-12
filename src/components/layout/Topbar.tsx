@@ -47,7 +47,7 @@ export const Topbar: React.FC = () => {
       <div className="topbar-left">
         <Link to="/dashboard" className="logo-container" style={{ textDecoration: 'none' }}>
           <AgroGanLogo size={36} />
-          <span className="logo-text">AgroGan</span>
+          <span className="logo-text">AGROGAN</span>
         </Link>
         <div className="topbar-divider"></div>
         <span className="scope-text">{config.nombre || 'Rebaño de Prueba'}</span>
