@@ -51,23 +51,36 @@ export const NormalDistributionChart: React.FC<NormalDistributionChartProps> = (
   const maxX = curva.length > 0 ? curva[curva.length - 1].x : 100;
 
   // Plugin para dibujar zonas de corte sombreadas y líneas verticales de umbrales zootécnicos
-  const cutoffPlugin: Plugin<'line'> = useMemo(() => ({
+  const cutoffPlugin: Plugin<'line'> = {
     id: 'cutoffLinesPlugin',
     afterDatasetsDraw(chart) {
       const { ctx, chartArea, scales } = chart;
       if (!chartArea || !scales.x) return;
 
+      const cfg = (chart.options.plugins as any)?.cutoffLinesConfig || {
+        lowerCutoffValue,
+        upperCutoffValue,
+        media,
+        unidad,
+        isLowerBetter
+      };
+      const effLower = cfg.lowerCutoffValue ?? lowerCutoffValue;
+      const effUpper = cfg.upperCutoffValue ?? upperCutoffValue;
+      const effMedia = cfg.media ?? media;
+      const effUnidad = cfg.unidad ?? unidad;
+      const effIsLowerBetter = cfg.isLowerBetter ?? isLowerBetter;
+
       const xScale = scales.x;
       const top = chartArea.top;
       const bottom = chartArea.bottom;
 
-      const lowerPx = Math.max(chartArea.left, Math.min(chartArea.right, xScale.getPixelForValue(lowerCutoffValue)));
-      const upperPx = Math.max(chartArea.left, Math.min(chartArea.right, xScale.getPixelForValue(upperCutoffValue)));
-      const meanPx = Math.max(chartArea.left, Math.min(chartArea.right, xScale.getPixelForValue(media)));
+      const lowerPx = Math.max(chartArea.left, Math.min(chartArea.right, xScale.getPixelForValue(effLower)));
+      const upperPx = Math.max(chartArea.left, Math.min(chartArea.right, xScale.getPixelForValue(effUpper)));
+      const meanPx = Math.max(chartArea.left, Math.min(chartArea.right, xScale.getPixelForValue(effMedia)));
 
       ctx.save();
 
-      if (!isLowerBetter) {
+      if (!effIsLowerBetter) {
         // Zona Descarte a la izquierda
         ctx.fillStyle = 'rgba(239, 68, 68, 0.12)';
         ctx.fillRect(chartArea.left, top, lowerPx - chartArea.left, bottom - top);
@@ -97,11 +110,11 @@ export const NormalDistributionChart: React.FC<NormalDistributionChartProps> = (
       ctx.setLineDash([]);
       ctx.fillStyle = '#dc2626';
       ctx.font = 'bold 11px Outfit, sans-serif';
-      ctx.textAlign = !isLowerBetter ? 'right' : 'left';
-      const cullingText = !isLowerBetter
-        ? `Descarte (≤ ${lowerCutoffValue} ${unidad})`
-        : `Descarte (≥ ${lowerCutoffValue} ${unidad})`;
-      ctx.fillText(cullingText, !isLowerBetter ? lowerPx - 6 : lowerPx + 6, top + 16);
+      ctx.textAlign = !effIsLowerBetter ? 'right' : 'left';
+      const cullingText = !effIsLowerBetter
+        ? `Descarte (≤ ${effLower} ${effUnidad})`
+        : `Descarte (≥ ${effLower} ${effUnidad})`;
+      ctx.fillText(cullingText, !effIsLowerBetter ? lowerPx - 6 : lowerPx + 6, top + 16);
 
       // 2. Línea de Élite (Azul)
       ctx.strokeStyle = '#2563eb';
@@ -115,11 +128,11 @@ export const NormalDistributionChart: React.FC<NormalDistributionChartProps> = (
       // Etiqueta Élite
       ctx.fillStyle = '#2563eb';
       ctx.font = 'bold 11px Outfit, sans-serif';
-      ctx.textAlign = !isLowerBetter ? 'left' : 'right';
-      const eliteText = !isLowerBetter
-        ? `Élite (≥ ${upperCutoffValue} ${unidad})`
-        : `Élite (≤ ${upperCutoffValue} ${unidad})`;
-      ctx.fillText(eliteText, !isLowerBetter ? upperPx + 6 : upperPx - 6, top + 16);
+      ctx.textAlign = !effIsLowerBetter ? 'left' : 'right';
+      const eliteText = !effIsLowerBetter
+        ? `Élite (≥ ${effUpper} ${effUnidad})`
+        : `Élite (≤ ${effUpper} ${effUnidad})`;
+      ctx.fillText(eliteText, !effIsLowerBetter ? upperPx + 6 : upperPx - 6, top + 16);
 
       // 3. Línea de Media Poblacional (Verde bosque)
       ctx.strokeStyle = '#15803d';
@@ -134,11 +147,11 @@ export const NormalDistributionChart: React.FC<NormalDistributionChartProps> = (
       ctx.fillStyle = '#15803d';
       ctx.font = 'bold 11px Outfit, sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(`μ: ${media} ${unidad}`, meanPx, top + 32);
+      ctx.fillText(`μ: ${effMedia} ${effUnidad}`, meanPx, top + 32);
 
       ctx.restore();
     }
-  }), [lowerCutoffValue, upperCutoffValue, media, unidad, isLowerBetter]);
+  };
 
   const chartData = {
     datasets: [
@@ -167,6 +180,13 @@ export const NormalDistributionChart: React.FC<NormalDistributionChartProps> = (
     plugins: {
       datalabels: {
         display: false
+      },
+      cutoffLinesConfig: {
+        lowerCutoffValue,
+        upperCutoffValue,
+        media,
+        unidad,
+        isLowerBetter
       },
       legend: {
         position: 'top',
@@ -227,7 +247,12 @@ export const NormalDistributionChart: React.FC<NormalDistributionChartProps> = (
 
   return (
     <div style={{ width: '100%', height: 320, position: 'relative' }}>
-      <Line data={chartData} options={options} plugins={[cutoffPlugin]} />
+      <Line
+        key={`gauss-chart-${variableName}-${lowerCutoffValue}-${upperCutoffValue}-${media}-${lowerPercent}-${upperPercent}`}
+        data={chartData}
+        options={options}
+        plugins={[cutoffPlugin]}
+      />
     </div>
   );
 };
