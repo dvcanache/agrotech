@@ -5,6 +5,9 @@ import { REPORT_CATEGORIES } from './reportesData';
 import { ReportCategoryCard } from './components/ReportCategoryCard';
 import { NuevoReporteModal, ReporteItem } from './components/NuevoReporteModal';
 import { DetalleReporteModal } from './components/DetalleReporteModal';
+import { AdHocReportDesignerModal } from './components/AdHocReportDesignerModal';
+import { GuiaMovilizacionModal } from './components/GuiaMovilizacionModal';
+import { Calculator, Truck } from 'lucide-react';
 
 const INITIAL_REPORTS: ReporteItem[] = [
   {
@@ -63,6 +66,8 @@ export const ReportesView: React.FC = () => {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);
+  const [isAdHocModalOpen, setIsAdHocModalOpen] = useState(false);
+  const [isGuiaModalOpen, setIsGuiaModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('Gestión');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -127,6 +132,30 @@ export const ReportesView: React.FC = () => {
         </div>
 
         <div className="events-header-right">
+          {/* Botón Diseñar Informe BI Ad-Hoc */}
+          <button
+            type="button"
+            className="btn-primary"
+            onClick={() => setIsAdHocModalOpen(true)}
+            title="Abrir Diseñador de Reportes BI Ad-Hoc"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px', fontSize: 13 }}
+          >
+            <Calculator size={15} />
+            <span>+ Diseñar Informe BI</span>
+          </button>
+
+          {/* Botón Guía de Movilización */}
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={() => setIsGuiaModalOpen(true)}
+            title="Emitir Guía de Movilización Pecuaria Oficial"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 12px', fontSize: 13 }}
+          >
+            <Truck size={15} />
+            <span>Guía Movilización</span>
+          </button>
+
           {/* Green Split Button con Dropdown */}
           <div style={{ position: 'relative' }} onClick={e => e.stopPropagation()}>
             <div className="split-button-container">
@@ -160,7 +189,7 @@ export const ReportesView: React.FC = () => {
                   position: 'absolute',
                   right: 0,
                   top: 'calc(100% + 6px)',
-                  width: 230,
+                  width: 250,
                   boxShadow: '0 10px 25px rgba(0,0,0,0.12)',
                   borderRadius: 8,
                   border: '1px solid var(--border-gray)',
@@ -211,13 +240,22 @@ export const ReportesView: React.FC = () => {
                 <div
                   className="dropdown-item"
                   onClick={() => {
-                    setSelectedCategory('Personalizado');
                     setIsDropdownOpen(false);
-                    setIsNewModalOpen(true);
+                    setIsAdHocModalOpen(true);
                   }}
                   style={{ borderTop: '1px solid #f1f5f9', fontWeight: 600, color: 'var(--primary-color)' }}
                 >
-                  + Reporte Personalizado
+                  ✨ + Diseñador BI Ad-Hoc
+                </div>
+                <div
+                  className="dropdown-item"
+                  onClick={() => {
+                    setIsDropdownOpen(false);
+                    setIsGuiaModalOpen(true);
+                  }}
+                  style={{ fontWeight: 600, color: '#15803d' }}
+                >
+                  🚛 + Guía de Movilización Pecuaria
                 </div>
               </div>
             )}
@@ -412,6 +450,19 @@ export const ReportesView: React.FC = () => {
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
         reporte={selectedReporte}
+      />
+
+      {/* Modal Diseñador BI Ad-Hoc */}
+      <AdHocReportDesignerModal
+        isOpen={isAdHocModalOpen}
+        onClose={() => setIsAdHocModalOpen(false)}
+        onSaveReport={handleSaveReporte}
+      />
+
+      {/* Modal Guía de Movilización Pecuaria */}
+      <GuiaMovilizacionModal
+        isOpen={isGuiaModalOpen}
+        onClose={() => setIsGuiaModalOpen(false)}
       />
     </div>
   );

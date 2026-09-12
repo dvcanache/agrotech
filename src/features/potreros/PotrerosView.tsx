@@ -3,10 +3,21 @@ import { POTREROS_MOCK_DATA, PotreroItem } from './potrerosData';
 import { PotrerosTable } from './components/PotrerosTable';
 import { PotrerosToolbar } from './components/PotrerosToolbar';
 import { NuevoPotreroModal } from './components/NuevoPotreroModal';
+import { ModalAforoPotrero } from './components/ModalAforoPotrero';
 import { PotrerosFilterDrawer, PotrerosFilterState } from './components/PotrerosFilterDrawer';
 import { ReportPagination } from '../reportes/components/ReportPagination';
 import { exportToCSV, exportToPDF } from '../reportes/utils/exportUtils';
-import { Trees, CheckCircle2, Moon, Activity } from 'lucide-react';
+import { getPrvStatusInfo, PrvStatus } from './prvUtils';
+import './potreros.css';
+import {
+  Trees,
+  CheckCircle2,
+  Moon,
+  Activity,
+  Scale,
+  Compass
+} from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const INITIAL_FILTERS: PotrerosFilterState = {
   estatus: '',
@@ -20,8 +31,11 @@ export const PotrerosView: React.FC = () => {
   const [potreros, setPotreros] = useState<PotreroItem[]>(POTREROS_MOCK_DATA);
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState<PotrerosFilterState>(INITIAL_FILTERS);
+  const [prvFilter, setPrvFilter] = useState<'todos' | PrvStatus>('todos');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);
+  const [isAforoModalOpen, setIsAforoModalOpen] = useState(false);
+  const [selectedAforoPaddock, setSelectedAforoPaddock] = useState<PotreroItem | null>(null);
   const [selectedPotreros, setSelectedPotreros] = useState<{ [key: string]: boolean }>({});
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 8;
@@ -40,7 +54,18 @@ export const PotrerosView: React.FC = () => {
         if (!matches) return false;
       }
 
-      // Estatus
+      // PRV Traffic Light Filter
+      if (prvFilter !== 'todos') {
+        const prvInfo = getPrvStatusInfo(
+          item.animalesPresentes,
+          item.diasOcupacionActual,
+          item.diasDescansoActual,
+          item.diasDescansoRequeridos
+        );
+        if (prvInfo.status !== prvFilter) return false;
+      }
+
+      // Estatus general
       if (filters.estatus && item.estatus !== filters.estatus) {
         return false;
       }
@@ -68,12 +93,12 @@ export const PotrerosView: React.FC = () => {
 
       return true;
     });
-  }, [potreros, searchTerm, filters]);
+  }, [potreros, searchTerm, filters, prvFilter]);
 
   // Reset to first page when search or filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, filters]);
+  }, [searchTerm, filters, prvFilter]);
 
   // Pagination
   const totalPages = Math.max(1, Math.ceil(filteredPotreros.length / pageSize));
@@ -113,18 +138,63 @@ export const PotrerosView: React.FC = () => {
     setPotreros(prev => [nuevo, ...prev]);
   };
 
+  const handleOpenAforoModal = (paddock?: PotreroItem) => {
+    setSelectedAforoPaddock(paddock || potreros[0]);
+    setIsAforoModalOpen(true);
+  };
+
+  const handleSaveAforo = (
+    codigo: string,
+    aforoKgM2: number,
+    porcentajeMS: number,
+    cargaRecomendadaUggHa: number,
+    aforoKgMsHa: number
+  ) => {
+    setPotreros(prev =>
+      prev.map(p => {
+        if (p.codigo === codigo) {
+          return {
+            ...p,
+            aforoKgM2,
+            porcentajeMS,
+            cargaRecomendadaUggHa,
+            aforoKgMsHa
+          };
+        }
+        return p;
+      })
+    );
+  };
+
   const hasActiveFilters =
     filters.estatus !== '' ||
     filters.especieForrajera !== '' ||
     filters.areaMin !== '' ||
     filters.areaMax !== '' ||
-    filters.conLote !== 'todos';
+    filters.conLote !== 'todos' ||
+    prvFilter !== 'todos';
 
   // KPI Metrics
   const totalSuperficieHa = potreros.reduce((sum, p) => sum + p.areaHa, 0);
   const potrerosActivos = potreros.filter(p => p.estatus === 'Activo').length;
   const potrerosDescanso = potreros.filter(p => p.estatus === 'En descanso').length;
   const totalAnimales = potreros.reduce((sum, p) => sum + p.animalesPresentes, 0);
+  const totalUgg = potreros.reduce((sum, p) => sum + p.uggPresentes, 0);
+
+  // PRV Count breakdown
+  const prvCounts = useMemo(() => {
+    const counts = { optimo: 0, pastoreo: 0, sobrepastoreo: 0, descanso: 0 };
+    potreros.forEach(p => {
+      const info = getPrvStatusInfo(
+        p.animalesPresentes,
+        p.diasOcupacionActual,
+        p.diasDescansoActual,
+        p.diasDescansoRequeridos
+      );
+      counts[info.status]++;
+    });
+    return counts;
+  }, [potreros]);
 
   // Export handlers
   const handleExportExcel = () => {
@@ -135,52 +205,102 @@ export const PotrerosView: React.FC = () => {
       'Perímetro (m)',
       'Especie Forrajera',
       'Aforo (kg MV/m²)',
-      'Carga Recomendada (UGG/ha)',
-      'Carga Actual (UGG/ha)',
+      'Oferta MS (kg MS/ha)',
+      'Materia Seca (%)',
       'Lote Asignado',
-      'Animales Presentes',
-      'Estatus'
+      'Animales',
+      'UGG Presentes',
+      'Carga Actual (UGG/ha)',
+      'Carga Recom. (UGG/ha)',
+      'Días Ocupado',
+      'Días Descanso',
+      'Semáforo PRV'
     ];
-    const rows = filteredPotreros.map(p => [
-      p.codigo,
-      p.descripcion,
-      p.areaHa,
-      p.perimetroM,
-      p.especieForrajera,
-      p.aforoKgM2,
-      p.cargaRecomendadaUggHa,
-      p.cargaActualUggHa,
-      p.loteAsignado || 'Sin Lote',
-      p.animalesPresentes,
-      p.estatus
-    ]);
-    exportToCSV('maestro_potreros', headers, rows);
+    const rows = filteredPotreros.map(p => {
+      const prv = getPrvStatusInfo(
+        p.animalesPresentes,
+        p.diasOcupacionActual,
+        p.diasDescansoActual,
+        p.diasDescansoRequeridos
+      );
+      return [
+        p.codigo,
+        p.descripcion,
+        p.areaHa,
+        p.perimetroM,
+        p.especieForrajera,
+        p.aforoKgM2,
+        p.aforoKgMsHa,
+        p.porcentajeMS,
+        p.loteAsignado || 'Sin Lote',
+        p.animalesPresentes,
+        p.uggPresentes,
+        p.cargaActualUggHa,
+        p.cargaRecomendadaUggHa,
+        p.diasOcupacionActual,
+        p.diasDescansoActual,
+        prv.label
+      ];
+    });
+    exportToCSV('maestro_potreros_prv', headers, rows);
   };
 
   const handleExportPdf = () => {
-    const headers = ['Código', 'Descripción', 'Superficie', 'Forraje', 'Lote', 'Animales', 'Carga', 'Estatus'];
-    const rows = filteredPotreros.map(p => [
-      p.codigo,
-      p.descripcion,
-      `${p.areaHa} ha`,
-      p.especieForrajera,
-      p.loteAsignado || 'N/A',
-      p.animalesPresentes,
-      `${p.cargaActualUggHa} UGG`,
-      p.estatus
-    ]);
-    exportToPDF('maestro_potreros', 'Maestro de Potreros y Pasturas', headers, rows);
+    const headers = [
+      'Código',
+      'Superficie',
+      'Forraje',
+      'Aforo MS',
+      'Lote',
+      'Animales',
+      'Carga',
+      'Semáforo PRV'
+    ];
+    const rows = filteredPotreros.map(p => {
+      const prv = getPrvStatusInfo(
+        p.animalesPresentes,
+        p.diasOcupacionActual,
+        p.diasDescansoActual,
+        p.diasDescansoRequeridos
+      );
+      return [
+        p.codigo,
+        `${p.areaHa} ha`,
+        p.especieForrajera,
+        `${p.aforoKgMsHa} kg/ha`,
+        p.loteAsignado || 'Sin lote',
+        `${p.animalesPresentes} cab`,
+        `${p.cargaActualUggHa} UGG/ha`,
+        prv.shortLabel
+      ];
+    });
+    exportToPDF('maestro_potreros_prv', 'Maestro de Potreros & Pastoreo Racional Voisin', headers, rows);
   };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20, width: '100%' }}>
       {/* Header */}
-      <div className="events-header">
+      <div className="events-header" style={{ flexWrap: 'wrap', gap: 12 }}>
         <div className="events-header-left">
-          <h2 className="toolbar-title">Maestro de Potreros</h2>
+          <h2 className="toolbar-title">Maestro de Potreros & Pasturas (PRV)</h2>
           <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-            Administración agronómica de pasturas y cargas animales
+            Administración agronómica de parcelas, aforos forrajeros y leyes del Pastoreo Racional Voisin
           </span>
+        </div>
+        <div className="events-header-right" style={{ display: 'flex', gap: 8 }}>
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={() => handleOpenAforoModal()}
+            style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+          >
+            <Scale size={16} />
+            <span>Calculadora de Aforo</span>
+          </button>
+          <Link to="/mapas" className="btn-secondary" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Compass size={16} />
+            <span>Visor Cartográfico GIS</span>
+          </Link>
         </div>
       </div>
 
@@ -204,7 +324,7 @@ export const PotrerosView: React.FC = () => {
             <Trees size={22} />
           </div>
           <div>
-            <div style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 500 }}>Superficie Total</div>
+            <div style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 500 }}>Superficie Predial</div>
             <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)' }}>
               {totalSuperficieHa.toFixed(1)} ha
             </div>
@@ -267,12 +387,75 @@ export const PotrerosView: React.FC = () => {
             <Activity size={22} />
           </div>
           <div>
-            <div style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 500 }}>Semovientes en Pastoreo</div>
+            <div style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 500 }}>Animales & UGG</div>
             <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)' }}>
-              {totalAnimales} cabezas
+              {totalAnimales} cab ({totalUgg.toFixed(1)} UGG)
             </div>
           </div>
         </div>
+      </div>
+
+      {/* PRV Voisin Traffic Light Bar */}
+      <div className="prv-summary-bar">
+        <div className="prv-summary-title">
+          <span>Semáforo Voisin (PRV):</span>
+        </div>
+
+        <div className="prv-summary-pills">
+          <button
+            type="button"
+            className={`prv-filter-pill ${prvFilter === 'todos' ? 'active' : ''}`}
+            onClick={() => setPrvFilter('todos')}
+          >
+            Todos ({potreros.length})
+          </button>
+
+          <button
+            type="button"
+            className={`prv-filter-pill pill-optimo ${prvFilter === 'optimo' ? 'active' : ''}`}
+            onClick={() => setPrvFilter('optimo')}
+            title="Punto Óptimo de Reposo: listo para pastorear"
+          >
+            <span>🟢 Punto Óptimo ({prvCounts.optimo})</span>
+          </button>
+
+          <button
+            type="button"
+            className={`prv-filter-pill pill-pastoreo ${prvFilter === 'pastoreo' ? 'active' : ''}`}
+            onClick={() => setPrvFilter('pastoreo')}
+            title="Pastoreo activo: 1 a 2 días de permanencia"
+          >
+            <span>🟡 En Pastoreo ({prvCounts.pastoreo})</span>
+          </button>
+
+          <button
+            type="button"
+            className={`prv-filter-pill pill-sobrepastoreo ${prvFilter === 'sobrepastoreo' ? 'active' : ''}`}
+            onClick={() => setPrvFilter('sobrepastoreo')}
+            title="Alerta de sobrepastoreo: >2 días de permanencia"
+          >
+            <span>🔴 ¡Sobrepastoreo! ({prvCounts.sobrepastoreo})</span>
+          </button>
+
+          <button
+            type="button"
+            className={`prv-filter-pill pill-descanso ${prvFilter === 'descanso' ? 'active' : ''}`}
+            onClick={() => setPrvFilter('descanso')}
+            title="En descanso y recuperación forrajera"
+          >
+            <span>🔵 En Descanso ({prvCounts.descanso})</span>
+          </button>
+        </div>
+
+        {prvFilter !== 'todos' && (
+          <button
+            type="button"
+            onClick={() => setPrvFilter('todos')}
+            style={{ fontSize: 11, color: 'var(--text-secondary)', textDecoration: 'underline', cursor: 'pointer' }}
+          >
+            Limpiar filtro
+          </button>
+        )}
       </div>
 
       {/* Toolbar */}
@@ -295,6 +478,8 @@ export const PotrerosView: React.FC = () => {
           isSelectAll={isSelectAll}
           onToggleSelectAll={handleToggleSelectAll}
           onToggleSelect={handleToggleSelect}
+          onOpenAforoModal={handleOpenAforoModal}
+          onSelectPotrero={potrero => handleOpenAforoModal(potrero)}
         />
         <ReportPagination
           currentPage={currentPage}
@@ -310,6 +495,14 @@ export const PotrerosView: React.FC = () => {
         isOpen={isNewModalOpen}
         onClose={() => setIsNewModalOpen(false)}
         onSave={handleSaveNuevoPotrero}
+      />
+
+      <ModalAforoPotrero
+        isOpen={isAforoModalOpen}
+        onClose={() => setIsAforoModalOpen(false)}
+        paddock={selectedAforoPaddock}
+        paddocksList={potreros}
+        onSaveAforo={handleSaveAforo}
       />
 
       <PotrerosFilterDrawer

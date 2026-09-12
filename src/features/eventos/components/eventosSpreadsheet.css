@@ -1,0 +1,728 @@
+/* ==========================================================================
+   AgroTech NextGen - Eventos & Modo Hoja de Cálculo (Spreadsheet Mode) Styles
+   ========================================================================== */
+
+/* Mode Switcher Header */
+.eventos-mode-switcher {
+  display: flex;
+  align-items: center;
+  background-color: #ffffff;
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid var(--border-gray);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.eventos-mode-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.eventos-mode-btn:hover {
+  color: var(--text-primary);
+  background-color: #f8fafc;
+}
+
+.eventos-mode-btn.active {
+  background-color: var(--primary-color);
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(45, 106, 79, 0.25);
+}
+
+/* Quick Action Command Launcher Button */
+.quick-action-launcher-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.quick-action-launcher-btn:hover {
+  background-color: #e2e8f0;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.quick-action-kbd {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  color: #64748b;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+}
+
+/* Quick Action Modal Backdrop & Dialog */
+.quick-action-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 10vh;
+  animation: fadeIn 0.15s ease-out;
+}
+
+.quick-action-dialog {
+  background-color: #ffffff;
+  width: 100%;
+  max-width: 640px;
+  border-radius: 14px;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.quick-action-search-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid #e2e8f0;
+  background-color: #fafbfc;
+}
+
+.quick-action-search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 15px;
+  font-family: inherit;
+  color: #1e293b;
+  outline: none;
+}
+
+.quick-action-search-input::placeholder {
+  color: #94a3b8;
+}
+
+.quick-action-list {
+  max-height: 420px;
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.quick-action-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+  padding: 8px 10px 4px 10px;
+}
+
+.quick-action-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  background: transparent;
+  transition: all 0.12s ease;
+  border: 1px solid transparent;
+}
+
+.quick-action-item:hover,
+.quick-action-item.selected {
+  background-color: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.quick-action-item-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.quick-action-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--primary-ultra-light);
+  color: var(--primary-color);
+  flex-shrink: 0;
+}
+
+.quick-action-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.quick-action-sub {
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* ==========================================================================
+   Spreadsheet Grid Mode Styling
+   ========================================================================== */
+
+.spreadsheet-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+/* Live KPI Banner */
+.spreadsheet-kpi-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.spreadsheet-kpi-card {
+  background-color: #ffffff;
+  border: 1px solid var(--border-gray);
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.spreadsheet-kpi-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.spreadsheet-kpi-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.spreadsheet-kpi-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.spreadsheet-kpi-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.spreadsheet-kpi-sub {
+  font-size: 11px;
+  color: #10b981;
+  font-weight: 600;
+}
+
+/* Spreadsheet Sub-Type Selector & Action Bar */
+.spreadsheet-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  background-color: #ffffff;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--border-gray);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+.spreadsheet-tabs {
+  display: flex;
+  gap: 8px;
+  background-color: #f1f5f9;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.spreadsheet-tab-btn {
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.spreadsheet-tab-btn.active {
+  background-color: #ffffff;
+  color: var(--primary-color);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.spreadsheet-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Spreadsheet Grid Table */
+.spreadsheet-table-wrapper {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  overflow-x: auto;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  max-height: 60vh;
+}
+
+.spreadsheet-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+  text-align: left;
+}
+
+.spreadsheet-table thead {
+  position: sticky;
+  top: 0;
+  background-color: #f8fafc;
+  z-index: 10;
+}
+
+.spreadsheet-table th {
+  padding: 10px 12px;
+  font-weight: 600;
+  color: #475569;
+  border-bottom: 2px solid #e2e8f0;
+  border-right: 1px solid #e2e8f0;
+  white-space: nowrap;
+  font-size: 12px;
+  user-select: none;
+}
+
+.spreadsheet-table th:last-child {
+  border-right: none;
+}
+
+.spreadsheet-table td {
+  padding: 4px 6px;
+  border-bottom: 1px solid #f1f5f9;
+  border-right: 1px solid #f1f5f9;
+  background-color: #ffffff;
+  vertical-align: middle;
+}
+
+.spreadsheet-table td:last-child {
+  border-right: none;
+}
+
+.spreadsheet-table tr:hover td {
+  background-color: #fbfdfc;
+}
+
+.spreadsheet-table tr.active-row td {
+  background-color: #f0fdf4;
+}
+
+/* Spreadsheet Cell Inputs */
+.spreadsheet-input {
+  width: 100%;
+  height: 32px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 13px;
+  font-family: inherit;
+  color: #1e293b;
+  background-color: transparent;
+  outline: none;
+  transition: all 0.12s ease;
+}
+
+.spreadsheet-input:hover {
+  border-color: #cbd5e1;
+  background-color: #ffffff;
+}
+
+.spreadsheet-input:focus {
+  border-color: var(--primary-light);
+  background-color: #ffffff;
+  box-shadow: 0 0 0 2px rgba(82, 183, 136, 0.2);
+}
+
+.spreadsheet-input.num {
+  text-align: right;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+}
+
+.spreadsheet-cell-computed {
+  padding: 6px 10px;
+  text-align: right;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  color: var(--primary-color);
+  background-color: #f8fafc;
+  border-radius: 4px;
+  display: block;
+}
+
+/* Cell Status Badges */
+.badge-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.badge-status-pill.valid {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.badge-status-pill.warning {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+
+.badge-status-pill.danger {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+/* Floating / Sticky Keyboard Help Footer */
+.spreadsheet-kbd-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 8px 16px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  border: 1px solid var(--border-gray);
+  font-size: 12px;
+  color: #64748b;
+}
+
+.spreadsheet-kbd-shortcuts {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.spreadsheet-shortcut-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ==========================================================================
+   4-Quarter Mastitis Udder Diagram
+   ========================================================================== */
+.udder-diagram-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  background: #f8fafc;
+  padding: 16px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.udder-diagram-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+  max-width: 420px;
+}
+
+.udder-quarter-card {
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.udder-quarter-card:hover {
+  border-color: #94a3b8;
+}
+
+.udder-quarter-card.selected {
+  border-color: #ef4444;
+  background-color: #fff1f2;
+}
+
+.udder-quarter-card.cmt-negative {
+  border-color: #10b981;
+  background-color: #f0fdf4;
+}
+
+.udder-quarter-card.cmt-traces {
+  border-color: #3b82f6;
+  background-color: #eff6ff;
+}
+
+.udder-quarter-card.cmt-1 {
+  border-color: #f59e0b;
+  background-color: #fffbeb;
+}
+
+.udder-quarter-card.cmt-2 {
+  border-color: #f97316;
+  background-color: #fff7ed;
+}
+
+.udder-quarter-card.cmt-3 {
+  border-color: #ef4444;
+  background-color: #fef2f2;
+}
+
+.udder-quarter-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 700;
+  font-size: 13px;
+  color: #1e293b;
+}
+
+.udder-cmt-select {
+  width: 100%;
+  height: 28px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 11px;
+  background: #ffffff;
+  padding: 2px 4px;
+}
+
+/* Milk Withdrawal Warning Banner */
+.withdrawal-warning-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 12px 14px;
+  color: #991b1b;
+  font-size: 13px;
+}
+
+/* Inbreeding Warning Banner */
+.inbreeding-warning-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background-color: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  padding: 12px 14px;
+  color: #92400e;
+  font-size: 13px;
+}
+
+/* AM-PM Rule Recommendation Banner */
+.ampm-rule-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 12px 14px;
+  color: #1e40af;
+  font-size: 13px;
+}
+
+/* Destete simultaneo container */
+.destete-box {
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ==========================================================================
+   RFID Bluetooth Scanner Simulator
+   ========================================================================== */
+.rfid-scanner-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background-color: #0f172a;
+  border-radius: 12px;
+  padding: 16px;
+  color: #f8fafc;
+}
+
+.rfid-scanner-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.rfid-status-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.rfid-status-badge.connected {
+  background-color: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+
+.rfid-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #10b981;
+  animation: pulseDot 1.5s infinite;
+}
+
+@keyframes pulseDot {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+.rfid-counts-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.rfid-count-box {
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.rfid-count-box.confirmed {
+  background-color: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #34d399;
+}
+
+.rfid-count-box.foreign {
+  background-color: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #fbbf24;
+}
+
+.rfid-count-box.missing {
+  background-color: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #f87171;
+}
+
+.rfid-count-number {
+  font-size: 22px;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.rfid-count-label {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.85;
+}
+
+.rfid-tag-stream {
+  background-color: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 10px;
+  max-height: 150px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+}
+
+.rfid-tag-pill {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.rfid-tag-pill.confirmed {
+  background-color: rgba(16, 185, 129, 0.2);
+  color: #6ee7b7;
+}
+
+.rfid-tag-pill.foreign {
+  background-color: rgba(245, 158, 11, 0.2);
+  color: #fde68a;
+}
+
+.rfid-tag-pill.missing {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}

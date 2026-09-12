@@ -97,7 +97,36 @@ export const AnimalesTable: React.FC<AnimalesTableProps> = ({
               </td>
               <td>
                 <div className="td-inner">
-                  <span className="td-line1">{animal.practico}</span>
+                  <span className="td-line1" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      padding: '2px 8px',
+                      borderRadius: 6,
+                      backgroundColor: '#e8f5e9',
+                      color: '#2d6a4f',
+                      fontWeight: 800,
+                      fontSize: 13,
+                      boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                    }}>
+                      {animal.practico}
+                    </span>
+                    {animal.alertaSanitaria && (
+                      <span 
+                        title={`Alerta Sanitaria: ${animal.alertaSanitaria}`} 
+                        style={{ 
+                          fontSize: 11, 
+                          backgroundColor: '#fee2e2', 
+                          color: '#dc2626', 
+                          padding: '1px 6px', 
+                          borderRadius: 4, 
+                          fontWeight: 700 
+                        }}
+                      >
+                        ⚠️ Retiro
+                      </span>
+                    )}
+                  </span>
                   <span className="td-line2">{animal.unico}</span>
                 </div>
               </td>

@@ -1,20 +1,22 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Search, Filter, Layers, ArrowUpDown } from 'lucide-react';
+import { Search, Filter, Layers, ArrowUpDown, Truck } from 'lucide-react';
 import { ReportViewHeader } from '../../components/ReportViewHeader';
 import { ReportPagination } from '../../components/ReportPagination';
 import { ReportSettingsModal, ColumnSetting } from '../../components/ReportSettingsModal';
 import { SeleccionarRebanosModal } from '../components/SeleccionarRebanosModal';
 import { MultirebanoFilterDrawer, MultirebanoFilterValues } from '../components/MultirebanoFilterDrawer';
+import { GuiaMovilizacionModal } from '../../components/GuiaMovilizacionModal';
 import { exportToCSV } from '../../utils/exportUtils';
 import { MOCK_MULTIREBANO_TRANSACCIONES } from '../multirebanosMockData';
 import { MultirebanoTransaccionEntity } from '../../../../types2/entities';
 
 export const MultirebanoTransaccionesView: React.FC = () => {
-  const [transacciones] = useState<MultirebanoTransaccionEntity[]>(MOCK_MULTIREBANO_TRANSACCIONES);
+  const [transacciones, setTransacciones] = useState<MultirebanoTransaccionEntity[]>(MOCK_MULTIREBANO_TRANSACCIONES);
 
   const [isHerdModalOpen, setIsHerdModalOpen] = useState(false);
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [isGuiaModalOpen, setIsGuiaModalOpen] = useState(false);
 
   const [selectedHerds, setSelectedHerds] = useState<string[]>([
     'HERD-01',
@@ -176,6 +178,23 @@ export const MultirebanoTransaccionesView: React.FC = () => {
         onSettingsClick={() => setIsSettingsModalOpen(true)}
         extraActions={
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={() => setIsGuiaModalOpen(true)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                fontWeight: 600,
+                fontSize: 13,
+                padding: '7px 14px'
+              }}
+              title="Emitir Guía Oficial de Movilización Pecuaria entre Rebaños"
+            >
+              <Truck size={15} />
+              <span>+ Guía de Movilización</span>
+            </button>
             <button
               type="button"
               className="btn-secondary"
@@ -386,6 +405,15 @@ export const MultirebanoTransaccionesView: React.FC = () => {
         columns={columns}
         onToggleColumn={toggleColumn}
         onResetColumns={resetColumns}
+      />
+
+      {/* Modal Guía de Movilización Pecuaria */}
+      <GuiaMovilizacionModal
+        isOpen={isGuiaModalOpen}
+        onClose={() => setIsGuiaModalOpen(false)}
+        onSuccess={newGuia => {
+          setTransacciones(prev => [newGuia, ...prev]);
+        }}
       />
     </div>
   );

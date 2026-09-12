@@ -41,6 +41,7 @@ import { MultirebanoProduccionDiariaView } from './features/reportes/multirebano
 
 import { MapasView } from './features/mapas/MapasView';
 import { PotrerosView } from './features/potreros/PotrerosView';
+import { EquipmentView } from './features/equipment/EquipmentView';
 
 export const App: React.FC = () => {
   return (
@@ -59,6 +60,9 @@ export const App: React.FC = () => {
             <Route path="paddocks" element={<PotrerosView />} />
             <Route path="eventos" element={<EventosView />} />
             <Route path="events" element={<EventosView />} />
+            <Route path="equipment" element={<EquipmentView />} />
+            <Route path="maquinaria" element={<EquipmentView />} />
+            <Route path="equipos" element={<EquipmentView />} />
             <Route path="reportes" element={<ReportesView />} />
             <Route path="ajustes" element={<AjustesView />} />
             <Route path="settings" element={<AjustesView />} />

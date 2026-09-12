@@ -1,0 +1,696 @@
+/* =========================================================================
+ * ESTILOS DE MÓDULO: MAQUINARIA, VEHÍCULOS, IMPLEMENTOS Y COMBUSTIBLE
+ * AgroTech NextGen - Paleta #2D6A4F, #52B788, #F3F5F4, Outfit & JetBrains Mono
+ * ========================================================================= */
+
+.equipment-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  padding-bottom: 32px;
+}
+
+/* Header */
+.equipment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.equipment-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.equipment-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.equipment-title-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background-color: var(--primary-ultra-light, #e8f5e9);
+  color: var(--primary-color, #2d6a4f);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.equipment-main-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text-primary, #1f2937);
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.equipment-subtitle {
+  font-family: 'Outfit', sans-serif;
+  font-size: 13.5px;
+  color: var(--text-secondary, #6b7280);
+}
+
+.equipment-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* KPI Cards Grid */
+.equipment-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  width: 100%;
+}
+
+.equipment-kpi-card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 16px 18px;
+  border: 1px solid var(--border-gray, #eef2f5);
+  box-shadow: var(--card-shadow, 0 4px 18px 0 rgba(0, 0, 0, 0.03));
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.equipment-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+}
+
+.equipment-kpi-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.equipment-kpi-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.equipment-kpi-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary, #6b7280);
+}
+
+.equipment-kpi-value {
+  font-family: 'Outfit', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary, #1f2937);
+  line-height: 1.2;
+}
+
+.equipment-kpi-sub {
+  font-size: 11.5px;
+  color: var(--text-secondary, #6b7280);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Category Filter Tabs & View Switcher */
+.equipment-controls-panel {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 14px 18px;
+  border: 1px solid var(--border-gray, #eef2f5);
+  box-shadow: var(--card-shadow, 0 4px 18px 0 rgba(0, 0, 0, 0.03));
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.equipment-controls-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.category-filter-tabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-gray, #f4f6f8);
+  padding: 4px;
+  border-radius: 10px;
+  overflow-x: auto;
+}
+
+.category-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary, #6b7280);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.category-tab-btn:hover {
+  color: var(--text-primary, #1f2937);
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.category-tab-btn.active {
+  background: #ffffff;
+  color: var(--primary-color, #2d6a4f);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.category-tab-count {
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background: var(--border-gray, #eef2f5);
+  color: var(--text-secondary, #6b7280);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.category-tab-btn.active .category-tab-count {
+  background: var(--primary-ultra-light, #e8f5e9);
+  color: var(--primary-color, #2d6a4f);
+  font-weight: 700;
+}
+
+/* Sub-views Selector (Flota, Combustible, Mantenimiento) */
+.view-mode-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 2px solid var(--border-gray, #eef2f5);
+  margin-top: 4px;
+}
+
+.view-mode-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary, #6b7280);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.view-mode-tab:hover {
+  color: var(--primary-color, #2d6a4f);
+}
+
+.view-mode-tab.active {
+  color: var(--primary-color, #2d6a4f);
+  border-bottom-color: var(--primary-color, #2d6a4f);
+}
+
+/* Search and Filters row */
+.equipment-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.equipment-search-wrapper {
+  position: relative;
+  flex: 1;
+  min-width: 260px;
+}
+
+.equipment-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary, #6b7280);
+  pointer-events: none;
+}
+
+.equipment-search-input {
+  width: 100%;
+  padding: 9px 12px 9px 38px;
+  border-radius: 8px;
+  border: 1px solid var(--border-gray, #eef2f5);
+  background: var(--bg-gray, #f4f6f8);
+  font-size: 13.5px;
+  color: var(--text-primary, #1f2937);
+  transition: all 0.2s ease;
+}
+
+.equipment-search-input:focus {
+  outline: none;
+  border-color: var(--primary-light, #52b788);
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.15);
+}
+
+.equipment-select-filter {
+  padding: 9px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border-gray, #eef2f5);
+  background: var(--bg-gray, #f4f6f8);
+  font-size: 13px;
+  color: var(--text-primary, #1f2937);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.equipment-select-filter:focus {
+  outline: none;
+  border-color: var(--primary-light, #52b788);
+}
+
+/* High-Density Equipment Table */
+.equipment-table-card {
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid var(--border-gray, #eef2f5);
+  box-shadow: var(--card-shadow, 0 4px 18px 0 rgba(0, 0, 0, 0.03));
+  overflow: hidden;
+}
+
+.equipment-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.equipment-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+}
+
+.equipment-table th {
+  background: #f8fafc;
+  padding: 12px 14px;
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary, #6b7280);
+  border-bottom: 1px solid var(--border-gray, #eef2f5);
+  white-space: nowrap;
+}
+
+.equipment-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-gray, #eef2f5);
+  color: var(--text-primary, #1f2937);
+  vertical-align: middle;
+}
+
+.equipment-table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.equipment-table tbody tr:hover {
+  background-color: #f9fbf9;
+}
+
+.equipment-table tbody tr.selected {
+  background-color: var(--primary-ultra-light, #e8f5e9);
+}
+
+/* Code badge / JetBrains Mono */
+.code-chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--primary-color, #2d6a4f);
+  background: var(--primary-ultra-light, #e8f5e9);
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(45, 106, 79, 0.15);
+  display: inline-block;
+}
+
+/* Status Chips */
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status-chip.operativo {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.status-chip.en-labor {
+  background: #eff6ff;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+
+.status-chip.en-mantenimiento {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.status-chip.fuera-de-servicio {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.status-chip.operativo .status-dot {
+  background-color: #10b981;
+}
+
+.status-chip.en-labor .status-dot {
+  background-color: #3b82f6;
+}
+
+.status-chip.en-mantenimiento .status-dot {
+  background-color: #f59e0b;
+}
+
+.status-chip.fuera-de-servicio .status-dot {
+  background-color: #ef4444;
+}
+
+/* Service Warning Chip */
+.service-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.service-chip.alert {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  animation: pulse-border 2s infinite;
+}
+
+.service-chip.warning {
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #ffedd5;
+}
+
+.service-chip.ok {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #dcfce7;
+}
+
+@keyframes pulse-border {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.3); }
+  70% { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+/* Actions cell */
+.actions-cell-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.action-btn-mini {
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--border-gray, #eef2f5);
+  background: #ffffff;
+  color: var(--text-secondary, #6b7280);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.action-btn-mini:hover {
+  background: var(--bg-gray, #f4f6f8);
+  color: var(--text-primary, #1f2937);
+  border-color: #cbd5e1;
+}
+
+.action-btn-mini.primary:hover {
+  background: var(--primary-ultra-light, #e8f5e9);
+  color: var(--primary-color, #2d6a4f);
+  border-color: var(--primary-light, #52b788);
+}
+
+.action-btn-mini.fuel:hover {
+  background: #eff6ff;
+  color: #2563eb;
+  border-color: #93c5fd;
+}
+
+/* Modals & Dialogs */
+.equipment-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.equipment-modal-content {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 680px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modal-slide-in 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modal-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.equipment-modal-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border-gray, #eef2f5);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+}
+
+.equipment-modal-header-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.equipment-modal-icon-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--primary-ultra-light, #e8f5e9);
+  color: var(--primary-color, #2d6a4f);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.equipment-modal-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--text-primary, #1f2937);
+  margin: 0;
+}
+
+.equipment-modal-desc {
+  font-size: 12.5px;
+  color: var(--text-secondary, #6b7280);
+  margin: 0;
+}
+
+.equipment-modal-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary, #6b7280);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.equipment-modal-close-btn:hover {
+  background: var(--bg-gray, #f4f6f8);
+  color: var(--text-primary, #1f2937);
+}
+
+.equipment-modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.equipment-modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border-gray, #eef2f5);
+  background: #f8fafc;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Wizard Steps Indicator */
+.wizard-steps {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--bg-gray, #f4f6f8);
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+
+.wizard-step-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary, #6b7280);
+}
+
+.wizard-step-item.active {
+  color: var(--primary-color, #2d6a4f);
+}
+
+.wizard-step-bubble {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--border-gray, #eef2f5);
+  color: var(--text-secondary, #6b7280);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+}
+
+.wizard-step-item.active .wizard-step-bubble {
+  background: var(--primary-color, #2d6a4f);
+  color: #ffffff;
+}
+
+/* Efficiency card badge in Fuel modal */
+.efficiency-display-box {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.efficiency-display-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #166534;
+}
+
+.efficiency-display-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 18px;
+  font-weight: 700;
+  color: #15803d;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .equipment-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+  .equipment-controls-top {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .equipment-filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

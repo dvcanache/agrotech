@@ -1,7 +1,9 @@
-import React, { useRef, useEffect } from 'react';
-import { Search, ChevronDown } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Search, ChevronDown, Bluetooth, Wifi, WifiOff } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Link } from 'react-router-dom';
+import { HardwareSyncModal } from './HardwareSyncModal';
+import { offlineSyncService } from '../../services/offlineSyncService';
 
 export const Topbar: React.FC = () => {
   const {
@@ -13,7 +15,19 @@ export const Topbar: React.FC = () => {
     config
   } = useApp();
 
+  const [isHardwareOpen, setIsHardwareOpen] = useState(false);
+  const [isOnline, setIsOnline] = useState(offlineSyncService.isOnline());
+  const [pendingCount, setPendingCount] = useState(offlineSyncService.getPendientesCount());
+
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const unsub = offlineSyncService.subscribe((items, online) => {
+      setIsOnline(online);
+      setPendingCount(items.filter(i => i.estado === 'pendiente' || i.estado === 'error').length);
+    });
+    return unsub;
+  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -92,7 +106,44 @@ export const Topbar: React.FC = () => {
       </div>
 
       {/* Right Profile Avatar and Dropdown */}
-      <div className="topbar-right" ref={dropdownRef}>
+      <div className="topbar-right" ref={dropdownRef} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        {/* Hardware & Offline Sync Pill Button */}
+        <button
+          type="button"
+          onClick={() => setIsHardwareOpen(true)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '6px 12px',
+            borderRadius: 20,
+            background: isOnline ? '#e8f5e9' : '#fee2e2',
+            border: `1px solid ${isOnline ? '#a7f3d0' : '#fca5a5'}`,
+            color: isOnline ? '#166534' : '#991b1b',
+            fontSize: 12,
+            fontWeight: 500,
+            cursor: 'pointer',
+            transition: 'all 0.2s ease'
+          }}
+          title="Gestor de Hardware IoT (RFID/Básculas) y Cola Offline"
+        >
+          <Bluetooth size={14} color="#0284c7" />
+          {isOnline ? <Wifi size={14} color="#16a34a" /> : <WifiOff size={14} color="#dc2626" />}
+          <span>{isOnline ? 'Online' : 'Offline'}</span>
+          {pendingCount > 0 && (
+            <span style={{
+              background: '#ea580c',
+              color: '#fff',
+              borderRadius: 10,
+              padding: '1px 5px',
+              fontSize: 10,
+              fontWeight: 700
+            }}>
+              {pendingCount}
+            </span>
+          )}
+        </button>
+
         <div
           className={`profile-container ${isProfileOpen ? 'active' : ''}`}
           id="profile-container"
@@ -130,6 +181,12 @@ export const Topbar: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Hardware & Offline Sync Modal */}
+      <HardwareSyncModal
+        isOpen={isHardwareOpen}
+        onClose={() => setIsHardwareOpen(false)}
+      />
     </header>
   );
 };

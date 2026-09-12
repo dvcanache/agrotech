@@ -1,0 +1,962 @@
+/* =========================================================================
+ * AGROTECH NEXTGEN - FICHA ANIMAL 360° (EXPEDIENTE ZOOTÉCNICO)
+ * Paleta: #2D6A4F (Primario), #52B788 (Acento Menta), #F3F5F4 (Fondo Menta)
+ * ========================================================================= */
+
+.ficha360-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  padding: 16px;
+  animation: ficha360FadeIn 0.2s ease-out;
+}
+
+@keyframes ficha360FadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.ficha360-modal {
+  background: #ffffff;
+  width: 100%;
+  max-width: 1240px;
+  height: 94vh;
+  max-height: 900px;
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: 'Outfit', sans-serif;
+  color: #1f2937;
+  animation: ficha360SlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes ficha360SlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* =========================================================================
+ * CABECERA DINÁMICA
+ * ========================================================================= */
+
+.ficha360-header {
+  background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 70%, #40916c 100%);
+  color: #ffffff;
+  padding: 18px 24px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.ficha360-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.ficha360-header-identity {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ficha360-tag-avatar {
+  background: #ffffff;
+  color: #2d6a4f;
+  min-width: 58px;
+  height: 58px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 2px solid #52b788;
+  font-weight: 800;
+  padding: 4px;
+}
+
+.ficha360-tag-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #52b788;
+  line-height: 1;
+}
+
+.ficha360-tag-num {
+  font-size: 19px;
+  font-weight: 900;
+  line-height: 1.1;
+  color: #1b4332;
+}
+
+.ficha360-title-block h2 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  letter-spacing: -0.3px;
+}
+
+.ficha360-alias {
+  font-weight: 400;
+  opacity: 0.9;
+  font-size: 17px;
+}
+
+.ficha360-codes-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 4px;
+  font-size: 12.5px;
+  color: #d8f3dc;
+}
+
+.ficha360-code-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.ficha360-code-item strong {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.ficha360-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ficha360-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ficha360-btn-primary {
+  background-color: #52b788;
+  color: #081c15;
+}
+
+.ficha360-btn-primary:hover {
+  background-color: #74c69d;
+  transform: translateY(-1px);
+}
+
+.ficha360-btn-ghost {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.ficha360-btn-ghost:hover {
+  background-color: rgba(255, 255, 255, 0.25);
+}
+
+.ficha360-close-btn {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.ficha360-close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Badges & Chips Row */
+.ficha360-badges-strip {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.ficha360-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  backdrop-filter: blur(4px);
+}
+
+.ficha360-badge-category {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+.ficha360-badge-active {
+  background-color: #d8f3dc;
+  color: #1b4332;
+}
+
+.ficha360-badge-reproductive {
+  background-color: #ffe8d6;
+  color: #7f4f24;
+}
+
+.ficha360-badge-productive {
+  background-color: #e0f2fe;
+  color: #0369a1;
+}
+
+.ficha360-badge-metric {
+  background-color: rgba(0, 0, 0, 0.2);
+  color: #f1f5f9;
+  font-size: 11.5px;
+}
+
+/* =========================================================================
+ * ALERTA SANITARIA DE RETIRO DE FÁRMACOS (INOCUIDAD)
+ * ========================================================================= */
+
+.ficha360-withholding-banner {
+  background: linear-gradient(90deg, #b91c1c 0%, #dc2626 50%, #ea580c 100%);
+  color: #ffffff;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 3px 6px rgba(185, 28, 28, 0.25);
+  animation: pulseWithdrawal 2.5s infinite;
+}
+
+@keyframes pulseWithdrawal {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.2);
+  }
+}
+
+.ficha360-withholding-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.ficha360-withholding-icon {
+  background: rgba(255, 255, 255, 0.25);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ficha360-withholding-text strong {
+  color: #fef08a;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  font-weight: 800;
+}
+
+.ficha360-withholding-pills {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.ficha360-pill-milk {
+  background: #ffffff;
+  color: #991b1b;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.ficha360-pill-meat {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+/* =========================================================================
+ * NAVEGACIÓN DE 7 PESTAÑAS
+ * ========================================================================= */
+
+.ficha360-tabs-bar {
+  background-color: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  flex-shrink: 0;
+}
+
+.ficha360-tab-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 13px 15px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.ficha360-tab-item:hover {
+  color: #2d6a4f;
+  background-color: #f1f5f9;
+}
+
+.ficha360-tab-item.active {
+  color: #2d6a4f;
+  border-bottom-color: #2d6a4f;
+  background-color: #ffffff;
+}
+
+.ficha360-tab-num {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #475569;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.ficha360-tab-item.active .ficha360-tab-num {
+  background: #2d6a4f;
+  color: #ffffff;
+}
+
+/* =========================================================================
+ * CONTENIDO DE PESTAÑAS (SCROLLABLE BODY)
+ * ========================================================================= */
+
+.ficha360-body {
+  flex: 1;
+  overflow-y: auto;
+  background-color: #f3f5f4;
+  padding: 20px;
+}
+
+/* Cards & Layout */
+.ficha360-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  margin-bottom: 16px;
+}
+
+.ficha360-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.ficha360-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.ficha360-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.ficha360-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+@media (max-width: 900px) {
+  .ficha360-grid-2, .ficha360-grid-3, .ficha360-grid-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Data fields */
+.ficha360-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ficha360-field-label {
+  font-size: 11.5px;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  font-weight: 600;
+}
+
+.ficha360-field-value {
+  font-size: 13.5px;
+  color: #0f172a;
+  font-weight: 500;
+}
+
+/* KPI Mini Cards */
+.ficha360-kpi-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ficha360-kpi-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ficha360-kpi-val {
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.1;
+  color: #1e293b;
+}
+
+.ficha360-kpi-lbl {
+  font-size: 11.5px;
+  color: #64748b;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* =========================================================================
+ * PESTAÑA 2: ÁRBOL GENEALÓGICO & WRIGHT F
+ * ========================================================================= */
+
+.ficha360-pedigree-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+  overflow-x: auto;
+}
+
+.pedigree-tree {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  min-width: 800px;
+  padding: 10px 0;
+}
+
+.pedigree-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  gap: 16px;
+  flex: 1;
+}
+
+.pedigree-node-card {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 10px 12px;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.pedigree-node-card:hover {
+  border-color: #2d6a4f;
+  background: #f0fdf4;
+  box-shadow: 0 4px 12px rgba(45, 106, 79, 0.1);
+}
+
+.pedigree-node-card.proband {
+  border: 2px solid #2d6a4f;
+  background: #e8f5e9;
+}
+
+.pedigree-node-role {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.pedigree-node-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.pedigree-node-meta {
+  font-size: 11px;
+  color: #475569;
+  display: flex;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+/* Wright's Box */
+.wright-box {
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.wright-box-warning {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+.wright-box-safe {
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+}
+
+/* =========================================================================
+ * PESTAÑA 3: TIMELINE GINECOLÓGICO
+ * ========================================================================= */
+
+.gyn-timeline {
+  position: relative;
+  padding-left: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.gyn-timeline::before {
+  content: '';
+  position: absolute;
+  left: 9px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background-color: #cbd5e1;
+}
+
+.gyn-timeline-item {
+  position: relative;
+}
+
+.gyn-timeline-dot {
+  position: absolute;
+  left: -28px;
+  top: 4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 0 2px #cbd5e1;
+  background-color: #ffffff;
+}
+
+.gyn-timeline-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  transition: all 0.15s;
+}
+
+.gyn-timeline-card:hover {
+  border-color: #94a3b8;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+.gyn-timeline-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.gyn-timeline-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gyn-timeline-date {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.gyn-timeline-desc {
+  font-size: 13px;
+  color: #334155;
+  line-height: 1.4;
+}
+
+.gyn-timeline-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.gyn-tag {
+  background: #f1f5f9;
+  color: #475569;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* =========================================================================
+ * PESTAÑA 4: CURVAS DE WOOD & CALIDAD LECHE
+ * ========================================================================= */
+
+.wood-formula-banner {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.wood-formula-math {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 15px;
+  font-weight: 700;
+  color: #2d6a4f;
+  background: #e8f5e9;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.wood-chart-wrapper {
+  height: 280px;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.ratio-gp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.ratio-gp-sara {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.ratio-gp-optimo {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.ratio-gp-cetosis {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+/* =========================================================================
+ * PESTAÑA 6: ANATOMÍA DE UBRE (4 CUARTOS) & CMT
+ * ========================================================================= */
+
+.udder-diagram-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.udder-label-indicator {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #64748b;
+  letter-spacing: 0.8px;
+  margin: 6px 0;
+}
+
+.udder-grid-4 {
+  display: grid;
+  grid-template-columns: 160px 160px;
+  grid-template-rows: 140px 140px;
+  gap: 12px;
+}
+
+.udder-quarter {
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+  position: relative;
+}
+
+.udder-quarter:hover {
+  transform: scale(1.03);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.quarter-ad {
+  border-top-left-radius: 40px;
+}
+
+.quarter-ai {
+  border-top-right-radius: 40px;
+}
+
+.quarter-pd {
+  border-bottom-left-radius: 40px;
+}
+
+.quarter-pi {
+  border-bottom-right-radius: 40px;
+}
+
+.quarter-code {
+  font-size: 20px;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+.quarter-name {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.quarter-cmt-pill {
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.cmt-negativo {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
+}
+
+.cmt-trazas {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #7dd3fc;
+}
+
+.cmt-grado1 {
+  background: #fef9c3;
+  color: #854d0e;
+  border: 1px solid #fde047;
+}
+
+.cmt-grado2 {
+  background: #ffedd5;
+  color: #9a3412;
+  border: 1px solid #fdba74;
+}
+
+.cmt-grado3 {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+  animation: pulseMastitis 2s infinite;
+}
+
+@keyframes pulseMastitis {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2);
+  }
+}
+
+/* =========================================================================
+ * TABLAS ESTILIZADAS AGROTECH
+ * ========================================================================= */
+
+.ficha360-table-wrapper {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.ficha360-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  text-align: left;
+}
+
+.ficha360-table th {
+  background: #f8fafc;
+  color: #475569;
+  font-weight: 700;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.ficha360-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #1e293b;
+}
+
+.ficha360-table tr:hover td {
+  background: #f8fafc;
+}
+
+.ficha360-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* =========================================================================
+ * PESTAÑA 5: CONDICIÓN CORPORAL (CC 1 - 5)
+ * ========================================================================= */
+
+.cc-scale-container {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.cc-level-btn {
+  flex: 1;
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 6px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.cc-level-btn:hover {
+  border-color: #52b788;
+}
+
+.cc-level-btn.active {
+  border-color: #2d6a4f;
+  background: #e8f5e9;
+  color: #1b4332;
+  font-weight: 700;
+}
+
+.cc-level-num {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.cc-level-desc {
+  font-size: 11px;
+  margin-top: 2px;
+  opacity: 0.85;
+}
+

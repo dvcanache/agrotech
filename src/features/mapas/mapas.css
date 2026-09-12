@@ -1,0 +1,515 @@
+/* ==========================================================================
+   AgroTech NextGen — Agro-GIS & Cartografía Potreros Styles
+   Palette: #2D6A4F (Primary), #52B788 (Primary Light), #F3F5F4 (Bg), Outfit
+   ========================================================================== */
+
+.gis-workspace-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+.gis-workspace-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 20px;
+  align-items: start;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 1200px) {
+  .gis-workspace-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Map Canvas Container */
+.gis-map-viewport {
+  position: relative;
+  background-color: #0d1b11;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.16);
+  border: 1px solid #23422a;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Map Controls Header */
+.gis-controls-header {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  right: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 20;
+  pointer-events: none;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.gis-layer-switcher {
+  display: flex;
+  background-color: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  pointer-events: auto;
+  gap: 4px;
+}
+
+.gis-layer-btn {
+  background: transparent;
+  color: #cbd5e1;
+  border: none;
+  border-radius: 7px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.gis-layer-btn:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.gis-layer-btn.active {
+  background: linear-gradient(135deg, #52b788 0%, #2d6a4f 100%);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 2px 10px rgba(45, 106, 79, 0.5);
+}
+
+.gis-prv-toggle-btn {
+  background-color: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #f1f5f9;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 9px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  pointer-events: auto;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  transition: all 0.2s ease;
+}
+
+.gis-prv-toggle-btn:hover {
+  background-color: rgba(30, 41, 59, 0.95);
+  transform: translateY(-1px);
+}
+
+.gis-prv-toggle-btn.active {
+  background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+  border-color: #34d399;
+  color: #ffffff;
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.5);
+}
+
+.gis-coord-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 6px 12px;
+  border-radius: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  font-size: 11.5px;
+  font-family: 'JetBrains Mono', monospace;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  pointer-events: auto;
+}
+
+/* Floating Tools on Bottom */
+.gis-bottom-tools {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 20;
+  flex-wrap: wrap;
+}
+
+.gis-bottom-right-controls {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 20;
+}
+
+.gis-map-control-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.gis-map-control-btn:hover {
+  background-color: #ffffff;
+  color: var(--primary-color);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  transform: translateY(-1px);
+}
+
+.gis-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  background-color: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
+  transition: all 0.2s ease;
+}
+
+.gis-toggle-btn:hover {
+  background-color: rgba(30, 41, 59, 0.95);
+  color: #ffffff;
+}
+
+.gis-toggle-btn.active {
+  background: linear-gradient(135deg, var(--primary-color) 0%, #1e4a37 100%);
+  color: #ffffff;
+  border-color: #52b788;
+  box-shadow: 0 4px 14px rgba(45, 106, 79, 0.4);
+  font-weight: 600;
+}
+
+/* NDVI Legend Bar */
+.ndvi-legend-card {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  padding: 8px 16px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 320px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  pointer-events: auto;
+}
+
+.ndvi-bar-gradient {
+  height: 10px;
+  border-radius: 5px;
+  background: linear-gradient(
+    to right,
+    #a52a2a 0%,     /* 0.1 - Suelo desnudo */
+    #d97706 20%,    /* 0.25 - Rastrojo */
+    #eab308 40%,    /* 0.45 - Vigor bajo */
+    #84cc16 60%,    /* 0.60 - Vigor medio */
+    #22c55e 80%,    /* 0.75 - Vigor alto */
+    #047857 100%    /* 0.85 - Biomasa exuberante */
+  );
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
+  position: relative;
+}
+
+.ndvi-indicator-pin {
+  position: absolute;
+  top: -4px;
+  width: 4px;
+  height: 18px;
+  background-color: #ffffff;
+  border-radius: 2px;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.8);
+  transform: translateX(-50%);
+  transition: left 0.2s ease;
+}
+
+/* Dynamic Floating Tooltip */
+.gis-floating-tooltip {
+  position: absolute;
+  z-index: 30;
+  pointer-events: none;
+  background-color: rgba(15, 23, 42, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: #ffffff;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
+  transform: translate(-50%, -120%);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  min-width: 220px;
+  max-width: 280px;
+}
+
+.gis-tooltip-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  padding-bottom: 6px;
+  margin-bottom: 6px;
+}
+
+.gis-tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  margin: 3px 0;
+  color: #cbd5e1;
+}
+
+.gis-tooltip-row strong {
+  color: #ffffff;
+}
+
+/* Sidebar Drawer for Paddock */
+.gis-drawer-card {
+  background-color: #ffffff;
+  border-radius: 14px;
+  box-shadow: var(--card-shadow);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.gis-drawer-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-gray);
+  background: linear-gradient(to bottom, #ffffff, #fafafa);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.gis-drawer-body {
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: calc(100vh - 220px);
+  overflow-y: auto;
+}
+
+/* Forage Balance Calculator Widget Styles */
+.forage-balance-card {
+  background-color: #f8faf9;
+  border: 1px solid #d1e7dd;
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.forage-balance-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.forage-balance-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background-color: #e8f5e9;
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.btn-toggle-sim {
+  border: 1px solid #cbd5e1;
+  background-color: #ffffff;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+
+.btn-toggle-sim:hover {
+  background-color: #f1f5f9;
+}
+
+.btn-toggle-sim.active {
+  background-color: var(--primary-ultra-light);
+  border-color: var(--primary-light);
+  color: var(--primary-color);
+}
+
+.forage-balance-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.balance-kpi-item {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.balance-kpi-label {
+  font-size: 10.5px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.balance-kpi-val {
+  font-size: 16px;
+  font-weight: 800;
+  margin: 3px 0;
+}
+
+.balance-kpi-val .unit {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.balance-kpi-val.highlight-green {
+  color: #15803d;
+}
+
+.balance-kpi-val.highlight-amber {
+  color: #b45309;
+}
+
+.balance-kpi-sub {
+  font-size: 10px;
+  color: #64748b;
+}
+
+/* Autonomy Banner & Gauge */
+.autonomy-banner {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.autonomy-bar-track {
+  width: 100%;
+  height: 8px;
+  background-color: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.autonomy-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.autonomy-bar-fill.optimal {
+  background: linear-gradient(90deg, #22c55e, #15803d);
+}
+
+.autonomy-bar-fill.danger {
+  background: linear-gradient(90deg, #f87171, #dc2626);
+}
+
+.autonomy-bar-fill.surplus {
+  background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+}
+
+/* Rotation Time Card */
+.rotation-time-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid var(--primary-color);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.rotation-time-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background-color: var(--primary-ultra-light);
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Simulator Drawer */
+.simulator-drawer {
+  background-color: #ffffff;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sim-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}

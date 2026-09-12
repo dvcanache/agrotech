@@ -49,8 +49,11 @@ export type TipoOrdeno = 'Inicio' | 'Ordeño' | 'Secado';
 export type EstatusPotrero =
   | 'Disponible'
   | 'Ocupado'
+  | 'Activo'
   | 'En descanso'
-  | 'Mantenimiento';
+  | 'Mantenimiento'
+  | 'En mantenimiento'
+  | 'En siembra';
 
 export type TipoLaborPotrero =
   | 'Fertilización'

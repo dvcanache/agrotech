@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutGrid, Map, Tag, Trees, Calendar, BarChart3, SlidersHorizontal } from 'lucide-react';
+import { LayoutGrid, Map, Tag, Trees, Calendar, Tractor, BarChart3, SlidersHorizontal } from 'lucide-react';
 
 interface NavItem {
   to: string;
@@ -14,6 +14,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/animales', label: 'Animales', icon: Tag },
   { to: '/potreros', label: 'Potreros', icon: Trees },
   { to: '/eventos', label: 'Centro de Eventos', icon: Calendar },
+  { to: '/equipment', label: 'Maquinaria & Equipos', icon: Tractor },
   { to: '/reportes', label: 'Centro de Reportes', icon: BarChart3 },
   { to: '/ajustes', label: 'Configuración', icon: SlidersHorizontal }
 ];

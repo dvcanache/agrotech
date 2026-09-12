@@ -1,6 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Animal } from '../../types/animal';
-import { generateAnimals } from './animalesData';
 import { useApp } from '../../context/AppContext';
 import { AnimalesFilterValues } from './components/AnimalesFilterDrawer';
 
@@ -12,8 +11,7 @@ export const INITIAL_ANIMALES_FILTERS: AnimalesFilterValues = {
 };
 
 export const useAnimales = (itemsPerPage = 10) => {
-  const { searchQuery } = useApp();
-  const [animals] = useState<Animal[]>(() => generateAnimals(49));
+  const { searchQuery, animals, addAnimal, updateAnimal } = useApp();
   const [selectedAnimals, setSelectedAnimals] = useState<{ [key: string]: boolean }>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [quickFilter, setQuickFilter] = useState('Todos los animales');

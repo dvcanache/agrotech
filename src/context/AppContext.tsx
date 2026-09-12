@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { GeneralConfig } from '../types/config';
+import { Animal } from '../types/animal';
+import { generateAnimals } from '../features/animales/animalesData';
 
 interface AppContextType {
   searchQuery: string;
@@ -10,6 +12,10 @@ interface AppContextType {
   config: GeneralConfig;
   updateConfig: (newConfig: GeneralConfig) => void;
   resetConfig: () => void;
+  animals: Animal[];
+  setAnimals: React.Dispatch<React.SetStateAction<Animal[]>>;
+  addAnimal: (animal: Animal) => void;
+  updateAnimal: (practico: string, updates: Partial<Animal>) => void;
 }
 
 const DEFAULT_CONFIG: GeneralConfig = {
@@ -28,10 +34,19 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [searchQuery, setSearchQuery] = useState('');
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [config, setConfig] = useState<GeneralConfig>(DEFAULT_CONFIG);
+  const [animals, setAnimals] = useState<Animal[]>(() => generateAnimals(49));
 
   const toggleProfile = () => setIsProfileOpen(prev => !prev);
   const updateConfig = (newConfig: GeneralConfig) => setConfig(newConfig);
   const resetConfig = () => setConfig(DEFAULT_CONFIG);
+
+  const addAnimal = (animal: Animal) => {
+    setAnimals(prev => [animal, ...prev]);
+  };
+
+  const updateAnimal = (practico: string, updates: Partial<Animal>) => {
+    setAnimals(prev => prev.map(a => a.practico === practico ? { ...a, ...updates } : a));
+  };
 
   return (
     <AppContext.Provider
@@ -43,7 +58,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         toggleProfile,
         config,
         updateConfig,
-        resetConfig
+        resetConfig,
+        animals,
+        setAnimals,
+        addAnimal,
+        updateAnimal
       }}
     >
       {children}

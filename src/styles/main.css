@@ -1,4 +1,5 @@
 @import './reports.css';
+@import '../features/reportes/components/reportesAdvanced.css';
 
 /* Reset and Variables */
 :root {

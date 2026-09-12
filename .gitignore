@@ -20,7 +20,10 @@ pnpm-debug.log*
 .idea/
 .vscode/
 
-# Ignorar archivos markdown de trabajo excepto README.md y reference/
+# Ignorar archivos markdown de trabajo excepto los documentos maestros del proyecto
 *.md
 !README.md
+!TODO.md
+!MEJORAS_E_IMPLEMENTACIONES_AGROTECH.md
 !reference/*.md
+
