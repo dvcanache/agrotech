@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { GeneralConfig } from '../types/config';
 import { Animal } from '../types/animal';
-import { generateAnimals } from '../features/animales/animalesData';
+import { BASE_ANIMALS, generateAnimals } from '../features/animales/animalesData';
 
 interface AppContextType {
   searchQuery: string;
@@ -34,7 +34,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [searchQuery, setSearchQuery] = useState('');
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [config, setConfig] = useState<GeneralConfig>(DEFAULT_CONFIG);
-  const [animals, setAnimals] = useState<Animal[]>(() => generateAnimals(49));
+  const [animals, setAnimals] = useState<Animal[]>(() => generateAnimals(BASE_ANIMALS.length));
 
   const toggleProfile = () => setIsProfileOpen(prev => !prev);
   const updateConfig = (newConfig: GeneralConfig) => setConfig(newConfig);

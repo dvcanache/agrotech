@@ -7,13 +7,17 @@ import {
   Award,
   AlertTriangle,
   TrendingUp,
+  TrendingDown,
   X,
-  Info,
   Layers,
   Scale,
   Milk,
   Calendar,
   Zap,
+  Egg,
+  Sparkles,
+  Droplets,
+  Ruler,
   RefreshCw,
   RotateCcw,
   CheckCircle2
@@ -26,8 +30,10 @@ import {
 } from './DistribucionNormalFilterDrawer';
 import { ReportSettingsModal, ColumnSetting } from '../../components/ReportSettingsModal';
 import { exportToCSV, exportToPDF } from '../../utils/exportUtils';
+import { EspecieAnimal } from '../../../../types/animal';
 import {
   ZOOTECH_VARIABLES,
+  SPECIES_OPTIONS,
   MOCK_POBLACION_ZOOTECNICA,
   AnimalZootecnico,
   calculateZootechStats,
@@ -35,6 +41,9 @@ import {
 } from './distribucionNormalData';
 
 export const DistribucionNormalView: React.FC = () => {
+  // Especie zootécnica seleccionada (por defecto Bovinos)
+  const [selectedSpecies, setSelectedSpecies] = useState<EspecieAnimal>('Bovinos');
+
   // Variable zootécnica seleccionada (por defecto Producción 305 Días)
   const [selectedVarId, setSelectedVarId] = useState<string>('produccion_305');
 
@@ -98,21 +107,47 @@ export const DistribucionNormalView: React.FC = () => {
 
   const isColVisible = (key: string) => columns.find(c => c.key === key)?.visible ?? true;
 
+  // Variables zootécnicas asociadas a la especie seleccionada
+  const speciesVariables = useMemo(() => {
+    return ZOOTECH_VARIABLES.filter(v => v.especie === selectedSpecies);
+  }, [selectedSpecies]);
+
   // Configuración de la variable actual
   const currentVarConfig = useMemo(() => {
-    return ZOOTECH_VARIABLES.find(v => v.id === selectedVarId) || ZOOTECH_VARIABLES[1];
-  }, [selectedVarId]);
+    const found = ZOOTECH_VARIABLES.find(v => v.id === selectedVarId);
+    if (found && found.especie === selectedSpecies) return found;
+    const fallback = ZOOTECH_VARIABLES.find(v => v.especie === selectedSpecies);
+    return fallback || ZOOTECH_VARIABLES[0];
+  }, [selectedVarId, selectedSpecies]);
 
-  // Población filtrada según filtros del drawer
+  // Cambio de especie zootécnica
+  const handleSpeciesChange = (speciesId: EspecieAnimal) => {
+    setSelectedSpecies(speciesId);
+    const targetVars = ZOOTECH_VARIABLES.filter(v => v.especie === speciesId);
+    if (targetVars.length > 0) {
+      setSelectedVarId(targetVars[0].id);
+    }
+    setSelectedAnimal(null);
+    setIsProcessed(true);
+    setHasPendingChanges(false);
+  };
+
+  // Población filtrada según filtros del drawer y variable zootécnica
   const rawAnimals = useMemo(() => {
-    const list = MOCK_POBLACION_ZOOTECNICA[selectedVarId] || MOCK_POBLACION_ZOOTECNICA['produccion_305'];
+    const list = MOCK_POBLACION_ZOOTECNICA[currentVarConfig.id] || [];
     return list.filter(animal => {
       if (filters.raza !== 'Todas las Razas' && animal.raza !== filters.raza) return false;
       if (filters.min && !isNaN(parseFloat(filters.min)) && animal.valor < parseFloat(filters.min)) return false;
       if (filters.max && !isNaN(parseFloat(filters.max)) && animal.valor > parseFloat(filters.max)) return false;
       return true;
     });
-  }, [selectedVarId, filters.raza, filters.min, filters.max]);
+  }, [currentVarConfig.id, filters.raza, filters.min, filters.max]);
+
+  // Razas disponibles para la especie y variable actual
+  const availableBreeds = useMemo(() => {
+    const list = MOCK_POBLACION_ZOOTECNICA[currentVarConfig.id] || [];
+    return Array.from(new Set(list.map(a => a.raza))).sort();
+  }, [currentVarConfig.id]);
 
   // Estadísticas zootécnicas calculadas
   const stats = useMemo(() => {
@@ -156,6 +191,36 @@ export const DistribucionNormalView: React.FC = () => {
     setHasPendingChanges(lowerPercent !== appliedLowerPercent || clamped !== appliedUpperPercent);
   };
 
+  // Nomenclatura zootécnica adaptada a cada especie
+  const getSubjectWording = (species: EspecieAnimal) => {
+    switch (species) {
+      case 'Aves de corral': return 'lotes / aves';
+      case 'Porcinos': return 'cerdas / ejemplares';
+      case 'Búfalos': return 'búfalas / bucerros';
+      case 'Caprinos': return 'cabras / cabritos';
+      case 'Equinos': return 'ejemplares equinos';
+      default: return 'vientres / semovientes';
+    }
+  };
+
+  const getEliteGroupLabel = (species: EspecieAnimal) => {
+    switch (species) {
+      case 'Aves de corral': return 'Lotes / Aves Élite';
+      case 'Porcinos': return 'Cerdas Élite / Reproductores';
+      case 'Equinos': return 'Ejemplares Élite';
+      default: return 'Donadoras Élite';
+    }
+  };
+
+  const getCullingGroupLabel = (species: EspecieAnimal) => {
+    switch (species) {
+      case 'Aves de corral': return 'Descarte / Salida de Lote';
+      case 'Porcinos': return 'Descarte / Reemplazo';
+      case 'Equinos': return 'Descarte / Reubicación';
+      default: return 'Descarte Sugerido (Culling)';
+    }
+  };
+
   const handleActualizarSimulador = () => {
     setIsRecalculating(true);
     setAppliedLowerPercent(lowerPercent);
@@ -175,7 +240,7 @@ export const DistribucionNormalView: React.FC = () => {
     const eliteSymbol = !currentVarConfig.esMenorMejor ? '≥' : '≤';
 
     setUpdateFeedback(
-      `¡Simulación actualizada! Descarte: ${lowerPercent}% (${cullingSymbol} ${updatedSim.lowerCutoffValue} ${currentVarConfig.unidad}, ${updatedSim.cullingAnimals.length} animales) | Élite: ${upperPercent}% (${eliteSymbol} ${updatedSim.upperCutoffValue} ${currentVarConfig.unidad}, ${updatedSim.eliteAnimals.length} animales)`
+      `¡Simulación zootécnica actualizada [${selectedSpecies}]! Descarte: ${lowerPercent}% (${cullingSymbol} ${updatedSim.lowerCutoffValue} ${currentVarConfig.unidad}, ${updatedSim.cullingAnimals.length} ${getSubjectWording(selectedSpecies)}) | Élite: ${upperPercent}% (${eliteSymbol} ${updatedSim.upperCutoffValue} ${currentVarConfig.unidad}, ${updatedSim.eliteAnimals.length} ${getSubjectWording(selectedSpecies)})`
     );
 
     setTimeout(() => {
@@ -219,7 +284,7 @@ export const DistribucionNormalView: React.FC = () => {
       `${row.porcentajeAcumulado}%`,
       row.zScore
     ]);
-    exportToCSV(`distribucion_normal_${selectedVarId}`, headers, rows);
+    exportToCSV(`distribucion_normal_${selectedSpecies}_${currentVarConfig.id}`, headers, rows);
   };
 
   const handleExportPDF = () => {
@@ -228,13 +293,13 @@ export const DistribucionNormalView: React.FC = () => {
     const rows = rawAnimals.map(a => {
       const isCull = simulation.cullingAnimals.some(c => c.id === a.id);
       const isElite = simulation.eliteAnimals.some(e => e.id === a.id);
-      const rec = isCull ? 'Descarte Sugerido' : isElite ? 'Donadora Élite' : 'Promedio';
+      const rec = isCull ? getCullingGroupLabel(selectedSpecies) : isElite ? getEliteGroupLabel(selectedSpecies) : 'Promedio';
       const z = stats.desviacionEstandar > 0 ? ((a.valor - stats.media) / stats.desviacionEstandar).toFixed(2) : '0';
       return [a.arete, a.nombre, a.raza, a.categoria, a.lote, a.valor, z, rec];
     });
     exportToPDF(
-      `distribucion_normal_${selectedVarId}`,
-      `Análisis Zootécnico Gaussiano - ${currentVarConfig.nombre}`,
+      `distribucion_normal_${selectedSpecies}_${currentVarConfig.id}`,
+      `Análisis Biométrico Gaussiano (${selectedSpecies}) - ${currentVarConfig.nombre}`,
       headers,
       rows
     );
@@ -243,13 +308,34 @@ export const DistribucionNormalView: React.FC = () => {
   const getVariableIcon = (varId: string) => {
     switch (varId) {
       case 'peso_destete':
+      case 'peso_destete_bucerro':
+      case 'peso_destete_cabrito':
+      case 'peso_faena_pollo':
         return <Scale size={20} />;
       case 'produccion_305':
+      case 'leche_bufala_270':
+      case 'leche_cabra_210':
         return <Milk size={20} />;
       case 'gdp':
+      case 'gdp_porcina':
+      case 'gdp_caprina':
         return <TrendingUp size={20} />;
       case 'iep':
         return <Calendar size={20} />;
+      case 'postura_pct':
+        return <Egg size={20} />;
+      case 'ica_avicola':
+      case 'grasa_dorsal':
+        return <TrendingDown size={20} />;
+      case 'lnv_camada':
+        return <Sparkles size={20} />;
+      case 'grasa_bufala_pct':
+        return <Droplets size={20} />;
+      case 'alzada_cruz':
+      case 'perimetro_toracico':
+        return <Ruler size={20} />;
+      case 'condicion_equina':
+        return <Award size={20} />;
       default:
         return <LineChart size={20} />;
     }
@@ -291,10 +377,29 @@ export const DistribucionNormalView: React.FC = () => {
         }
       />
 
-      {/* Selector Rápido de Variable Zootécnica */}
+      {/* Barra Selectora Multiespecie */}
+      <div className="species-selector-bar">
+        {SPECIES_OPTIONS.map(spec => {
+          const isSelected = selectedSpecies === spec.id;
+          return (
+            <button
+              key={spec.id}
+              type="button"
+              className={`species-tab-btn ${isSelected ? 'active' : ''}`}
+              onClick={() => handleSpeciesChange(spec.id)}
+              title={`${spec.nombre} - ${spec.descripcion}`}
+            >
+              <span className="species-tab-icon">{spec.icono}</span>
+              <span className="species-tab-name">{spec.nombre}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Selector Rápido de Variable Zootécnica de la Especie */}
       <div className="variable-selector-grid">
-        {ZOOTECH_VARIABLES.map(v => {
-          const isActive = selectedVarId === v.id;
+        {speciesVariables.map(v => {
+          const isActive = currentVarConfig.id === v.id;
           return (
             <button
               key={v.id}
@@ -397,7 +502,7 @@ export const DistribucionNormalView: React.FC = () => {
           <div className="simulation-header">
             <div className="simulation-header-title">
               <Sliders size={18} color="var(--primary-color)" />
-              <span>Simulador Zootécnico de Presión de Selección y Descarte Genético</span>
+              <span>Simulador Zootécnico de Presión de Selección y Descarte Genético ({selectedSpecies})</span>
               {hasPendingChanges && (
                 <span style={{
                   fontSize: 11,
@@ -482,7 +587,7 @@ export const DistribucionNormalView: React.FC = () => {
             </div>
           )}
 
-          {/* Banner de Ganancia Potencial del Rebaño */}
+          {/* Banner de Ganancia Potencial del Rebaño / Piara / Parvada */}
           <div className="simulation-gain-banner">
             <div style={{
               width: 44,
@@ -499,24 +604,24 @@ export const DistribucionNormalView: React.FC = () => {
             </div>
 
             <div className="gain-metric-box">
-              <span className="gain-metric-label">Progreso del Rebaño tras Descarte</span>
+              <span className="gain-metric-label">Progreso del Plantel tras Descarte ({selectedSpecies})</span>
               <span className="gain-metric-val">
                 {simulation.potentialHerdGain > 0 ? `+${simulation.potentialHerdGain}` : simulation.potentialHerdGain} {currentVarConfig.unidad}
               </span>
               <span style={{ fontSize: 11.5, color: '#166534' }}>
-                Nuevo promedio estimado: <strong>{simulation.remainingMean} {currentVarConfig.unidad}</strong> ({simulation.remainingAnimalsCount} vientres retenidos)
+                Nuevo promedio estimado: <strong>{simulation.remainingMean} {currentVarConfig.unidad}</strong> ({simulation.remainingAnimalsCount} {getSubjectWording(selectedSpecies)} retenidos)
               </span>
             </div>
 
             <div style={{ width: 1, height: 40, backgroundColor: '#bbf7d0', margin: '0 8px' }} />
 
             <div className="gain-metric-box">
-              <span className="gain-metric-label">Diferencial de Selección (S) de Donadoras</span>
+              <span className="gain-metric-label">Diferencial de Selección (S) — {getEliteGroupLabel(selectedSpecies)}</span>
               <span className="gain-metric-val" style={{ color: '#1d4ed8' }}>
                 +{simulation.selectionDifferential} {currentVarConfig.unidad}
               </span>
               <span style={{ fontSize: 11.5, color: '#1e40af' }}>
-                Promedio grupo élite: <strong>{simulation.eliteMean} {currentVarConfig.unidad}</strong> ({simulation.eliteAnimals.length} donadoras)
+                Promedio grupo élite: <strong>{simulation.eliteMean} {currentVarConfig.unidad}</strong> ({simulation.eliteAnimals.length} {getSubjectWording(selectedSpecies)})
               </span>
             </div>
           </div>
@@ -528,10 +633,10 @@ export const DistribucionNormalView: React.FC = () => {
               <div className="slider-title-row">
                 <span className="slider-label culling">
                   <AlertTriangle size={15} style={{ display: 'inline', verticalAlign: 'sub', marginRight: 4 }} />
-                  Umbral Inferior — Descarte / Venta
+                  Umbral Inferior — {getCullingGroupLabel(selectedSpecies)}
                 </span>
                 <span className="slider-badge-val culling">
-                  {lowerPercent}% inferior ({previewSimulation.cullingAnimals.length} animales)
+                  {lowerPercent}% inferior ({previewSimulation.cullingAnimals.length} {getSubjectWording(selectedSpecies)})
                 </span>
               </div>
 
@@ -596,15 +701,15 @@ export const DistribucionNormalView: React.FC = () => {
               </div>
             </div>
 
-            {/* Slider 2: Umbral Superior de Donadoras Élite */}
+            {/* Slider 2: Umbral Superior de Donadoras / Ejemplares Élite */}
             <div className="slider-card-elite">
               <div className="slider-title-row">
                 <span className="slider-label elite">
                   <Award size={16} style={{ display: 'inline', verticalAlign: 'sub', marginRight: 4 }} />
-                  Umbral Superior — Donadoras Élite
+                  Umbral Superior — {getEliteGroupLabel(selectedSpecies)}
                 </span>
                 <span className="slider-badge-val elite">
-                  {upperPercent}% superior ({previewSimulation.eliteAnimals.length} animales)
+                  {upperPercent}% superior ({previewSimulation.eliteAnimals.length} {getSubjectWording(selectedSpecies)})
                 </span>
               </div>
 
@@ -665,7 +770,7 @@ export const DistribucionNormalView: React.FC = () => {
 
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11.5, color: '#1e40af', fontWeight: 600 }}>
                 <span>Corte: {!currentVarConfig.esMenorMejor ? `≥ ${previewSimulation.upperCutoffValue}` : `≤ ${previewSimulation.upperCutoffValue}`} {currentVarConfig.unidad}</span>
-                <span>Recomendación: Semen Sexado / TE</span>
+                <span>Recomendación: Selección Élite</span>
               </div>
             </div>
           </div>
@@ -725,7 +830,7 @@ export const DistribucionNormalView: React.FC = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
               <div>
                 <h4 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
-                  Curva de Densidad Normal Gaussiana — {currentVarConfig.nombre}
+                  Curva de Densidad Normal Gaussiana ({selectedSpecies}) — {currentVarConfig.nombre}
                 </h4>
                 <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
                   {currentVarConfig.descripcion}
@@ -734,15 +839,15 @@ export const DistribucionNormalView: React.FC = () => {
               <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontSize: 12, fontWeight: 600 }}>
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: '#dc2626' }}>
                   <span style={{ width: 10, height: 10, backgroundColor: 'rgba(239,68,68,0.4)', border: '1.5px solid #dc2626', borderRadius: 2 }} />
-                  Descarte Sugerido ({appliedLowerPercent}%)
+                  Descarte ({appliedLowerPercent}%)
                 </span>
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: '#15803d' }}>
                   <span style={{ width: 10, height: 10, backgroundColor: 'rgba(82,183,136,0.4)', border: '1.5px solid #15803d', borderRadius: 2 }} />
-                  Rebaño Central
+                  Población Central
                 </span>
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: '#2563eb' }}>
                   <span style={{ width: 10, height: 10, backgroundColor: 'rgba(37,99,235,0.4)', border: '1.5px solid #2563eb', borderRadius: 2 }} />
-                  Donadoras Élite ({appliedUpperPercent}%)
+                  {getEliteGroupLabel(selectedSpecies)} ({appliedUpperPercent}%)
                 </span>
               </div>
             </div>
@@ -764,8 +869,8 @@ export const DistribucionNormalView: React.FC = () => {
             <div style={{ marginTop: 18, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
               <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, padding: 12 }}>
                 <div style={{ fontSize: 12, fontWeight: 700, color: '#991b1b', marginBottom: 8, display: 'flex', justifyContent: 'space-between' }}>
-                  <span>🔻 Candidatas a Descarte / Venta ({simulation.cullingAnimals.length})</span>
-                  <span>≤ {simulation.lowerCutoffValue} {currentVarConfig.unidad}</span>
+                  <span>🔻 {getCullingGroupLabel(selectedSpecies)} ({simulation.cullingAnimals.length})</span>
+                  <span>{!currentVarConfig.esMenorMejor ? `≤ ${simulation.lowerCutoffValue}` : `≥ ${simulation.lowerCutoffValue}`} {currentVarConfig.unidad}</span>
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, maxHeight: 90, overflowY: 'auto' }}>
                   {simulation.cullingAnimals.map(anim => (
@@ -782,15 +887,15 @@ export const DistribucionNormalView: React.FC = () => {
                     </button>
                   ))}
                   {simulation.cullingAnimals.length === 0 && (
-                    <span style={{ fontSize: 12, color: '#991b1b' }}>No hay animales en este rango (aumente el slider).</span>
+                    <span style={{ fontSize: 12, color: '#991b1b' }}>No hay ejemplares en este rango (aumente el slider).</span>
                   )}
                 </div>
               </div>
 
               <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 8, padding: 12 }}>
                 <div style={{ fontSize: 12, fontWeight: 700, color: '#1e40af', marginBottom: 8, display: 'flex', justifyContent: 'space-between' }}>
-                  <span>⭐ Donadoras Élite / Semen Sexado ({simulation.eliteAnimals.length})</span>
-                  <span>≥ {simulation.upperCutoffValue} {currentVarConfig.unidad}</span>
+                  <span>⭐ {getEliteGroupLabel(selectedSpecies)} ({simulation.eliteAnimals.length})</span>
+                  <span>{!currentVarConfig.esMenorMejor ? `≥ ${simulation.upperCutoffValue}` : `≤ ${simulation.upperCutoffValue}`} {currentVarConfig.unidad}</span>
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, maxHeight: 90, overflowY: 'auto' }}>
                   {simulation.eliteAnimals.map(anim => (
@@ -807,7 +912,7 @@ export const DistribucionNormalView: React.FC = () => {
                     </button>
                   ))}
                   {simulation.eliteAnimals.length === 0 && (
-                    <span style={{ fontSize: 12, color: '#1e40af' }}>No hay animales en este rango (aumente el slider).</span>
+                    <span style={{ fontSize: 12, color: '#1e40af' }}>No hay ejemplares en este rango (aumente el slider).</span>
                   )}
                 </div>
               </div>
@@ -823,10 +928,10 @@ export const DistribucionNormalView: React.FC = () => {
               <div className="selection-group-header culling">
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <AlertTriangle size={16} />
-                  <span>Recomendadas para Descarte / Venta ({simulation.cullingAnimals.length})</span>
+                  <span>{getCullingGroupLabel(selectedSpecies)} ({simulation.cullingAnimals.length})</span>
                 </div>
                 <span className="slider-badge-val culling">
-                  Promedio: {simulation.cullingAnimals.length > 0 ? (simulation.cullingAnimals.reduce((acc, a) => acc + a.valor, 0) / simulation.cullingAnimals.length).toFixed(1) : 0} {currentVarConfig.unidad}
+                  Promedio: {simulation.cullingAnimals.length > 0 ? (simulation.cullingAnimals.reduce((acc, a) => acc + a.valor, 0) / simulation.cullingAnimals.length).toFixed(stats.precision > 0 ? stats.precision : 1) : 0} {currentVarConfig.unidad}
                 </span>
               </div>
 
@@ -834,8 +939,8 @@ export const DistribucionNormalView: React.FC = () => {
                 <table className="report-grid-table">
                   <thead>
                     <tr>
-                      <th>Arete</th>
-                      <th>Nombre</th>
+                      <th>Identificador / Arete</th>
+                      <th>Nombre / Denominación</th>
                       <th>Raza</th>
                       <th>Lote</th>
                       <th>Valor ({currentVarConfig.unidad})</th>
@@ -869,7 +974,7 @@ export const DistribucionNormalView: React.FC = () => {
                     {simulation.cullingAnimals.length === 0 && (
                       <tr>
                         <td colSpan={6} style={{ textAlign: 'center', padding: 24, color: 'var(--text-secondary)' }}>
-                          No hay animales bajo el corte de descarte actual.
+                          No hay ejemplares bajo el corte de descarte actual.
                         </td>
                       </tr>
                     )}
@@ -878,12 +983,12 @@ export const DistribucionNormalView: React.FC = () => {
               </div>
             </div>
 
-            {/* Tabla Grupo Donadoras Élite */}
+            {/* Tabla Grupo Élite */}
             <div className="selection-group-box">
               <div className="selection-group-header elite">
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <Award size={16} />
-                  <span>Donadoras Élite / Selección Genética ({simulation.eliteAnimals.length})</span>
+                  <span>{getEliteGroupLabel(selectedSpecies)} ({simulation.eliteAnimals.length})</span>
                 </div>
                 <span className="slider-badge-val elite">
                   Promedio: {simulation.eliteMean} {currentVarConfig.unidad}
@@ -894,8 +999,8 @@ export const DistribucionNormalView: React.FC = () => {
                 <table className="report-grid-table">
                   <thead>
                     <tr>
-                      <th>Arete</th>
-                      <th>Nombre</th>
+                      <th>Identificador / Arete</th>
+                      <th>Nombre / Denominación</th>
                       <th>Raza</th>
                       <th>Lote</th>
                       <th>Valor ({currentVarConfig.unidad})</th>
@@ -929,7 +1034,7 @@ export const DistribucionNormalView: React.FC = () => {
                     {simulation.eliteAnimals.length === 0 && (
                       <tr>
                         <td colSpan={6} style={{ textAlign: 'center', padding: 24, color: 'var(--text-secondary)' }}>
-                          No hay animales sobre el corte élite actual.
+                          No hay ejemplares sobre el corte élite actual.
                         </td>
                       </tr>
                     )}
@@ -963,7 +1068,7 @@ export const DistribucionNormalView: React.FC = () => {
                       </td>
                     )}
                     {isColVisible('frecuenciaObservada') && (
-                      <td style={{ fontWeight: 600 }}>{int.frecuenciaObservada} animales</td>
+                      <td style={{ fontWeight: 600 }}>{int.frecuenciaObservada} ejemplares</td>
                     )}
                     {isColVisible('porcentajeObservado') && (
                       <td>
@@ -1025,12 +1130,16 @@ export const DistribucionNormalView: React.FC = () => {
             <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, fontSize: 13 }}>
                 <div>
+                  <span style={{ color: 'var(--text-secondary)', display: 'block', fontSize: 11 }}>Especie:</span>
+                  <strong>{selectedSpecies}</strong>
+                </div>
+                <div>
                   <span style={{ color: 'var(--text-secondary)', display: 'block', fontSize: 11 }}>Raza:</span>
                   <strong>{selectedAnimal.raza}</strong>
                 </div>
                 <div>
                   <span style={{ color: 'var(--text-secondary)', display: 'block', fontSize: 11 }}>Categoría:</span>
-                  <strong>{selectedAnimal.categoria} ({selectedAnimal.edadAnos} años)</strong>
+                  <strong>{selectedAnimal.categoria} ({selectedAnimal.edadAnos} {selectedAnimal.edadAnos < 1 ? 'año' : 'años'})</strong>
                 </div>
                 <div>
                   <span style={{ color: 'var(--text-secondary)', display: 'block', fontSize: 11 }}>Lote Actual:</span>
@@ -1079,9 +1188,9 @@ export const DistribucionNormalView: React.FC = () => {
                 border: `1px solid ${selectedAnimal.recomendacionGenetica === 'Descarte Sugerido' ? '#fecaca' : '#bbf7d0'}`
               }}>
                 {selectedAnimal.recomendacionGenetica === 'Descarte Sugerido' ? (
-                  <>⚠️ <strong>Recomendación Zootécnica:</strong> Candidata a Culling / Venta de descarte o traslado a rebaño comercial debido a rendimiento por debajo del percentil {lowerPercent}%.</>
+                  <>⚠️ <strong>Recomendación Zootécnica:</strong> Rendimiento de {selectedAnimal.valor} {currentVarConfig.unidad} en el percentil inferior {lowerPercent}%. Se sugiere descarte productivo ({getCullingGroupLabel(selectedSpecies)}), renovación de lote o reemplazo.</>
                 ) : (
-                  <>⭐ <strong>Recomendación Zootécnica:</strong> Vientre clasificado en el percentil superior {upperPercent}%. Recomendado para programas de inseminación con semen sexado o transferencia de embriones (TE).</>
+                  <>⭐ <strong>Recomendación Zootécnica:</strong> Rendimiento zootécnico destacado de {selectedAnimal.valor} {currentVarConfig.unidad} en el percentil superior {upperPercent}%. Ejemplar de alto mérito ({getEliteGroupLabel(selectedSpecies)}) priorizado para multiplicación genética y programas de reproducción.</>
                 )}
               </div>
             </div>
@@ -1106,10 +1215,11 @@ export const DistribucionNormalView: React.FC = () => {
         onClose={() => setIsFilterDrawerOpen(false)}
         filters={filters}
         onFilterChange={setFilters}
+        availableBreeds={availableBreeds}
         onReset={() =>
           setFilters({
             tipo: 'Todos',
-            variable: 'Días producción',
+            variable: currentVarConfig.nombre,
             agruparPor: 'Lote',
             min: '',
             max: '',

@@ -7,7 +7,46 @@
  * 4. Ley del Rendimiento Regular (Tiempos de permanencia uniformes).
  */
 
+import { EspecieAnimal } from '../../types/animal';
+
 export type PrvStatus = 'optimo' | 'pastoreo' | 'sobrepastoreo' | 'descanso';
+
+/**
+ * Factores oficiales de conversión a Unidad Gran Ganado (UGG) multi-especie
+ * Equivalencia estándar: 1 UGG = 450 kg de peso vivo bovino adulto.
+ */
+export const UGG_FACTORS: Record<EspecieAnimal, number> = {
+  'Bovinos': 1.0,
+  'Búfalos': 1.2,
+  'Equinos': 1.2,
+  'Porcinos': 0.3,
+  'Caprinos': 0.15,
+  'Aves de corral': 0.005
+};
+
+export const SPECIES_EMOJI: Record<EspecieAnimal, string> = {
+  'Bovinos': '🐮',
+  'Aves de corral': '🐔',
+  'Porcinos': '🐷',
+  'Búfalos': '🐃',
+  'Caprinos': '🐐',
+  'Equinos': '🐴'
+};
+
+export function getUggFactor(especie?: EspecieAnimal | string): number {
+  if (!especie) return 1.0;
+  return UGG_FACTORS[especie as EspecieAnimal] ?? 1.0;
+}
+
+export function calculateMultiSpeciesUgg(animales: number, especie?: EspecieAnimal | string): number {
+  const factor = getUggFactor(especie);
+  return Number((animales * factor).toFixed(2));
+}
+
+export function calculateMultiSpeciesCarga(ugg: number, areaHa: number): number {
+  if (areaHa <= 0) return 0;
+  return Number((ugg / areaHa).toFixed(2));
+}
 
 export interface PrvStatusInfo {
   status: PrvStatus;

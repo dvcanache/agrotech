@@ -1240,7 +1240,7 @@ export const BASE_ANIMALS: Animal[] = [
   }
 ];
 
-export const generateAnimals = (count = 50): Animal[] => {
+export const generateAnimals = (count = BASE_ANIMALS.length): Animal[] => {
   if (count <= BASE_ANIMALS.length) {
     return BASE_ANIMALS.slice(0, count);
   }

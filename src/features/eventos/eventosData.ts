@@ -9,7 +9,7 @@ export const EVENT_CATEGORIES: EventCategory[] = [
   {
     titulo: "Productivos",
     iconoType: "productivos",
-    enlaces: ["Pesajes de leche", "Secados", "Crecimientos"]
+    enlaces: ["Pesajes de leche", "Secados", "Crecimientos", "Control de Postura"]
   },
   {
     titulo: "Inventarios",

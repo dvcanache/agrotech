@@ -1,5 +1,17 @@
 import React from 'react';
 import { KpiCardData } from '../../../types/chart';
+import { 
+  Egg, 
+  Layers, 
+  Wheat, 
+  Activity, 
+  TrendingUp, 
+  Baby, 
+  Feather, 
+  Beef, 
+  PawPrint,
+  CheckCircle2 
+} from 'lucide-react';
 
 interface KpiCardsProps {
   cards: KpiCardData[];
@@ -42,19 +54,69 @@ export const KpiCards: React.FC<KpiCardsProps> = ({ cards }) => {
             <path d="M12 17v-5M9 14l3-3 3 3" />
           </svg>
         );
+      case 'census':
+        return <PawPrint size={26} strokeWidth={2.2} />;
+      case 'species':
+        return <Layers size={26} strokeWidth={2.2} />;
+      case 'egg':
+        return <Egg size={26} strokeWidth={2.2} />;
+      case 'meat':
+        return <Beef size={26} strokeWidth={2.2} />;
+      case 'pig':
+        return (
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="8" />
+            <ellipse cx="12" cy="13" rx="3.5" ry="2.5" />
+            <circle cx="10.8" cy="13" r="0.6" fill="currentColor" />
+            <circle cx="13.2" cy="13" r="0.6" fill="currentColor" />
+            <circle cx="9" cy="9" r="0.9" fill="currentColor" />
+            <circle cx="15" cy="9" r="0.9" fill="currentColor" />
+            <path d="M6 7C5 5.5 4 5 3.5 5 4 7 5 8 6 8" />
+            <path d="M18 7c1-1.5 2-2 2.5-2-.5 2-1.5 3-2.5 3" />
+          </svg>
+        );
+      case 'baby':
+        return <Baby size={26} strokeWidth={2.2} />;
+      case 'feather':
+        return <Feather size={26} strokeWidth={2.2} />;
+      case 'wheat':
+        return <Wheat size={26} strokeWidth={2.2} />;
+      case 'horse':
+        return (
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M6 20c1.5-4 2.5-6.5 4-9.5l2.5-4.5 4.5 1.5-1 3.5 3 2-2.5 4-3 1-1.5 3.5z" />
+            <circle cx="12.5" cy="8" r="1" fill="currentColor" />
+            <path d="M9 16c1.5 2 3 3 5 3" />
+          </svg>
+        );
+      case 'activity':
+        return <Activity size={26} strokeWidth={2.2} />;
+      case 'trending-up':
+        return <TrendingUp size={26} strokeWidth={2.2} />;
+      case 'check-circle':
+        return <CheckCircle2 size={26} strokeWidth={2.2} />;
+      default:
+        return <PawPrint size={26} strokeWidth={2.2} />;
     }
   };
 
   return (
-    <section className="kpi-grid">
+    <section className={`kpi-grid ${cards.length === 5 ? 'has-5' : ''}`}>
       {cards.map((card, idx) => (
         <div className="kpi-card" key={idx}>
           <div className="kpi-icon-container">
             {renderIcon(card.iconType)}
           </div>
           <div className="kpi-details">
-            <span className="kpi-value">{card.value}</span>
-            <span className="kpi-subtitle" title={card.subtitle}>{card.subtitle}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span className="kpi-value">{card.value}</span>
+              {card.badge && (
+                <span className="kpi-card-badge">{card.badge}</span>
+              )}
+            </div>
+            <span className="kpi-subtitle" title={card.subtitle}>
+              {card.subtitle}
+            </span>
           </div>
         </div>
       ))}

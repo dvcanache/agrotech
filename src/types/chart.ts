@@ -1,7 +1,27 @@
+export type KpiIconType =
+  | 'milk-bucket'
+  | 'scale-female'
+  | 'scale-male'
+  | 'weight-maute'
+  | 'census'
+  | 'species'
+  | 'egg'
+  | 'meat'
+  | 'pig'
+  | 'baby'
+  | 'feather'
+  | 'wheat'
+  | 'horse'
+  | 'activity'
+  | 'trending-up'
+  | 'check-circle';
+
 export interface KpiCardData {
   value: string;
   subtitle: string;
-  iconType: 'milk-bucket' | 'scale-female' | 'scale-male' | 'weight-maute';
+  iconType: KpiIconType;
+  badge?: string;
+  alert?: boolean;
 }
 
 export interface LegendItem {
@@ -12,7 +32,7 @@ export interface LegendItem {
 export interface ChartConfig {
   title: string;
   centerLabel: string;
-  centerValue: number;
+  centerValue: number | string;
   labels: string[];
   data: number[];
   colors: string[];

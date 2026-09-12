@@ -11,6 +11,68 @@
   width: 100%;
 }
 
+/* --- Barra Selectora Multiespecie --- */
+.species-selector-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 2px 10px 2px;
+  margin-bottom: 10px;
+  scrollbar-width: thin;
+}
+
+.species-selector-bar::-webkit-scrollbar {
+  height: 4px;
+}
+
+.species-selector-bar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.species-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  background: #ffffff;
+  border: 1.5px solid var(--border-gray);
+  border-radius: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  position: relative;
+}
+
+.species-tab-btn:hover {
+  border-color: #86efac;
+  color: var(--text-primary);
+  background: #f8fafc;
+  transform: translateY(-1px);
+}
+
+.species-tab-btn.active {
+  border-color: var(--primary-color);
+  background: #e8f5e9;
+  color: #1b4332;
+  box-shadow: 0 3px 8px rgba(45, 106, 79, 0.14);
+}
+
+.species-tab-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.species-tab-name {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
 /* Selector de Variable Zootécnica */
 .variable-selector-grid {
   display: grid;

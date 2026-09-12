@@ -20,6 +20,7 @@ interface DistribucionNormalFilterDrawerProps {
   filters: DistribucionNormalFilterValues;
   onFilterChange: (newFilters: DistribucionNormalFilterValues) => void;
   onReset: () => void;
+  availableBreeds?: string[];
 }
 
 export const DistribucionNormalFilterDrawer: React.FC<DistribucionNormalFilterDrawerProps> = ({
@@ -27,7 +28,8 @@ export const DistribucionNormalFilterDrawer: React.FC<DistribucionNormalFilterDr
   onClose,
   filters,
   onFilterChange,
-  onReset
+  onReset,
+  availableBreeds
 }) => {
   return (
     <ReportFilterDrawer
@@ -141,11 +143,19 @@ export const DistribucionNormalFilterDrawer: React.FC<DistribucionNormalFilterDr
           onChange={e => onFilterChange({ ...filters, raza: e.target.value })}
         >
           <option value="Todas las Razas">Todas las Razas</option>
-          <option value="Carora">Carora</option>
-          <option value="Gyr Lechero">Gyr Lechero</option>
-          <option value="Brahman">Brahman</option>
-          <option value="Holstein">Holstein</option>
-          <option value="Girolando">Girolando</option>
+          {availableBreeds && availableBreeds.length > 0 ? (
+            availableBreeds.map(r => (
+              <option key={r} value={r}>{r}</option>
+            ))
+          ) : (
+            <>
+              <option value="Carora">Carora</option>
+              <option value="Gyr Lechero">Gyr Lechero</option>
+              <option value="Brahman">Brahman</option>
+              <option value="Holstein">Holstein</option>
+              <option value="Girolando">Girolando</option>
+            </>
+          )}
         </select>
       </div>
 

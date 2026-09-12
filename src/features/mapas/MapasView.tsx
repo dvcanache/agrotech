@@ -7,7 +7,8 @@ import {
   GisPointOfInterest,
   GisGate
 } from './mapasData';
-import { getPrvStatusInfo, PrvStatus } from '../potreros/prvUtils';
+import { getPrvStatusInfo, PrvStatus, SPECIES_EMOJI, getUggFactor } from '../potreros/prvUtils';
+import { EspecieAnimal } from '../../types/animal';
 import { ForageBalanceWidget } from './components/ForageBalanceWidget';
 import { ModalAforoPotrero } from '../potreros/components/ModalAforoPotrero';
 import { PotreroItem } from '../potreros/potrerosData';
@@ -28,15 +29,33 @@ import {
   Scale,
   Sparkles,
   DoorOpen,
-  DoorClosed
+  DoorClosed,
+  Warehouse
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 type MapLayerType = 'satelital' | 'topografico' | 'ndvi';
 
+interface SectorFilterItem {
+  id: 'todos' | EspecieAnimal;
+  label: string;
+  icon: string;
+}
+
+const SECTORES: SectorFilterItem[] = [
+  { id: 'todos', label: 'Todos los Sectores', icon: '🐾' },
+  { id: 'Bovinos', label: 'Bovinos', icon: '🐮' },
+  { id: 'Aves de corral', label: 'Aves de corral', icon: '🐔' },
+  { id: 'Porcinos', label: 'Porcinos', icon: '🐷' },
+  { id: 'Búfalos', label: 'Búfalos', icon: '🐃' },
+  { id: 'Caprinos', label: 'Caprinos', icon: '🐐' },
+  { id: 'Equinos', label: 'Equinos', icon: '🐴' }
+];
+
 export const MapasView: React.FC = () => {
   const [paddocks, setPaddocks] = useState<GisPaddock[]>(GIS_PADDOCKS);
   const [selectedPaddock, setSelectedPaddock] = useState<GisPaddock | null>(GIS_PADDOCKS[0]);
+  const [selectedSpecies, setSelectedSpecies] = useState<'todos' | EspecieAnimal>('todos');
   const [hoveredPaddock, setHoveredPaddock] = useState<GisPaddock | null>(null);
   const [hoveredGate, setHoveredGate] = useState<GisGate | null>(null);
   const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null);
@@ -55,9 +74,23 @@ export const MapasView: React.FC = () => {
   const handleZoomOut = () => setZoomLevel(prev => Math.max(prev - 0.2, 0.7));
   const handleResetZoom = () => setZoomLevel(1);
 
-  // Filter paddocks by search & PRV status
+  // Handle species/sector filter change with auto-focus
+  const handleSelectSector = (secId: 'todos' | EspecieAnimal) => {
+    setSelectedSpecies(secId);
+    if (secId !== 'todos') {
+      const match = paddocks.find(p => p.especie === secId);
+      if (match) {
+        setSelectedPaddock(match);
+      }
+    }
+  };
+
+  // Filter paddocks by species, search & PRV status
   const filteredPaddocks = useMemo(() => {
     return paddocks.filter(p => {
+      if (selectedSpecies !== 'todos' && p.especie !== selectedSpecies) {
+        return false;
+      }
       if (prvFilter !== 'todos') {
         const prv = getPrvStatusInfo(
           p.animales,
@@ -72,16 +105,24 @@ export const MapasView: React.FC = () => {
         const matchCode = p.codigo.toLowerCase().includes(q);
         const matchName = p.nombre.toLowerCase().includes(q);
         const matchForage = p.especieForrajera.toLowerCase().includes(q);
-        if (!matchCode && !matchName && !matchForage) return false;
+        const matchSector = p.sector.toLowerCase().includes(q);
+        const matchSpecies = p.especie.toLowerCase().includes(q);
+        if (!matchCode && !matchName && !matchForage && !matchSector && !matchSpecies) return false;
       }
       return true;
     });
-  }, [paddocks, prvFilter, paddockSearch]);
+  }, [paddocks, selectedSpecies, prvFilter, paddockSearch]);
+
+  // Active sector paddocks for KPI calculations
+  const activeSectorPaddocks = useMemo(() => {
+    if (selectedSpecies === 'todos') return paddocks;
+    return paddocks.filter(p => p.especie === selectedSpecies);
+  }, [paddocks, selectedSpecies]);
 
   // PRV breakdown counts
   const prvCounts = useMemo(() => {
     const counts = { optimo: 0, pastoreo: 0, sobrepastoreo: 0, descanso: 0 };
-    paddocks.forEach(p => {
+    activeSectorPaddocks.forEach(p => {
       const info = getPrvStatusInfo(
         p.animales,
         p.diasOcupacionActual,
@@ -91,14 +132,14 @@ export const MapasView: React.FC = () => {
       counts[info.status]++;
     });
     return counts;
-  }, [paddocks]);
+  }, [activeSectorPaddocks]);
 
-  // Total summary metrics
-  const totalSuperficie = paddocks.reduce((sum, p) => sum + p.areaHa, 0);
-  const potrerosActivos = paddocks.filter(p => p.animales > 0).length;
-  const potrerosDescanso = paddocks.filter(p => p.animales === 0).length;
-  const animalesTotales = paddocks.reduce((sum, p) => sum + p.animales, 0);
-  const uggTotales = paddocks.reduce((sum, p) => sum + p.uggPresentes, 0);
+  // Summary metrics for the active sector or all farm
+  const totalSuperficie = activeSectorPaddocks.reduce((sum, p) => sum + p.areaHa, 0);
+  const potrerosActivos = activeSectorPaddocks.filter(p => p.animales > 0).length;
+  const potrerosDescanso = activeSectorPaddocks.filter(p => p.animales === 0).length;
+  const animalesTotales = activeSectorPaddocks.reduce((sum, p) => sum + p.animales, 0);
+  const uggTotales = activeSectorPaddocks.reduce((sum, p) => sum + p.uggPresentes, 0);
 
   // Update aforo callback from modal
   const handleSaveAforo = (
@@ -116,7 +157,6 @@ export const MapasView: React.FC = () => {
             aforoKgM2,
             porcentajeMS,
             aforoKgMsHa,
-            // Recalculate approximate NDVI based on new fresh biomass
             ndviValue: Math.min(0.85, Math.max(0.2, Number((0.25 + (aforoKgM2 / 6) * 0.6).toFixed(2))))
           };
           if (selectedPaddock?.codigo === codigo) {
@@ -134,6 +174,9 @@ export const MapasView: React.FC = () => {
     return paddocks.map(p => ({
       codigo: p.codigo,
       descripcion: p.nombre,
+      especie: p.especie,
+      sector: p.sector,
+      tipoInstalacion: p.tipoInstalacion,
       areaHa: p.areaHa,
       perimetroM: p.perimetroM,
       especieForrajera: p.especieForrajera,
@@ -152,7 +195,9 @@ export const MapasView: React.FC = () => {
       cargaActualUggHa: p.cargaUggHa,
       eficienciaAprovechamiento: p.eficienciaAprovechamiento,
       ndviValue: p.ndviValue,
-      prvStatus: p.prvStatus
+      prvStatus: p.prvStatus,
+      sistemaAlojamiento: p.sistemaAlojamiento,
+      capacidadMaxima: p.capacidadMaxima
     }));
   }, [paddocks]);
 
@@ -174,13 +219,13 @@ export const MapasView: React.FC = () => {
     if (isPrvMode) {
       switch (prvInfo.status) {
         case 'optimo':
-          return 'rgba(34, 197, 94, 0.65)'; // 🟢 Verde brillante
+          return 'rgba(34, 197, 94, 0.65)';
         case 'pastoreo':
-          return 'rgba(234, 179, 8, 0.60)'; // 🟡 Amarillo
+          return 'rgba(234, 179, 8, 0.60)';
         case 'sobrepastoreo':
-          return 'rgba(239, 68, 68, 0.65)'; // 🔴 Rojo
+          return 'rgba(239, 68, 68, 0.65)';
         case 'descanso':
-          return 'rgba(59, 130, 246, 0.55)'; // 🔵 Azul
+          return 'rgba(59, 130, 246, 0.55)';
         default:
           return 'rgba(34, 197, 94, 0.5)';
       }
@@ -188,23 +233,20 @@ export const MapasView: React.FC = () => {
 
     // Layer-specific fills
     if (activeLayer === 'ndvi') {
-      // Heatmap pseudo-color scale (0.10 to 0.85 NDVI)
       const val = paddock.ndviValue;
-      if (val >= 0.75) return 'rgba(4, 120, 87, 0.70)'; // Deep forest (Exuberante)
-      if (val >= 0.65) return 'rgba(22, 163, 74, 0.65)'; // Lush green (Óptimo)
-      if (val >= 0.55) return 'rgba(74, 222, 128, 0.60)'; // Bright green (Bueno)
-      if (val >= 0.48) return 'rgba(132, 204, 22, 0.55)'; // Light lime (Moderado)
-      if (val >= 0.40) return 'rgba(234, 179, 8, 0.55)';  // Yellow (Bajo/Pastoreado)
-      if (val >= 0.25) return 'rgba(217, 119, 6, 0.50)';  // Amber (Rastrojo)
-      return 'rgba(185, 28, 28, 0.55)';                   // Reddish-brown (Muy bajo)
+      if (val >= 0.75) return 'rgba(4, 120, 87, 0.70)';
+      if (val >= 0.65) return 'rgba(22, 163, 74, 0.65)';
+      if (val >= 0.55) return 'rgba(74, 222, 128, 0.60)';
+      if (val >= 0.48) return 'rgba(132, 204, 22, 0.55)';
+      if (val >= 0.40) return 'rgba(234, 179, 8, 0.55)';
+      if (val >= 0.25) return 'rgba(217, 119, 6, 0.50)';
+      return 'rgba(185, 28, 28, 0.55)';
     }
 
     if (activeLayer === 'topografico') {
-      // Hypsometric tint based on elevation/status
       return paddock.animales > 0 ? 'rgba(74, 114, 85, 0.4)' : 'rgba(196, 164, 132, 0.35)';
     }
 
-    // Satelital HD default
     return paddock.fillColor;
   };
 
@@ -228,7 +270,6 @@ export const MapasView: React.FC = () => {
     return paddock.color;
   };
 
-  // Map canvas background depending on layer
   const getMapBackground = () => {
     switch (activeLayer) {
       case 'satelital':
@@ -242,7 +283,6 @@ export const MapasView: React.FC = () => {
     }
   };
 
-  // Track mouse coordinates over SVG for dynamic tooltip
   const handleSvgMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     setTooltipPos({
@@ -256,9 +296,9 @@ export const MapasView: React.FC = () => {
       {/* Header */}
       <div className="events-header" style={{ flexWrap: 'wrap', gap: 12 }}>
         <div className="events-header-left">
-          <h2 className="toolbar-title">Cartografía Agro-GIS & Pastoreo Racional Voisin (PRV)</h2>
+          <h2 className="toolbar-title">Cartografía Agro-GIS & Infraestructura Multi-Especie</h2>
           <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-            Visor satelital ArcGIS, topografía, biomasa NDVI (0.10–0.85) y semáforo zootécnico de rotación
+            Visor satelital predial: potreros PRV, galpones avícolas, cochineras, apriscos y caballerizas con carga zootécnica
           </span>
         </div>
         <div className="events-header-right" style={{ display: 'flex', gap: 8 }}>
@@ -275,6 +315,30 @@ export const MapasView: React.FC = () => {
             <ExternalLink size={15} />
             <span>Maestro de Potreros</span>
           </Link>
+        </div>
+      </div>
+
+      {/* Sector / Especie Filter Toolbar */}
+      <div className="species-sector-toolbar">
+        <div className="species-sector-scroll">
+          {SECTORES.map(sec => {
+            const isSelected = selectedSpecies === sec.id;
+            const count = sec.id === 'todos'
+              ? paddocks.length
+              : paddocks.filter(p => p.especie === sec.id).length;
+            return (
+              <button
+                key={sec.id}
+                type="button"
+                className={`sector-tab-btn ${isSelected ? 'active' : ''}`}
+                onClick={() => handleSelectSector(sec.id)}
+              >
+                <span className="sector-tab-icon">{sec.icon}</span>
+                <span className="sector-tab-label">{sec.label}</span>
+                <span className="sector-tab-badge">{count}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -300,7 +364,9 @@ export const MapasView: React.FC = () => {
             <Trees size={22} />
           </div>
           <div>
-            <div style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 500 }}>Superficie Predial</div>
+            <div style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 500 }}>
+              {selectedSpecies === 'todos' ? 'Superficie Predial' : `Superficie Sector ${selectedSpecies}`}
+            </div>
             <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)' }}>
               {totalSuperficie.toFixed(1)} ha
             </div>
@@ -322,9 +388,11 @@ export const MapasView: React.FC = () => {
             <CheckCircle2 size={22} />
           </div>
           <div>
-            <div style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 500 }}>Potreros Ocupados</div>
+            <div style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 500 }}>
+              Instalaciones Activas
+            </div>
             <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)' }}>
-              {potrerosActivos} de {paddocks.length}
+              {potrerosActivos} de {activeSectorPaddocks.length}
             </div>
           </div>
         </div>
@@ -344,9 +412,11 @@ export const MapasView: React.FC = () => {
             <Moon size={22} />
           </div>
           <div>
-            <div style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 500 }}>En Reposo / Descanso</div>
+            <div style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 500 }}>
+              En Reposo / Disponibles
+            </div>
             <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)' }}>
-              {potrerosDescanso} parcelas
+              {potrerosDescanso} sectores
             </div>
           </div>
         </div>
@@ -366,9 +436,11 @@ export const MapasView: React.FC = () => {
             <Activity size={22} />
           </div>
           <div>
-            <div style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 500 }}>Presión de Pastoreo</div>
+            <div style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 500 }}>
+              Población & Carga Zootécnica
+            </div>
             <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)' }}>
-              {animalesTotales} cab ({uggTotales.toFixed(1)} UGG)
+              {animalesTotales.toLocaleString('es-VE')} cab/aves ({uggTotales.toFixed(1)} UGG)
             </div>
           </div>
         </div>
@@ -378,7 +450,7 @@ export const MapasView: React.FC = () => {
       <div className="prv-summary-bar" style={{ padding: '8px 14px' }}>
         <div className="prv-summary-title">
           <Sparkles size={16} color="var(--primary-color)" />
-          <span style={{ fontSize: 12.5 }}>Semáforo Pastoreo Voisin:</span>
+          <span style={{ fontSize: 12.5 }}>Semáforo de Pastoreo / Ocupación:</span>
         </div>
 
         <div className="prv-summary-pills">
@@ -387,14 +459,14 @@ export const MapasView: React.FC = () => {
             className={`prv-filter-pill ${prvFilter === 'todos' ? 'active' : ''}`}
             onClick={() => setPrvFilter('todos')}
           >
-            Todos ({paddocks.length})
+            Todos ({activeSectorPaddocks.length})
           </button>
 
           <button
             type="button"
             className={`prv-filter-pill pill-optimo ${prvFilter === 'optimo' ? 'active' : ''}`}
             onClick={() => setPrvFilter('optimo')}
-            title="Punto Óptimo de Reposo: listo para pastorear"
+            title="Punto Óptimo de Reposo: listo para pastoreo o recepción"
           >
             <span>🟢 Punto Óptimo ({prvCounts.optimo})</span>
           </button>
@@ -403,16 +475,16 @@ export const MapasView: React.FC = () => {
             type="button"
             className={`prv-filter-pill pill-pastoreo ${prvFilter === 'pastoreo' ? 'active' : ''}`}
             onClick={() => setPrvFilter('pastoreo')}
-            title="Pastoreo activo: 1 a 2 días de permanencia"
+            title="Ocupación activa controlada"
           >
-            <span>🟡 En Pastoreo ({prvCounts.pastoreo})</span>
+            <span>🟡 En Ocupación ({prvCounts.pastoreo})</span>
           </button>
 
           <button
             type="button"
             className={`prv-filter-pill pill-sobrepastoreo ${prvFilter === 'sobrepastoreo' ? 'active' : ''}`}
             onClick={() => setPrvFilter('sobrepastoreo')}
-            title="Alerta de sobrepastoreo: >2 días"
+            title="Alerta de sobrepastoreo o alta densidad"
           >
             <span>🔴 Sobrepastoreo ({prvCounts.sobrepastoreo})</span>
           </button>
@@ -421,7 +493,7 @@ export const MapasView: React.FC = () => {
             type="button"
             className={`prv-filter-pill pill-descanso ${prvFilter === 'descanso' ? 'active' : ''}`}
             onClick={() => setPrvFilter('descanso')}
-            title="En descanso y recuperación forrajera"
+            title="En descanso, vacío sanitario o recuperación"
           >
             <span>🔵 En Descanso ({prvCounts.descanso})</span>
           </button>
@@ -539,7 +611,7 @@ export const MapasView: React.FC = () => {
               title="Mostrar tranqueras y portones de acceso numerados"
             >
               <DoorClosed size={14} />
-              <span>Tranqueras (G1-G8)</span>
+              <span>Tranqueras (G1-G12)</span>
             </button>
 
             {activeLayer === 'topografico' && (
@@ -575,7 +647,7 @@ export const MapasView: React.FC = () => {
                 )}
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9.5, color: '#94a3b8' }}>
-                <span>0.10 (Suelo)</span>
+                <span>0.10 (Suelo / Cemento)</span>
                 <span>0.35 (Bajo)</span>
                 <span>0.55 (Medio)</span>
                 <span>0.70 (Alto)</span>
@@ -605,9 +677,11 @@ export const MapasView: React.FC = () => {
                     <div className="gis-tooltip-header">
                       <div>
                         <strong style={{ fontSize: 12.5, color: '#ffffff' }}>
-                          {hoveredPaddock.codigo} - {hoveredPaddock.nombre}
+                          {SPECIES_EMOJI[hoveredPaddock.especie]} {hoveredPaddock.codigo} - {hoveredPaddock.nombre}
                         </strong>
-                        <div style={{ fontSize: 10.5, color: '#94a3b8' }}>{hoveredPaddock.especieForrajera}</div>
+                        <div style={{ fontSize: 10.5, color: '#94a3b8' }}>
+                          {hoveredPaddock.sector} • {hoveredPaddock.especieForrajera}
+                        </div>
                       </div>
                       <span
                         style={{
@@ -629,18 +703,25 @@ export const MapasView: React.FC = () => {
                     </div>
 
                     <div className="gis-tooltip-row">
-                      <span>Lote & Presión:</span>
+                      <span>Lote & Carga Zootécnica:</span>
                       <strong>
                         {hoveredPaddock.animales > 0
-                          ? `${hoveredPaddock.animales} cab (${hoveredPaddock.cargaUggHa} UGG/ha)`
-                          : 'Sin ganado'}
+                          ? `${hoveredPaddock.animales} ${hoveredPaddock.especie === 'Aves de corral' ? 'aves' : 'cab'} (${hoveredPaddock.uggPresentes.toFixed(1)} UGG)`
+                          : 'Sin animales'}
                       </strong>
                     </div>
 
-                    <div className="gis-tooltip-row">
-                      <span>Aforo & Oferta MS:</span>
-                      <strong>{hoveredPaddock.aforoKgM2} kg/m² ({hoveredPaddock.aforoKgMsHa.toLocaleString('es-VE')} kg MS/ha)</strong>
-                    </div>
+                    {hoveredPaddock.aforoKgMsHa > 0 ? (
+                      <div className="gis-tooltip-row">
+                        <span>Aforo & Oferta MS:</span>
+                        <strong>{hoveredPaddock.aforoKgM2} kg/m² ({hoveredPaddock.aforoKgMsHa.toLocaleString('es-VE')} kg MS/ha)</strong>
+                      </div>
+                    ) : (
+                      <div className="gis-tooltip-row">
+                        <span>Alojamiento:</span>
+                        <strong>{hoveredPaddock.sistemaAlojamiento || 'Instalación techada'}</strong>
+                      </div>
+                    )}
 
                     <div className="gis-tooltip-row">
                       <span>Permanencia / Reposo:</span>
@@ -652,8 +733,10 @@ export const MapasView: React.FC = () => {
                     </div>
 
                     <div className="gis-tooltip-row">
-                      <span>Índice NDVI:</span>
-                      <strong style={{ color: '#86efac' }}>{hoveredPaddock.ndviValue.toFixed(2)}</strong>
+                      <span>Factor UGG & Densidad:</span>
+                      <strong style={{ color: '#86efac' }}>
+                        {getUggFactor(hoveredPaddock.especie)} UGG/cab • {hoveredPaddock.cargaUggHa.toFixed(2)} UGG/ha
+                      </strong>
                     </div>
                   </>
                 );
@@ -676,10 +759,10 @@ export const MapasView: React.FC = () => {
                 <strong style={{ fontSize: 12 }}>{hoveredGate.codigo} - {hoveredGate.nombre}</strong>
               </div>
               <div style={{ fontSize: 11, color: '#cbd5e1' }}>
-                Acceso al Callejón Central PRV
+                Acceso al Corredor de Manejo y Callejón PRV
               </div>
               <div style={{ fontSize: 11, fontWeight: 600, color: hoveredGate.abierta ? '#86efac' : '#fef08a', marginTop: 3 }}>
-                Estado: {hoveredGate.abierta ? 'Abierta (Ganado en parcela)' : 'Cerrada (Parcela en reposo)'}
+                Estado: {hoveredGate.abierta ? 'Abierta (Paso / Manejo activo)' : 'Cerrada (Sector en reposo)'}
               </div>
             </div>
           )}
@@ -731,17 +814,6 @@ export const MapasView: React.FC = () => {
                   <pattern id="topographicMesh" width="100" height="100" patternUnits="userSpaceOnUse">
                     <path d="M 0 30 Q 50 10 100 30 M 0 60 Q 50 40 100 60 M 0 90 Q 50 70 100 90" fill="none" stroke="rgba(120,90,50,0.15)" strokeWidth="1" />
                   </pattern>
-
-                  {/* Electric Fence Pattern for internal borders */}
-                  <pattern id="electricFence" width="20" height="20" patternUnits="userSpaceOnUse">
-                    <circle cx="10" cy="10" r="1" fill="#cbd5e1" />
-                  </pattern>
-
-                  {/* Satellite Landscape Features Simulation */}
-                  <radialGradient id="lakeGradient" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%" stopColor="#0f4c5c" stopOpacity="0.8" />
-                    <stop offset="100%" stopColor="#1b263b" stopOpacity="0.9" />
-                  </radialGradient>
                 </defs>
 
                 {/* Base Layer Texture */}
@@ -752,13 +824,11 @@ export const MapasView: React.FC = () => {
 
                 {/* Georeferencing Lat/Long Grid Lines */}
                 <g stroke="rgba(255,255,255,0.07)" strokeWidth="1" strokeDasharray="3,3">
-                  {/* Meridians */}
                   <line x1="200" y1="40" x2="200" y2="680" />
                   <line x1="450" y1="40" x2="450" y2="680" />
                   <line x1="700" y1="40" x2="700" y2="680" />
-                  {/* Parallels */}
-                  <line x1="60" y1="200" x2="900" y2="200" />
-                  <line x1="60" y1="450" x2="900" y2="450" />
+                  <line x1="60" y1="200" x2="930" y2="200" />
+                  <line x1="60" y1="450" x2="930" y2="450" />
                 </g>
 
                 {/* Lat/Long Coordinate Ticks on Margins */}
@@ -770,54 +840,47 @@ export const MapasView: React.FC = () => {
                   <text x="50" y="454" textAnchor="end">9°33'00"N</text>
                 </g>
 
-                {/* Topographic Contour Lines (when topographic layer active) */}
+                {/* Topographic Contour Lines */}
                 {activeLayer === 'topografico' && showContourLines && (
                   <g stroke="rgba(100, 75, 45, 0.45)" strokeWidth="1.2" fill="none">
                     <path d="M 60 140 Q 300 110 500 130 T 900 150" />
                     <text x="75" y="136" fill="#8c6d48" fontSize="9" fontWeight="600">110m</text>
-
                     <path d="M 60 230 Q 350 200 600 240 T 900 220" />
                     <text x="75" y="226" fill="#8c6d48" fontSize="9" fontWeight="600">120m</text>
-
                     <path d="M 60 340 Q 400 310 650 330 T 900 360" />
                     <text x="75" y="336" fill="#8c6d48" fontSize="9" fontWeight="600">130m</text>
-
                     <path d="M 60 460 Q 380 430 700 480 T 900 470" />
                     <text x="75" y="456" fill="#8c6d48" fontSize="9" fontWeight="600">140m</text>
-
                     <path d="M 60 580 Q 450 560 750 590 T 900 610" />
                     <text x="75" y="576" fill="#8c6d48" fontSize="9" fontWeight="600">150m</text>
-
-                    {/* Spot elevations */}
-                    <g fill="#785530" fontSize="9.5" fontWeight="700">
-                      <text x="240" y="160">▲ 168 msnm</text>
-                      <text x="680" y="210">▲ 155 msnm</text>
-                      <text x="430" y="430">▲ 142 msnm</text>
-                    </g>
                   </g>
                 )}
 
-                {/* Central PRV Grazing Corridor & Farm Roads */}
-                <path
-                  d="M 50 285 L 890 305 M 338 70 L 328 670 M 562 80 L 542 680"
-                  stroke={activeLayer === 'topografico' ? 'rgba(160, 130, 90, 0.6)' : 'rgba(215, 185, 140, 0.45)'}
-                  strokeWidth="10"
-                  strokeLinecap="round"
-                  fill="none"
-                />
-                <path
-                  d="M 50 285 L 890 305 M 338 70 L 328 670 M 562 80 L 542 680"
-                  stroke="#ffffff"
-                  strokeWidth="1.2"
-                  strokeDasharray="6,6"
-                  fill="none"
-                  opacity="0.4"
-                />
+                {/* Central PRV Grazing Corridors & Service Roads connecting all sectors */}
+                <g stroke={activeLayer === 'topografico' ? 'rgba(160, 130, 90, 0.6)' : 'rgba(215, 185, 140, 0.45)'} strokeWidth="8" strokeLinecap="round" fill="none">
+                  {/* Horizontal Roads */}
+                  <path d="M 50 275 L 940 275" />
+                  <path d="M 50 490 L 940 490" />
+                  {/* Vertical Roads */}
+                  <path d="M 330 65 L 330 690" />
+                  <path d="M 545 65 L 545 690" />
+                  <path d="M 752 65 L 752 690" />
+                  <path d="M 848 65 L 848 690" />
+                </g>
+                <g stroke="#ffffff" strokeWidth="1" strokeDasharray="5,5" fill="none" opacity="0.35">
+                  <path d="M 50 275 L 940 275" />
+                  <path d="M 50 490 L 940 490" />
+                  <path d="M 330 65 L 330 690" />
+                  <path d="M 545 65 L 545 690" />
+                  <path d="M 752 65 L 752 690" />
+                  <path d="M 848 65 L 848 690" />
+                </g>
 
-                {/* Paddock Polygons Overlay */}
+                {/* Multi-Species Paddocks & Installations Overlay */}
                 {paddocks.map(paddock => {
                   const isSelected = selectedPaddock?.id === paddock.id;
                   const isHovered = hoveredPaddock?.id === paddock.id;
+                  const matchesSpecies = selectedSpecies === 'todos' || paddock.especie === selectedSpecies;
                   const prvInfo = getPrvStatusInfo(
                     paddock.animales,
                     paddock.diasOcupacionActual,
@@ -826,20 +889,32 @@ export const MapasView: React.FC = () => {
                   );
                   const isOvergrazedAlert = prvInfo.status === 'sobrepastoreo';
 
+                  // Dynamic styles when species is filtered
+                  const opacity = matchesSpecies ? 1.0 : 0.22;
+                  const strokeColor = isSelected ? '#52b788' : isHovered ? '#ffffff' : getPaddockStroke(paddock);
+                  const strokeWidth = isSelected ? 4 : isHovered ? 3.5 : (selectedSpecies !== 'todos' && matchesSpecies) ? 3 : 2;
+
                   return (
-                    <g key={paddock.id}>
-                      {/* Outer boundary polygon */}
+                    <g
+                      key={paddock.id}
+                      style={{
+                        opacity,
+                        transition: 'all 0.3s ease',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {/* Polygon Surface */}
                       <polygon
                         points={paddock.polygonPoints}
                         fill={getPaddockFill(paddock)}
-                        stroke={getPaddockStroke(paddock)}
-                        strokeWidth={isSelected ? 4 : isHovered ? 3.5 : isOvergrazedAlert ? 3 : 2}
+                        stroke={strokeColor}
+                        strokeWidth={strokeWidth}
                         strokeDasharray={paddock.animales === 0 && !isPrvMode ? '6,4' : undefined}
                         style={{
-                          cursor: 'pointer',
-                          transition: 'all 0.2s ease',
                           filter: isSelected
-                            ? 'drop-shadow(0 0 12px rgba(82,183,136,0.85))'
+                            ? 'drop-shadow(0 0 14px rgba(82,183,136,0.95))'
+                            : (selectedSpecies !== 'todos' && matchesSpecies)
+                            ? 'drop-shadow(0 0 10px rgba(82,183,136,0.65))'
                             : isOvergrazedAlert
                             ? 'drop-shadow(0 0 10px rgba(239,68,68,0.75))'
                             : undefined
@@ -849,12 +924,12 @@ export const MapasView: React.FC = () => {
                         onClick={() => setSelectedPaddock(paddock)}
                       />
 
-                      {/* Overgrazing Warning Ring */}
-                      {isOvergrazedAlert && (
+                      {/* Overgrazing Alert Pulse */}
+                      {isOvergrazedAlert && matchesSpecies && (
                         <circle
                           cx={paddock.center.x}
-                          cy={paddock.center.y - 30}
-                          r="10"
+                          cy={paddock.center.y - 28}
+                          r="9"
                           fill="#ef4444"
                           stroke="#ffffff"
                           strokeWidth="2"
@@ -862,68 +937,71 @@ export const MapasView: React.FC = () => {
                         />
                       )}
 
-                      {/* Paddock Text Labels */}
+                      {/* Code and Species Icon Text */}
                       <text
                         x={paddock.center.x}
-                        y={paddock.center.y - 12}
+                        y={paddock.center.y - 10}
                         textAnchor="middle"
                         fill="#ffffff"
-                        fontSize="14.5"
+                        fontSize={paddock.areaHa < 2 ? "12" : "13.5"}
                         fontWeight="800"
                         style={{ pointerEvents: 'none', textShadow: '0 2px 5px rgba(0,0,0,0.9)' }}
                       >
-                        {paddock.codigo}
+                        {SPECIES_EMOJI[paddock.especie]} {paddock.codigo}
                       </text>
 
+                      {/* Area label */}
                       <text
                         x={paddock.center.x}
                         y={paddock.center.y + 6}
                         textAnchor="middle"
                         fill="#f1f5f9"
-                        fontSize="11.5"
+                        fontSize="11"
                         fontWeight="600"
                         style={{ pointerEvents: 'none', textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}
                       >
                         {paddock.areaHa} ha
                       </text>
 
-                      {/* Animals & UGG or PRV Badge Indicator */}
+                      {/* Animals & UGG count */}
                       {paddock.animales > 0 ? (
                         <text
                           x={paddock.center.x}
-                          y={paddock.center.y + 24}
+                          y={paddock.center.y + 22}
                           textAnchor="middle"
                           fill={isOvergrazedAlert ? '#fca5a5' : '#86efac'}
-                          fontSize="10.5"
+                          fontSize={paddock.areaHa < 2 ? "9.5" : "10"}
                           fontWeight="700"
                           style={{ pointerEvents: 'none', textShadow: '0 1px 4px rgba(0,0,0,0.9)' }}
                         >
-                          {paddock.animales} cab • {paddock.cargaUggHa} UGG/ha
+                          {paddock.animales} {paddock.especie === 'Aves de corral' ? 'aves' : 'cab'} • {paddock.uggPresentes.toFixed(1)} UGG
                         </text>
                       ) : (
                         <text
                           x={paddock.center.x}
-                          y={paddock.center.y + 24}
+                          y={paddock.center.y + 22}
                           textAnchor="middle"
                           fill={prvInfo.status === 'optimo' ? '#86efac' : '#93c5fd'}
-                          fontSize="10"
+                          fontSize="9.5"
                           fontWeight="600"
                           style={{ pointerEvents: 'none', textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}
                         >
-                          {prvInfo.status === 'optimo'
-                            ? `🟢 Listo (${paddock.diasDescansoActual}d)`
-                            : `🔵 Reposo (${paddock.diasDescansoActual}/${paddock.diasDescansoRequeridos}d)`}
+                          {paddock.tipoInstalacion === 'potrero' || paddock.tipoInstalacion === 'sabana'
+                            ? (prvInfo.status === 'optimo'
+                                ? `🟢 Listo (${paddock.diasDescansoActual}d)`
+                                : `🔵 Reposo (${paddock.diasDescansoActual}/${paddock.diasDescansoRequeridos}d)`)
+                            : 'Disponible'}
                         </text>
                       )}
 
-                      {/* NDVI value indicator badge on polygon */}
+                      {/* NDVI value on active NDVI layer */}
                       {activeLayer === 'ndvi' && (
                         <text
                           x={paddock.center.x}
-                          y={paddock.center.y + 40}
+                          y={paddock.center.y + 36}
                           textAnchor="middle"
                           fill="#fef08a"
-                          fontSize="10"
+                          fontSize="9.5"
                           fontWeight="800"
                           style={{ pointerEvents: 'none', textShadow: '0 1px 4px rgba(0,0,0,0.9)' }}
                         >
@@ -934,7 +1012,7 @@ export const MapasView: React.FC = () => {
                   );
                 })}
 
-                {/* Gates (Tranqueras G1-G8) Overlay */}
+                {/* Gates (Tranqueras G1-G12) Overlay */}
                 {showGates && GIS_GATES.map(gate => (
                   <g
                     key={gate.id}
@@ -946,11 +1024,8 @@ export const MapasView: React.FC = () => {
                       if (found) setSelectedPaddock(found);
                     }}
                   >
-                    {/* Gate Post 1 */}
                     <circle cx={gate.x - 4} cy={gate.y} r={3} fill="#475569" stroke="#ffffff" strokeWidth="1" />
-                    {/* Gate Post 2 */}
                     <circle cx={gate.x + 4} cy={gate.y} r={3} fill="#475569" stroke="#ffffff" strokeWidth="1" />
-                    {/* Gate Bar */}
                     <line
                       x1={gate.x - 4}
                       y1={gate.y}
@@ -959,7 +1034,6 @@ export const MapasView: React.FC = () => {
                       stroke={gate.abierta ? '#22c55e' : '#f59e0b'}
                       strokeWidth={2.5}
                     />
-                    {/* Gate Tag */}
                     <rect
                       x={gate.x - 10}
                       y={gate.y - 14}
@@ -995,7 +1069,7 @@ export const MapasView: React.FC = () => {
                     <rect
                       x={poi.x + 9}
                       y={poi.y - 10}
-                      width={poi.nombre.length * 6.2 + 10}
+                      width={poi.nombre.length * 6.0 + 10}
                       height={19}
                       rx={4}
                       fill="rgba(15, 23, 42, 0.9)"
@@ -1006,7 +1080,7 @@ export const MapasView: React.FC = () => {
                       x={poi.x + 14}
                       y={poi.y + 3}
                       fill="#ffffff"
-                      fontSize="10"
+                      fontSize="9.5"
                       fontWeight="600"
                     >
                       {poi.nombre}
@@ -1038,7 +1112,7 @@ export const MapasView: React.FC = () => {
           </div>
         </div>
 
-        {/* Right: Selected Paddock Inspector & Forage Balance Widget */}
+        {/* Right: Selected Paddock Inspector & Zootechnical Balance Widget */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, minWidth: 0, width: '100%' }}>
           {selectedPaddock ? (
             <div className="gis-drawer-card">
@@ -1052,16 +1126,20 @@ export const MapasView: React.FC = () => {
                     selectedPaddock.diasDescansoRequeridos
                   );
                   return (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, width: '100%' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, width: '100%' }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <span style={{
                           fontSize: 11,
                           fontWeight: 700,
                           textTransform: 'uppercase',
                           color: 'var(--primary-color)',
-                          letterSpacing: '0.04em'
+                          letterSpacing: '0.04em',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 6
                         }}>
-                          Ficha Parcelaria GIS
+                          <span>{SPECIES_EMOJI[selectedPaddock.especie]}</span>
+                          <span>{selectedPaddock.sector}</span>
                         </span>
                         <span
                           className={`prv-chip ${prv.badgeClass}`}
@@ -1079,7 +1157,7 @@ export const MapasView: React.FC = () => {
                         {selectedPaddock.codigo} — {selectedPaddock.nombre}
                       </h3>
                       <span style={{ fontSize: 11.5, color: 'var(--text-secondary)' }}>
-                        {prv.tagline} • {prv.description}
+                        {selectedPaddock.sistemaAlojamiento || selectedPaddock.especieForrajera}
                       </span>
                     </div>
                   );
@@ -1106,37 +1184,51 @@ export const MapasView: React.FC = () => {
                   </div>
 
                   <div>
-                    <span style={{ fontSize: 10.5, color: 'var(--text-secondary)', fontWeight: 600 }}>CARGA ACTUAL</span>
+                    <span style={{ fontSize: 10.5, color: 'var(--text-secondary)', fontWeight: 600 }}>CARGA ZOOTÉCNICA</span>
                     <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--primary-color)' }}>
-                      {selectedPaddock.cargaUggHa} UGG/ha
+                      {selectedPaddock.cargaUggHa.toFixed(2)} UGG/ha
                     </div>
                     <span style={{ fontSize: 10, color: '#64748b' }}>
-                      {selectedPaddock.animales} cab ({selectedPaddock.uggPresentes.toFixed(1)} UGG)
+                      {selectedPaddock.animales} {selectedPaddock.especie === 'Aves de corral' ? 'aves' : 'cab'} ({selectedPaddock.uggPresentes.toFixed(1)} UGG)
                     </span>
                   </div>
 
                   <div>
-                    <span style={{ fontSize: 10.5, color: 'var(--text-secondary)', fontWeight: 600 }}>AFORO MATERIA SECA</span>
+                    <span style={{ fontSize: 10.5, color: 'var(--text-secondary)', fontWeight: 600 }}>
+                      {selectedPaddock.aforoKgMsHa > 0 ? 'AFORO MATERIA SECA' : 'CAPACIDAD DE DISEÑO'}
+                    </span>
                     <div style={{ fontSize: 16, fontWeight: 800, color: '#15803d' }}>
-                      {selectedPaddock.aforoKgMsHa.toLocaleString('es-VE')} <span style={{ fontSize: 10 }}>kg/ha</span>
+                      {selectedPaddock.aforoKgMsHa > 0
+                        ? `${selectedPaddock.aforoKgMsHa.toLocaleString('es-VE')} kg/ha`
+                        : `${selectedPaddock.capacidadMaxima || Math.round(selectedPaddock.animales * 1.25)} plazas`}
                     </div>
                     <span style={{ fontSize: 10, color: '#64748b' }}>
-                      {selectedPaddock.aforoKgM2} kg MV/m² ({selectedPaddock.porcentajeMS}% MS)
+                      {selectedPaddock.aforoKgMsHa > 0
+                        ? `${selectedPaddock.aforoKgM2} kg MV/m² (${selectedPaddock.porcentajeMS}% MS)`
+                        : 'Aforo de Alojamiento'}
                     </span>
                   </div>
 
                   <div>
-                    <span style={{ fontSize: 10.5, color: 'var(--text-secondary)', fontWeight: 600 }}>VIGOR NDVI</span>
+                    <span style={{ fontSize: 10.5, color: 'var(--text-secondary)', fontWeight: 600 }}>
+                      {selectedPaddock.aforoKgMsHa > 0 ? 'VIGOR NDVI' : 'SISTEMA'}
+                    </span>
                     <div style={{ fontSize: 16, fontWeight: 800, color: '#0284c7' }}>
-                      {selectedPaddock.ndviValue.toFixed(2)}
+                      {selectedPaddock.aforoKgMsHa > 0
+                        ? selectedPaddock.ndviValue.toFixed(2)
+                        : (selectedPaddock.tipoInstalacion === 'galpon' ? 'Galpón' :
+                           selectedPaddock.tipoInstalacion === 'cochinera' ? 'Cochinera' :
+                           selectedPaddock.tipoInstalacion === 'aprisco' ? 'Aprisco' : 'Caballeriza')}
                     </div>
                     <span style={{ fontSize: 10, color: '#64748b' }}>
-                      {selectedPaddock.especieForrajera.split(' ')[0]}
+                      {selectedPaddock.aforoKgMsHa > 0
+                        ? selectedPaddock.especieForrajera.split(' ')[0]
+                        : 'Bioseguridad'}
                     </span>
                   </div>
                 </div>
 
-                {/* Forage Balance Calculator Widget Component */}
+                {/* Forage Balance / Facility Management Widget */}
                 <ForageBalanceWidget
                   paddock={selectedPaddock}
                   onOpenAforoModal={() => setIsAforoModalOpen(true)}
@@ -1146,9 +1238,9 @@ export const MapasView: React.FC = () => {
           ) : (
             <div className="gis-panel-card" style={{ padding: 32, textAlign: 'center', color: 'var(--text-secondary)' }}>
               <Info size={36} style={{ margin: '0 auto 10px auto', opacity: 0.5 }} />
-              <h4 style={{ margin: 0, fontSize: 14 }}>Ningún potrero seleccionado</h4>
+              <h4 style={{ margin: 0, fontSize: 14 }}>Ningún sector seleccionado</h4>
               <p style={{ fontSize: 12, marginTop: 4 }}>
-                Haga clic en cualquier parcela del mapa para inspeccionar su balance forrajero y estado PRV.
+                Haga clic en cualquier parcela o instalación del mapa para inspeccionar sus datos zootécnicos.
               </p>
             </div>
           )}
@@ -1157,7 +1249,7 @@ export const MapasView: React.FC = () => {
           <div className="gis-panel-card" style={{ padding: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
               <h4 style={{ fontSize: 13, fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
-                Parcelas del Predio ({filteredPaddocks.length})
+                Instalaciones del Predio ({filteredPaddocks.length})
               </h4>
               <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Clic para enfocar</span>
             </div>
@@ -1165,7 +1257,7 @@ export const MapasView: React.FC = () => {
             <input
               type="text"
               className="form-input"
-              placeholder="Buscar parcela por código o forraje..."
+              placeholder="Buscar por código, sector o forraje..."
               value={paddockSearch}
               onChange={e => setPaddockSearch(e.target.value)}
               style={{
@@ -1179,7 +1271,7 @@ export const MapasView: React.FC = () => {
               }}
             />
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 200, overflowY: 'auto' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 220, overflowY: 'auto' }}>
               {filteredPaddocks.map(p => {
                 const prv = getPrvStatusInfo(
                   p.animales,
@@ -1204,20 +1296,22 @@ export const MapasView: React.FC = () => {
                     onClick={() => setSelectedPaddock(p)}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-                      <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: prv.color, flexShrink: 0 }} />
+                      <span style={{ fontSize: 14 }}>{SPECIES_EMOJI[p.especie]}</span>
                       <div style={{ minWidth: 0 }}>
                         <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--text-primary)' }}>
                           {p.codigo} — {p.nombre}
                         </div>
                         <div style={{ fontSize: 10.5, color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {p.especieForrajera}
+                          {p.sector} • {p.especieForrajera}
                         </div>
                       </div>
                     </div>
 
                     <div style={{ textAlign: 'right', flexShrink: 0 }}>
                       <div style={{ fontSize: 12, fontWeight: 700 }}>{p.areaHa} ha</div>
-                      <div style={{ fontSize: 10, color: prv.color, fontWeight: 600 }}>{prv.shortLabel}</div>
+                      <div style={{ fontSize: 10, color: prv.color, fontWeight: 600 }}>
+                        {p.animales > 0 ? `${p.animales} cab/av` : prv.shortLabel}
+                      </div>
                     </div>
                   </div>
                 );

@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { GisPaddock } from '../mapasData';
-import { calculateForageBalance, ForageBalanceResult } from '../../potreros/prvUtils';
+import { calculateForageBalance, ForageBalanceResult, SPECIES_EMOJI, getUggFactor } from '../../potreros/prvUtils';
 import {
   Scale,
   Clock,
   AlertTriangle,
   Sliders,
-  ArrowRight
+  ArrowRight,
+  Warehouse,
+  CheckCircle2,
+  Activity,
+  Layers
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -19,6 +23,8 @@ export const ForageBalanceWidget: React.FC<ForageBalanceWidgetProps> = ({
   paddock,
   onOpenAforoModal
 }) => {
+  const isPastoral = paddock.tipoInstalacion === 'potrero' || paddock.tipoInstalacion === 'sabana';
+
   // Simulator state with defaults initialized from paddock
   const [simUgg, setSimUgg] = useState<number>(paddock.uggPresentes > 0 ? paddock.uggPresentes : 25);
   const [simConsumoPv, setSimConsumoPv] = useState<number>(2.8);
@@ -41,10 +47,149 @@ export const ForageBalanceWidget: React.FC<ForageBalanceWidgetProps> = ({
     diasDescansoRequeridos: paddock.diasDescansoRequeridos
   });
 
-  // Calculate percentage of autonomy safe range (1-3 days in PRV)
   const isOvergrazed = paddock.diasOcupacionActual > 2;
   const isOptimalReady = paddock.animales === 0 && paddock.diasDescansoActual >= paddock.diasDescansoRequeridos;
 
+  // Render facility card for intensive housing
+  if (!isPastoral) {
+    const maxCapacity = paddock.capacidadMaxima || Math.round(paddock.animales * 1.2) || 100;
+    const occupancyPercent = Math.min(100, Math.round((paddock.animales / maxCapacity) * 100));
+    const factorUgg = getUggFactor(paddock.especie);
+    const m2Disponibles = paddock.areaHa * 10000;
+    const densidadTexto = paddock.animales > 0 
+      ? (m2Disponibles / paddock.animales >= 1 
+          ? `${(m2Disponibles / paddock.animales).toFixed(1)} m²/cab` 
+          : `${(paddock.animales / m2Disponibles).toFixed(2)} cab/m²`)
+      : 'Disponible';
+
+    return (
+      <div className="forage-balance-card" style={{ borderColor: 'var(--primary-light)' }}>
+        <div className="forage-balance-header">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div className="forage-balance-icon" style={{ backgroundColor: 'var(--primary-ultra-light)', color: 'var(--primary-color)' }}>
+              <Warehouse size={18} />
+            </div>
+            <div>
+              <h4 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
+                Gestión Zootécnica & Instalación
+              </h4>
+              <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
+                {SPECIES_EMOJI[paddock.especie]} {paddock.sector} • {paddock.sistemaAlojamiento || 'Instalación techada'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Capacity and Stocking Grid */}
+        <div className="forage-balance-grid">
+          <div className="balance-kpi-item">
+            <span className="balance-kpi-label">Ocupación de Instalación</span>
+            <div className="balance-kpi-val highlight-green">
+              {paddock.animales} <span className="unit">/ {maxCapacity} plazas</span>
+            </div>
+            <span className="balance-kpi-sub">
+              {occupancyPercent}% de capacidad de diseño
+            </span>
+          </div>
+
+          <div className="balance-kpi-item">
+            <span className="balance-kpi-label">Carga Zootécnica UGG</span>
+            <div className="balance-kpi-val highlight-amber">
+              {paddock.uggPresentes.toFixed(2)} <span className="unit">UGG</span>
+            </div>
+            <span className="balance-kpi-sub">
+              Factor especie: {factorUgg} UGG/ejemplar
+            </span>
+          </div>
+        </div>
+
+        {/* Progress Bar of Capacity */}
+        <div className="autonomy-banner">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: '#334155', textTransform: 'uppercase' }}>
+              Densidad & Espacio Vital
+            </span>
+            <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--primary-color)' }}>
+              {densidadTexto}
+            </span>
+          </div>
+
+          <div className="autonomy-bar-track">
+            <div
+              className={`autonomy-bar-fill ${occupancyPercent > 90 ? 'danger' : 'optimal'}`}
+              style={{ width: `${occupancyPercent}%` }}
+            />
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: '#64748b', marginTop: 4 }}>
+            <span>0% Vacío</span>
+            <span style={{ fontWeight: 700, color: '#166534' }}>Óptimo Confort Animal</span>
+            <span>100% Lleno</span>
+          </div>
+        </div>
+
+        {/* Feeding and Sanitation Specs */}
+        <div className="rotation-time-card" style={{ borderLeftColor: '#0284c7' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+            <div className="rotation-time-icon" style={{ backgroundColor: '#e0f2fe', color: '#0284c7' }}>
+              <Layers size={16} />
+            </div>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <span style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
+                Sistema de Alimentación & Manejo
+              </span>
+              <div style={{ fontSize: 12.5, fontWeight: 700, color: '#1e293b', marginTop: 2 }}>
+                {paddock.especieForrajera}
+              </div>
+              <p style={{ fontSize: 11, color: '#475569', margin: '4px 0 0 0', lineHeight: 1.3 }}>
+                Permanencia acumulada: {paddock.diasOcupacionActual} días. Monitoreo higiénico y bioseguridad activa.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+          <Link
+            to="/animales"
+            className="btn-secondary"
+            style={{
+              flex: 1,
+              padding: '7px 10px',
+              fontSize: 11.5,
+              textDecoration: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 6
+            }}
+          >
+            <Activity size={14} />
+            <span>Ver Semovientes</span>
+          </Link>
+          <Link
+            to="/eventos"
+            className="btn-primary"
+            style={{
+              flex: 1,
+              padding: '7px 10px',
+              fontSize: 11.5,
+              textDecoration: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 6
+            }}
+          >
+            <span>Manejo de Lote</span>
+            <ArrowRight size={14} />
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // Pastoral Grazing Paddock Layout
   return (
     <div className="forage-balance-card">
       {/* Widget Header */}
@@ -58,7 +203,7 @@ export const ForageBalanceWidget: React.FC<ForageBalanceWidgetProps> = ({
               Balance Forrajero & Autonomía (PRV)
             </h4>
             <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
-              Oferta disponible vs Demanda diaria del lote
+              Oferta disponible vs Demanda diaria ({SPECIES_EMOJI[paddock.especie]} {paddock.especie})
             </span>
           </div>
         </div>
@@ -174,7 +319,7 @@ export const ForageBalanceWidget: React.FC<ForageBalanceWidgetProps> = ({
           <div className="sim-field">
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11 }}>
               <span>Carga del Lote:</span>
-              <strong>{simUgg.toFixed(1)} UGG ({Math.round(simUgg * 1.15)} cab)</strong>
+              <strong>{simUgg.toFixed(1)} UGG</strong>
             </div>
             <input
               type="range"

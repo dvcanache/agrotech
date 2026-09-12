@@ -4,6 +4,7 @@ import { PASTURE_SPECIES_OPTIONS } from '../potrerosData';
 
 export interface PotrerosFilterState {
   estatus: string;
+  especie: string;
   especieForrajera: string;
   areaMin: string;
   areaMax: string;
@@ -33,7 +34,7 @@ export const PotrerosFilterDrawer: React.FC<PotrerosFilterDrawerProps> = ({
         <div className="drawer-header">
           <div className="drawer-header-title">
             <Filter size={18} color="var(--primary-color)" />
-            <span>Filtros de Potreros</span>
+            <span>Filtros de Potreros e Instalaciones</span>
           </div>
           <button type="button" className="report-modal-close-btn" onClick={onClose}>
             <X size={18} />
@@ -41,9 +42,27 @@ export const PotrerosFilterDrawer: React.FC<PotrerosFilterDrawerProps> = ({
         </div>
 
         <div className="drawer-body">
+          {/* Especie / Sector Animal */}
+          <div className="form-field">
+            <label className="form-label">Especie / Sector Productivo</label>
+            <select
+              className="form-select"
+              value={filters.especie}
+              onChange={e => onChange({ ...filters, especie: e.target.value })}
+            >
+              <option value="">Todas las especies y sectores</option>
+              <option value="Bovinos">🐮 Bovinos (Vacunos)</option>
+              <option value="Aves de corral">🐔 Aves de corral</option>
+              <option value="Porcinos">🐷 Porcinos</option>
+              <option value="Búfalos">🐃 Búfalos</option>
+              <option value="Caprinos">🐐 Caprinos</option>
+              <option value="Equinos">🐴 Equinos</option>
+            </select>
+          </div>
+
           {/* Estatus */}
           <div className="form-field">
-            <label className="form-label">Estatus del Potrero</label>
+            <label className="form-label">Estatus del Potrero / Instalación</label>
             <select
               className="form-select"
               value={filters.estatus}
@@ -57,15 +76,15 @@ export const PotrerosFilterDrawer: React.FC<PotrerosFilterDrawerProps> = ({
             </select>
           </div>
 
-          {/* Especie Forrajera */}
+          {/* Especie Forrajera / Sustrato */}
           <div className="form-field">
-            <label className="form-label">Especie Forrajera</label>
+            <label className="form-label">Especie Forrajera / Sistema de Alojamiento</label>
             <select
               className="form-select"
               value={filters.especieForrajera}
               onChange={e => onChange({ ...filters, especieForrajera: e.target.value })}
             >
-              <option value="">Todas las especies</option>
+              <option value="">Todos los forrajes e instalaciones</option>
               {PASTURE_SPECIES_OPTIONS.map(specie => (
                 <option key={specie} value={specie}>{specie}</option>
               ))}
@@ -101,9 +120,9 @@ export const PotrerosFilterDrawer: React.FC<PotrerosFilterDrawerProps> = ({
               value={filters.conLote}
               onChange={e => onChange({ ...filters, conLote: e.target.value })}
             >
-              <option value="todos">Todos los potreros</option>
-              <option value="con_lote">Solo con lote asignado (pastando)</option>
-              <option value="sin_lote">Solo sin lote asignado (vacíos)</option>
+              <option value="todos">Todas las parcelas</option>
+              <option value="con_lote">Solo con lote asignado (ocupadas)</option>
+              <option value="sin_lote">Solo sin lote asignado (libres)</option>
             </select>
           </div>
         </div>

@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { X, Trees, Check } from 'lucide-react';
 import { PotreroItem, PASTURE_SPECIES_OPTIONS } from '../potrerosData';
 import { EstatusPotrero } from '../../../types2/common';
+import { EspecieAnimal } from '../../../types/animal';
+import { TipoInstalacion } from '../../mapas/mapasData';
 
 interface NuevoPotreroModalProps {
   isOpen: boolean;
@@ -17,12 +19,14 @@ export const NuevoPotreroModal: React.FC<NuevoPotreroModalProps> = ({
   const [formData, setFormData] = useState({
     codigo: '',
     descripcion: '',
+    especie: 'Bovinos' as EspecieAnimal,
+    tipoInstalacion: 'potrero' as TipoInstalacion,
     areaHa: 25.0,
     perimetroM: 2000,
     especieForrajera: PASTURE_SPECIES_OPTIONS[0],
     aforoKgM2: 3.0,
     cargaRecomendadaUggHa: 1.5,
-    diasOcupacionMax: 5,
+    diasOcupacionMax: 3,
     diasDescansoRequeridos: 30,
     estatus: 'En descanso' as EstatusPotrero,
     loteAsignado: ''
@@ -33,17 +37,22 @@ export const NuevoPotreroModal: React.FC<NuevoPotreroModalProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.codigo.trim() || !formData.descripcion.trim()) {
-      alert('Por favor ingrese el código y la descripción del potrero.');
+      alert('Por favor ingrese el código y la descripción del potrero o instalación.');
       return;
     }
 
     const nuevo: PotreroItem = {
       codigo: formData.codigo.trim().toUpperCase(),
       descripcion: formData.descripcion.trim(),
+      especie: formData.especie,
+      sector: `Sector ${formData.especie}`,
+      tipoInstalacion: formData.tipoInstalacion,
       areaHa: Number(formData.areaHa),
       perimetroM: Number(formData.perimetroM),
       especieForrajera: formData.especieForrajera,
       aforoKgM2: Number(formData.aforoKgM2),
+      porcentajeMS: 22,
+      aforoKgMsHa: Number(formData.aforoKgM2) * 10000 * 0.22,
       cargaRecomendadaUggHa: Number(formData.cargaRecomendadaUggHa),
       diasOcupacionMax: Number(formData.diasOcupacionMax),
       diasOcupacionActual: 0,
@@ -52,7 +61,10 @@ export const NuevoPotreroModal: React.FC<NuevoPotreroModalProps> = ({
       estatus: formData.estatus,
       loteAsignado: formData.loteAsignado ? formData.loteAsignado : undefined,
       animalesPresentes: 0,
-      cargaActualUggHa: 0.0
+      uggPresentes: 0.0,
+      cargaActualUggHa: 0.0,
+      eficienciaAprovechamiento: 75,
+      ndviValue: 0.65
     };
 
     onSave(nuevo);
@@ -78,9 +90,9 @@ export const NuevoPotreroModal: React.FC<NuevoPotreroModalProps> = ({
               <Trees size={20} />
             </div>
             <div>
-              <h3 className="report-modal-title">Registrar Nuevo Potrero</h3>
+              <h3 className="report-modal-title">Registrar Nuevo Potrero o Instalación</h3>
               <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: 0 }}>
-                Definición zootécnica y agronómica de parcela de pastoreo
+                Definición zootécnica y agronómica de parcela o infraestructura
               </p>
             </div>
           </div>
@@ -98,7 +110,7 @@ export const NuevoPotreroModal: React.FC<NuevoPotreroModalProps> = ({
                 <input
                   type="text"
                   required
-                  placeholder="ej. POT9"
+                  placeholder="ej. POT9 / GALP-04"
                   className="form-input"
                   value={formData.codigo}
                   onChange={e => setFormData({ ...formData, codigo: e.target.value })}
@@ -109,11 +121,46 @@ export const NuevoPotreroModal: React.FC<NuevoPotreroModalProps> = ({
                 <input
                   type="text"
                   required
-                  placeholder="ej. Potrero El Rincón"
+                  placeholder="ej. Potrero El Rincón / Galpón Levante"
                   className="form-input"
                   value={formData.descripcion}
                   onChange={e => setFormData({ ...formData, descripcion: e.target.value })}
                 />
+              </div>
+            </div>
+
+            {/* Especie y Tipo de Instalación */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+              <div className="form-field">
+                <label className="form-label">Especie Animal *</label>
+                <select
+                  className="form-select"
+                  value={formData.especie}
+                  onChange={e => setFormData({ ...formData, especie: e.target.value as EspecieAnimal })}
+                >
+                  <option value="Bovinos">🐮 Bovinos (1.0 UGG)</option>
+                  <option value="Búfalos">🐃 Búfalos (1.2 UGG)</option>
+                  <option value="Equinos">🐴 Equinos (1.2 UGG)</option>
+                  <option value="Porcinos">🐷 Porcinos (0.3 UGG)</option>
+                  <option value="Caprinos">🐐 Caprinos (0.15 UGG)</option>
+                  <option value="Aves de corral">🐔 Aves de corral (0.005 UGG)</option>
+                </select>
+              </div>
+
+              <div className="form-field">
+                <label className="form-label">Tipo de Instalación *</label>
+                <select
+                  className="form-select"
+                  value={formData.tipoInstalacion}
+                  onChange={e => setFormData({ ...formData, tipoInstalacion: e.target.value as TipoInstalacion })}
+                >
+                  <option value="potrero">Potrero Tradicional / PRV</option>
+                  <option value="sabana">Sabana Baja / Bajíos Inundables</option>
+                  <option value="galpon">Galpón Avícola</option>
+                  <option value="cochinera">Cochinera / Complejo Porcino</option>
+                  <option value="aprisco">Aprisco Caprino Elevado</option>
+                  <option value="caballeriza">Caballeriza / Picadero</option>
+                </select>
               </div>
             </div>
 
@@ -141,7 +188,7 @@ export const NuevoPotreroModal: React.FC<NuevoPotreroModalProps> = ({
             </div>
 
             <div className="form-field" style={{ marginBottom: 16 }}>
-              <label className="form-label">Especie Forrajera Dominante</label>
+              <label className="form-label">Especie Forrajera / Sistema de Alojamiento</label>
               <select
                 className="form-select"
                 value={formData.especieForrajera}
@@ -165,7 +212,7 @@ export const NuevoPotreroModal: React.FC<NuevoPotreroModalProps> = ({
                 />
               </div>
               <div className="form-field">
-                <label className="form-label">Carga Máxima (UGG/ha)</label>
+                <label className="form-label">Carga Recomendada (UGG/ha)</label>
                 <input
                   type="number"
                   step="0.1"
@@ -231,7 +278,7 @@ export const NuevoPotreroModal: React.FC<NuevoPotreroModalProps> = ({
             </button>
             <button type="submit" className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <Check size={16} />
-              <span>Guardar Potrero</span>
+              <span>Guardar Instalación</span>
             </button>
           </div>
         </form>

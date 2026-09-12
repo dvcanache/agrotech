@@ -1,6 +1,6 @@
 import React from 'react';
 import { PotreroItem } from '../potrerosData';
-import { getPrvStatusInfo } from '../prvUtils';
+import { getPrvStatusInfo, SPECIES_EMOJI, getUggFactor } from '../prvUtils';
 import { MoreVertical, Scale, Map, AlertTriangle, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -39,8 +39,8 @@ export const PotrerosTable: React.FC<PotrerosTableProps> = ({
             </th>
             <th>
               <div className="th-inner">
-                <span className="th-title">Código</span>
-                <span className="th-subtitle">Descripción</span>
+                <span className="th-title">Código & Especie</span>
+                <span className="th-subtitle">Descripción / Sector</span>
               </div>
             </th>
             <th>
@@ -51,20 +51,20 @@ export const PotrerosTable: React.FC<PotrerosTableProps> = ({
             </th>
             <th>
               <div className="th-inner">
-                <span className="th-title">Especie Forrajera</span>
-                <span className="th-subtitle">Vigor NDVI</span>
+                <span className="th-title">Forraje / Alojamiento</span>
+                <span className="th-subtitle">Vigor NDVI / Estatus</span>
               </div>
             </th>
             <th>
               <div className="th-inner">
-                <span className="th-title">Aforo (kg MV/m²)</span>
-                <span className="th-subtitle">Oferta MS (kg MS/ha)</span>
+                <span className="th-title">Aforo / Capacidad</span>
+                <span className="th-subtitle">Oferta MS / Plazas</span>
               </div>
             </th>
             <th>
               <div className="th-inner">
                 <span className="th-title">Lote Asignado</span>
-                <span className="th-subtitle">Animales & UGG</span>
+                <span className="th-subtitle">Población & UGG</span>
               </div>
             </th>
             <th>
@@ -82,7 +82,7 @@ export const PotrerosTable: React.FC<PotrerosTableProps> = ({
             <th>
               <div className="th-inner">
                 <span className="th-title">Semáforo PRV</span>
-                <span className="th-subtitle">Estado Voisin</span>
+                <span className="th-subtitle">Estado Zootécnico</span>
               </div>
             </th>
             <th style={{ width: 100, textAlign: 'center' }}>Acciones</th>
@@ -96,6 +96,7 @@ export const PotrerosTable: React.FC<PotrerosTableProps> = ({
               potrero.diasDescansoActual,
               potrero.diasDescansoRequeridos
             );
+            const factorUgg = getUggFactor(potrero.especie);
 
             return (
               <tr
@@ -113,12 +114,24 @@ export const PotrerosTable: React.FC<PotrerosTableProps> = ({
                   />
                 </td>
 
-                {/* Código & Descripción */}
+                {/* Código & Especie */}
                 <td>
                   <div className="td-inner">
-                    <span className="td-line1" style={{ fontWeight: 700, color: 'var(--primary-color)' }}>
-                      {potrero.codigo}
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span className="td-line1" style={{ fontWeight: 800, color: 'var(--primary-color)' }}>
+                        {potrero.codigo}
+                      </span>
+                      <span style={{
+                        fontSize: 11,
+                        padding: '1px 6px',
+                        borderRadius: 10,
+                        backgroundColor: '#e8f5e9',
+                        color: '#2d6a4f',
+                        fontWeight: 600
+                      }}>
+                        {SPECIES_EMOJI[potrero.especie]} {potrero.especie}
+                      </span>
+                    </div>
                     <span className="td-line2" style={{ fontWeight: 500 }}>
                       {potrero.descripcion}
                     </span>
@@ -144,41 +157,76 @@ export const PotrerosTable: React.FC<PotrerosTableProps> = ({
                       {potrero.especieForrajera}
                     </span>
                     <span className="td-line2" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <span
-                        style={{
-                          width: 8,
-                          height: 8,
-                          borderRadius: '50%',
-                          backgroundColor: potrero.ndviValue >= 0.7 ? '#22c55e' : potrero.ndviValue >= 0.5 ? '#eab308' : '#ef4444'
-                        }}
-                      />
-                      NDVI: {potrero.ndviValue.toFixed(2)}
+                      {potrero.aforoKgMsHa > 0 ? (
+                        <>
+                          <span
+                            style={{
+                              width: 8,
+                              height: 8,
+                              borderRadius: '50%',
+                              backgroundColor: potrero.ndviValue >= 0.7 ? '#22c55e' : potrero.ndviValue >= 0.5 ? '#eab308' : '#ef4444'
+                            }}
+                          />
+                          <span>NDVI: {potrero.ndviValue.toFixed(2)}</span>
+                        </>
+                      ) : (
+                        <span style={{ color: '#64748b' }}>
+                          {potrero.sistemaAlojamiento || 'Instalación techada'}
+                        </span>
+                      )}
                     </span>
                   </div>
                 </td>
 
-                {/* Aforo en Verde & Materia Seca */}
+                {/* Aforo en Verde & Materia Seca o Capacidad */}
                 <td>
                   <div className="td-inner">
-                    <span className="td-line1" style={{ fontWeight: 700, color: '#1f2937' }}>
-                      {potrero.aforoKgM2.toFixed(1)} <span style={{ fontSize: 11, fontWeight: 500, color: '#6b7280' }}>kg MV/m²</span>
-                    </span>
-                    <span className="td-line2" style={{ fontWeight: 600, color: 'var(--primary-color)' }}>
-                      {potrero.aforoKgMsHa.toLocaleString('es-VE')} kg MS/ha ({potrero.porcentajeMS}% MS)
-                    </span>
+                    {potrero.aforoKgMsHa > 0 ? (
+                      <>
+                        <span className="td-line1" style={{ fontWeight: 700, color: '#1f2937' }}>
+                          {potrero.aforoKgM2.toFixed(1)} <span style={{ fontSize: 11, fontWeight: 500, color: '#6b7280' }}>kg MV/m²</span>
+                        </span>
+                        <span className="td-line2" style={{ fontWeight: 600, color: 'var(--primary-color)' }}>
+                          {potrero.aforoKgMsHa.toLocaleString('es-VE')} kg MS/ha ({potrero.porcentajeMS}% MS)
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="td-line1" style={{ fontWeight: 700, color: '#1f2937' }}>
+                          {potrero.capacidadMaxima || Math.round(potrero.animalesPresentes * 1.25)} <span style={{ fontSize: 11, fontWeight: 500, color: '#6b7280' }}>plazas</span>
+                        </span>
+                        <span className="td-line2" style={{ color: '#64748b' }}>
+                          Capacidad de diseño
+                        </span>
+                      </>
+                    )}
                   </div>
                 </td>
 
-                {/* Lote & Animales */}
+                {/* Lote & Animales / UGG */}
                 <td>
                   <div className="td-inner">
                     <span className="td-line1" style={{ fontWeight: 600 }}>
                       {potrero.loteAsignado || 'Sin lote asignado'}
                     </span>
                     <span className="td-line2">
-                      {potrero.animalesPresentes > 0
-                        ? `${potrero.animalesPresentes} cabezas (${potrero.uggPresentes.toFixed(1)} UGG)`
-                        : 'En reposo / Vacío'}
+                      {potrero.animalesPresentes > 0 ? (
+                        <>
+                          <strong style={{ color: 'var(--text-primary)' }}>
+                            {potrero.animalesPresentes.toLocaleString('es-VE')} {potrero.especie === 'Aves de corral' ? 'aves' : 'cab'}
+                          </strong>
+                          {' • '}
+                          <span style={{ color: 'var(--primary-color)', fontWeight: 700 }}>
+                            {potrero.uggPresentes.toFixed(2)} UGG
+                          </span>
+                          {' '}
+                          <span style={{ fontSize: 10, color: '#94a3b8' }}>
+                            (×{factorUgg})
+                          </span>
+                        </>
+                      ) : (
+                        'En reposo / Vacío'
+                      )}
                     </span>
                   </div>
                 </td>
@@ -207,14 +255,14 @@ export const PotrerosTable: React.FC<PotrerosTableProps> = ({
                     <span className="td-line1" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                       {potrero.animalesPresentes > 0 ? (
                         <>
-                          <Clock size={12} color={potrero.diasOcupacionActual > 2 ? '#ef4444' : '#eab308'} />
+                          <Clock size={12} color={potrero.diasOcupacionActual > 2 && (potrero.tipoInstalacion === 'potrero' || potrero.tipoInstalacion === 'sabana') ? '#ef4444' : '#eab308'} />
                           <span style={{
                             fontWeight: 700,
-                            color: potrero.diasOcupacionActual > 2 ? '#dc2626' : '#854d0e'
+                            color: potrero.diasOcupacionActual > 2 && (potrero.tipoInstalacion === 'potrero' || potrero.tipoInstalacion === 'sabana') ? '#dc2626' : '#854d0e'
                           }}>
                             {potrero.diasOcupacionActual} d ocupado
                           </span>
-                          {potrero.diasOcupacionActual > 2 && (
+                          {potrero.diasOcupacionActual > 2 && (potrero.tipoInstalacion === 'potrero' || potrero.tipoInstalacion === 'sabana') && (
                             <AlertTriangle size={12} color="#dc2626" title="¡Sobrepastoreo! Superó 2 días" />
                           )}
                         </>
@@ -231,7 +279,7 @@ export const PotrerosTable: React.FC<PotrerosTableProps> = ({
                           {potrero.diasDescansoActual} / {potrero.diasDescansoRequeridos} d descanso
                         </span>
                       ) : (
-                        <span style={{ color: '#9ca3af' }}>En pastoreo</span>
+                        <span style={{ color: '#9ca3af' }}>En ocupación</span>
                       )}
                     </span>
                   </div>
@@ -239,61 +287,52 @@ export const PotrerosTable: React.FC<PotrerosTableProps> = ({
 
                 {/* PRV Status Chip */}
                 <td>
-                  <div
+                  <span
                     className={`prv-chip ${prvInfo.badgeClass}`}
                     style={{
                       backgroundColor: prvInfo.bgColor,
                       color: prvInfo.textColor,
                       borderColor: prvInfo.borderColor
                     }}
-                    title={`${prvInfo.label}: ${prvInfo.description}`}
                   >
                     <span className="prv-chip-dot" style={{ backgroundColor: prvInfo.color }} />
-                    <span className="prv-chip-text">{prvInfo.shortLabel}</span>
-                  </div>
+                    <span>{prvInfo.shortLabel}</span>
+                  </span>
                 </td>
 
                 {/* Acciones */}
-                <td style={{ textAlign: 'center' }} onClick={e => e.stopPropagation()}>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                    <button
-                      type="button"
-                      className="btn-icon"
-                      title="Calcular aforo forrajero (Marco de corte)"
-                      onClick={() => onOpenAforoModal?.(potrero)}
-                      style={{ color: 'var(--primary-color)' }}
-                    >
-                      <Scale size={16} />
-                    </button>
+                <td onClick={e => e.stopPropagation()}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+                    {onOpenAforoModal && potrero.aforoKgMsHa > 0 && (
+                      <button
+                        type="button"
+                        className="btn-icon-table"
+                        title="Calcular Aforo con Marco de Corte"
+                        onClick={() => onOpenAforoModal(potrero)}
+                      >
+                        <Scale size={15} />
+                      </button>
+                    )}
                     <Link
                       to="/mapas"
-                      className="btn-icon"
-                      title="Ver potrero en Cartografía GIS"
-                      style={{ color: '#1976d2', display: 'inline-flex', alignItems: 'center' }}
+                      className="btn-icon-table"
+                      title="Localizar en Cartografía Agro-GIS"
                     >
-                      <Map size={16} />
+                      <Map size={15} />
                     </Link>
                     <button
                       type="button"
-                      className="btn-icon"
+                      className="btn-icon-table"
                       title="Más opciones"
                       onClick={() => onSelectPotrero?.(potrero)}
                     >
-                      <MoreVertical size={16} />
+                      <MoreVertical size={15} />
                     </button>
                   </div>
                 </td>
               </tr>
             );
           })}
-
-          {items.length === 0 && (
-            <tr>
-              <td colSpan={10} style={{ textAlign: 'center', padding: '36px', color: 'var(--text-secondary)' }}>
-                No se encontraron potreros registrados con los filtros actuales.
-              </td>
-            </tr>
-          )}
         </tbody>
       </table>
     </div>

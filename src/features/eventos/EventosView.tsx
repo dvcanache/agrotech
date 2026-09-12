@@ -6,6 +6,8 @@ import { NuevoEventoModal, EventoItem } from './components/NuevoEventoModal';
 import { SpreadsheetGridMode } from './components/SpreadsheetGridMode';
 import { QuickActionModal } from './components/QuickActionModal';
 import { Link } from 'react-router-dom';
+import { useApp } from '../../context/AppContext';
+import { ESPECIES_TAXONOMY } from '../../types/animal';
 import './components/eventosSpreadsheet.css';
 
 const INITIAL_EVENTS: EventoItem[] = [
@@ -15,32 +17,80 @@ const INITIAL_EVENTS: EventoItem[] = [
     codigoAnimal: '0001',
     categoria: 'Productivos',
     tipoEvento: 'Pesajes de leche',
-    vencimiento: 'Próximo control en 15 días',
-    tecnico: 'Dr. Carlos Mendoza'
+    vencimiento: 'Próximo control lechero en 15 días (14.2 kg)',
+    tecnico: 'Dr. Carlos Mendoza',
+    observaciones: 'AM: 7.8 kg | PM: 6.4 kg | Grasa: 3.8% | RCS: 145k'
   },
   {
     id: 'ev-2',
-    fecha: '08/09/2026',
-    codigoAnimal: '0002',
-    categoria: 'Reproductivos',
-    tipoEvento: 'Revisiones',
-    vencimiento: 'Aviso de Secado en 180 días',
-    tecnico: 'Roberto Gómez'
+    fecha: '10/09/2026',
+    codigoAnimal: 'GALP-01',
+    categoria: 'Productivos',
+    tipoEvento: 'Control de Postura',
+    vencimiento: 'Recolección diaria programada (% postura: 95.2%)',
+    tecnico: 'Control Avícola Masivo',
+    observaciones: 'Galpón 01: 2,500 aves | 2,380 comerciales | 35 rotos | Peso Prom: 62.5 g'
   },
   {
     id: 'ev-3',
-    fecha: '01/09/2026',
-    codigoAnimal: 'BCA01',
+    fecha: '09/09/2026',
+    codigoAnimal: 'POR-CR01',
+    categoria: 'Reproductivos',
+    tipoEvento: 'Partos',
+    vencimiento: 'Destete de camada en 21 días (12 lechones)',
+    tecnico: 'Ing. Agr. Marcos Solís',
+    observaciones: 'Parto Porcino: 12 vivos, 1 mortinato (Total: 13 | Camada: 16.8 kg | Prom: 1.40 kg)'
+  },
+  {
+    id: 'ev-4',
+    fecha: '08/09/2026',
+    codigoAnimal: 'BUF-01',
+    categoria: 'Productivos',
+    tipoEvento: 'Pesajes de leche',
+    vencimiento: 'Próximo control lechero búfala (8.6 kg)',
+    tecnico: 'Roberto Gómez',
+    observaciones: 'Ordeño Búfala: 8.6 kg/día | Grasa butirométrica 7.8% | RCS: 120k'
+  },
+  {
+    id: 'ev-5',
+    fecha: '05/09/2026',
+    codigoAnimal: 'EQU-YG01',
     categoria: 'Veterinarios',
     tipoEvento: 'Planes sanitarios',
-    vencimiento: 'Refuerzo Aftosa en 6 meses',
-    tecnico: 'Luis Martínez'
+    vencimiento: 'Prueba Serológica AIE (Test Coggins) en 6 meses',
+    tecnico: 'Dr. Carlos Mendoza',
+    observaciones: 'Certificación de Anemia Infecciosa Equina Negativa • INSAI'
+  },
+  {
+    id: 'ev-6',
+    fecha: '01/09/2026',
+    codigoAnimal: 'CAP-CL01',
+    categoria: 'Veterinarios',
+    tipoEvento: 'Planes sanitarios',
+    vencimiento: 'Refuerzo Clostridiosis caprina en 6 meses',
+    tecnico: 'Luis Martínez',
+    observaciones: 'Vacunación polivalente de enterotoxemia caprina en aprisco'
   }
 ];
 
 export const EventosView: React.FC = () => {
+  const { animals } = useApp();
   const [eventos, setEventos] = useState<EventoItem[]>(INITIAL_EVENTS);
   const [viewMode, setViewMode] = useState<'directorio' | 'spreadsheet'>('directorio');
+
+  const getAnimalSpeciesMeta = (code: string) => {
+    const match = animals.find(a => a.practico.toUpperCase() === code.toUpperCase());
+    if (match?.especie) {
+      return ESPECIES_TAXONOMY[match.especie];
+    }
+    const c = code.toUpperCase();
+    if (c.startsWith('AVE-') || c.startsWith('GALP-')) return ESPECIES_TAXONOMY['Aves de corral'];
+    if (c.startsWith('POR-')) return ESPECIES_TAXONOMY['Porcinos'];
+    if (c.startsWith('BUF-')) return ESPECIES_TAXONOMY['Búfalos'];
+    if (c.startsWith('CAP-')) return ESPECIES_TAXONOMY['Caprinos'];
+    if (c.startsWith('EQU-')) return ESPECIES_TAXONOMY['Equinos'];
+    return ESPECIES_TAXONOMY['Bovinos'];
+  };
   
   // Modals state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -300,9 +350,13 @@ export const EventosView: React.FC = () => {
                           color: 'var(--primary-color)',
                           backgroundColor: 'var(--primary-ultra-light)',
                           padding: '2px 8px',
-                          borderRadius: 4
+                          borderRadius: 4,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 6
                         }}>
-                          {ev.codigoAnimal}
+                          <span>{getAnimalSpeciesMeta(ev.codigoAnimal)?.icono || '🐾'}</span>
+                          <span>{ev.codigoAnimal}</span>
                         </span>
                       </td>
                       <td>
@@ -310,6 +364,11 @@ export const EventosView: React.FC = () => {
                         <span style={{ fontSize: 11, color: 'var(--text-secondary)', display: 'block' }}>
                           {ev.categoria} {ev.tecnico ? `• ${ev.tecnico}` : ''}
                         </span>
+                        {ev.observaciones && (
+                          <span style={{ fontSize: 11, color: '#475569', display: 'block', marginTop: 2, fontStyle: 'italic' }}>
+                            {ev.observaciones}
+                          </span>
+                        )}
                       </td>
                       <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
