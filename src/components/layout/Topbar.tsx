@@ -45,7 +45,7 @@ export const Topbar: React.FC = () => {
     <header className="topbar">
       {/* Left Logo & Herd Name */}
       <div className="topbar-left">
-        <Link to="/dashboard" className="logo-container" style={{ textDecoration: 'none', color: 'inherit' }}>
+        <Link to="/dashboard" className="logo-container" style={{ textDecoration: 'none' }}>
           <AgroGanLogo size={36} />
           <span className="logo-text">AgroGan</span>
         </Link>

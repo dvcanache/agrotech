@@ -1,6 +1,21 @@
 @import './reports.css';
 @import '../features/reportes/components/reportesAdvanced.css';
 
+@font-face {
+  font-family: 'ITC Avant Garde Gothic Paneuropean Bold';
+  src: local('ITC Avant Garde Gothic Paneuropean Bold'),
+       local('ITCAvantGardeGothicPaneuropean-Bold'),
+       local('ITC Avant Garde Gothic Paneuropean-Bold'),
+       local('ITC Avant Garde Gothic Paneuropean'),
+       local('ITC Avant Garde Gothic Std Bold'),
+       local('ITC Avant Garde Gothic Bold'),
+       local('AvantGardeGothic-Bold'),
+       local('Avant Garde Bold');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Reset and Variables */
 :root {
   --primary-color: #2d6a4f;
@@ -173,10 +188,11 @@ body {
 }
 
 .logo-text {
-  font-size: 21px;
+  font-family: 'ITC Avant Garde Gothic Paneuropean Bold', 'ITC Avant Garde Gothic Paneuropean', 'ITC Avant Garde Gothic Std', 'ITC Avant Garde Gothic', 'Avant Garde Gothic', 'Avant Garde', 'Century Gothic', sans-serif;
+  font-size: 22px;
   font-weight: 700;
-  color: var(--primary-light);
-  letter-spacing: -0.5px;
+  color: #2596be;
+  letter-spacing: -0.3px;
 }
 
 .topbar-divider {
