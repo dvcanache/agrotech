@@ -109,35 +109,35 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
 
         {/* Form Body */}
         <form onSubmit={handleSubmit}>
-          <div className="report-modal-body" style={{ maxHeight: '75vh', overflowY: 'auto' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
-              <div>
-                <label className="filter-label">Fecha del Evento *</label>
+          <div className="report-modal-body" style={{ maxHeight: '75vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+              <div className="form-field">
+                <label className="form-label">Fecha del Evento *</label>
                 <input
                   type="date"
                   required
-                  className="filter-input"
+                  className="form-input"
                   value={formData.fecha}
                   onChange={e => setFormData({ ...formData, fecha: e.target.value })}
                 />
               </div>
-              <div>
-                <label className="filter-label">Código del Animal *</label>
+              <div className="form-field">
+                <label className="form-label">Código del Animal *</label>
                 <input
                   type="text"
                   required
                   placeholder="ej. 0001, BCA01"
-                  className="filter-input"
+                  className="form-input"
                   value={formData.codigoAnimal}
                   onChange={e => setFormData({ ...formData, codigoAnimal: e.target.value })}
                 />
               </div>
             </div>
 
-            <div style={{ marginBottom: 14 }}>
-              <label className="filter-label">Técnico / Operario Responsable</label>
+            <div className="form-field">
+              <label className="form-label">Técnico / Operario Responsable</label>
               <select
-                className="filter-input"
+                className="form-select"
                 value={formData.tecnico}
                 onChange={e => setFormData({ ...formData, tecnico: e.target.value })}
               >
@@ -150,19 +150,19 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
 
             {/* Campos condicionales por tipo de evento */}
             {tipoInicial.includes('Servicio') && (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
-                <div>
-                  <label className="filter-label">Reproductor / Pajuela</label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                <div className="form-field">
+                  <label className="form-label">Reproductor / Pajuela</label>
                   <input
                     type="text"
-                    className="filter-input"
+                    className="form-input"
                     value={formData.reproductor}
                     onChange={e => setFormData({ ...formData, reproductor: e.target.value })}
                   />
                 </div>
-                <div>
-                  <label className="filter-label">Modalidad</label>
-                  <select className="filter-input">
+                <div className="form-field">
+                  <label className="form-label">Modalidad</label>
+                  <select className="form-select">
                     <option>Inseminación Artificial (IA)</option>
                     <option>Monta Natural Dirigida</option>
                     <option>IATF</option>
@@ -172,11 +172,11 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
             )}
 
             {tipoInicial.includes('Revisión') && (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
-                <div>
-                  <label className="filter-label">Diagnóstico de Preñez</label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                <div className="form-field">
+                  <label className="form-label">Diagnóstico de Preñez</label>
                   <select
-                    className="filter-input"
+                    className="form-select"
                     value={formData.diagnostico}
                     onChange={e => setFormData({ ...formData, diagnostico: e.target.value })}
                   >
@@ -185,11 +185,11 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
                     <option value="Dudosa">Dudosa / Repetir</option>
                   </select>
                 </div>
-                <div>
-                  <label className="filter-label">Días de Gestación Estimados</label>
+                <div className="form-field">
+                  <label className="form-label">Días de Gestación Estimados</label>
                   <input
                     type="number"
-                    className="filter-input"
+                    className="form-input"
                     value={formData.diasGestacion}
                     onChange={e => setFormData({ ...formData, diasGestacion: parseInt(e.target.value, 10) || 0 })}
                   />
@@ -198,23 +198,23 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
             )}
 
             {tipoInicial.includes('Pesaje') && (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
-                <div>
-                  <label className="filter-label">Turno Mañana (kg)</label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                <div className="form-field">
+                  <label className="form-label">Turno Mañana (kg)</label>
                   <input
                     type="number"
                     step="0.1"
-                    className="filter-input"
+                    className="form-input"
                     value={formData.pesajeAmKg}
                     onChange={e => setFormData({ ...formData, pesajeAmKg: parseFloat(e.target.value) || 0 })}
                   />
                 </div>
-                <div>
-                  <label className="filter-label">Turno Tarde (kg)</label>
+                <div className="form-field">
+                  <label className="form-label">Turno Tarde (kg)</label>
                   <input
                     type="number"
                     step="0.1"
-                    className="filter-input"
+                    className="form-input"
                     value={formData.pesajePmKg}
                     onChange={e => setFormData({ ...formData, pesajePmKg: parseFloat(e.target.value) || 0 })}
                   />
@@ -223,48 +223,47 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
             )}
 
             {tipoInicial.includes('Crecimiento') && (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
-                <div>
-                  <label className="filter-label">Peso en Báscula (kg)</label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                <div className="form-field">
+                  <label className="form-label">Peso en Báscula (kg)</label>
                   <input
                     type="number"
-                    className="filter-input"
+                    className="form-input"
                     value={formData.pesoCorporalKg}
                     onChange={e => setFormData({ ...formData, pesoCorporalKg: parseFloat(e.target.value) || 0 })}
                   />
                 </div>
-                <div>
-                  <label className="filter-label">Condición Corporal (1.0 - 5.0)</label>
-                  <input type="number" step="0.25" defaultValue="3.25" className="filter-input" />
+                <div className="form-field">
+                  <label className="form-label">Condición Corporal (1.0 - 5.0)</label>
+                  <input type="number" step="0.25" defaultValue="3.25" className="form-input" />
                 </div>
               </div>
             )}
 
             {tipoInicial.includes('Mastitis') && (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
-                <div>
-                  <label className="filter-label">Cuartos Mamarios Afectados</label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                <div className="form-field">
+                  <label className="form-label">Cuartos Mamarios Afectados</label>
                   <input
                     type="text"
-                    className="filter-input"
+                    className="form-input"
                     value={formData.cuartosAfectados}
                     onChange={e => setFormData({ ...formData, cuartosAfectados: e.target.value })}
                   />
                 </div>
-                <div>
-                  <label className="filter-label">Tiempo de Retiro Leche (días)</label>
-                  <input type="number" defaultValue="5" className="filter-input" />
+                <div className="form-field">
+                  <label className="form-label">Tiempo de Retiro Leche (días)</label>
+                  <input type="number" defaultValue="5" className="form-input" />
                 </div>
               </div>
             )}
 
-            <div style={{ marginBottom: 14 }}>
-              <label className="filter-label">Observaciones y Notas de Campo</label>
+            <div className="form-field">
+              <label className="form-label">Observaciones y Notas de Campo</label>
               <textarea
                 rows={3}
                 placeholder="Anotaciones zootécnicas o comportamiento..."
-                className="filter-input"
-                style={{ resize: 'vertical' }}
+                className="form-input"
                 value={formData.observaciones}
                 onChange={e => setFormData({ ...formData, observaciones: e.target.value })}
               />

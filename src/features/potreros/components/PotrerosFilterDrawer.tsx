@@ -28,24 +28,24 @@ export const PotrerosFilterDrawer: React.FC<PotrerosFilterDrawerProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="filter-drawer-backdrop" onClick={onClose}>
-      <div className="filter-drawer" onClick={e => e.stopPropagation()}>
-        <div className="filter-drawer-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+    <div className="drawer-backdrop" onClick={onClose}>
+      <aside className="filter-drawer-panel" onClick={e => e.stopPropagation()}>
+        <div className="drawer-header">
+          <div className="drawer-header-title">
             <Filter size={18} color="var(--primary-color)" />
-            <h3 className="filter-drawer-title">Filtros de Potreros</h3>
+            <span>Filtros de Potreros</span>
           </div>
           <button type="button" className="report-modal-close-btn" onClick={onClose}>
             <X size={18} />
           </button>
         </div>
 
-        <div className="filter-drawer-body">
+        <div className="drawer-body">
           {/* Estatus */}
-          <div className="filter-group">
-            <label className="filter-label">Estatus del Potrero</label>
+          <div className="form-field">
+            <label className="form-label">Estatus del Potrero</label>
             <select
-              className="filter-input"
+              className="form-select"
               value={filters.estatus}
               onChange={e => onChange({ ...filters, estatus: e.target.value })}
             >
@@ -58,10 +58,10 @@ export const PotrerosFilterDrawer: React.FC<PotrerosFilterDrawerProps> = ({
           </div>
 
           {/* Especie Forrajera */}
-          <div className="filter-group">
-            <label className="filter-label">Especie Forrajera</label>
+          <div className="form-field">
+            <label className="form-label">Especie Forrajera</label>
             <select
-              className="filter-input"
+              className="form-select"
               value={filters.especieForrajera}
               onChange={e => onChange({ ...filters, especieForrajera: e.target.value })}
             >
@@ -73,20 +73,20 @@ export const PotrerosFilterDrawer: React.FC<PotrerosFilterDrawerProps> = ({
           </div>
 
           {/* Rango de Superficie */}
-          <div className="filter-group">
-            <label className="filter-label">Superficie (Hectáreas)</label>
+          <div className="form-field">
+            <label className="form-label">Superficie (Hectáreas)</label>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               <input
                 type="number"
                 placeholder="Mín ha"
-                className="filter-input"
+                className="form-input"
                 value={filters.areaMin}
                 onChange={e => onChange({ ...filters, areaMin: e.target.value })}
               />
               <input
                 type="number"
                 placeholder="Máx ha"
-                className="filter-input"
+                className="form-input"
                 value={filters.areaMax}
                 onChange={e => onChange({ ...filters, areaMax: e.target.value })}
               />
@@ -94,10 +94,10 @@ export const PotrerosFilterDrawer: React.FC<PotrerosFilterDrawerProps> = ({
           </div>
 
           {/* Ocupación / Lote */}
-          <div className="filter-group">
-            <label className="filter-label">Asignación de Lote</label>
+          <div className="form-field">
+            <label className="form-label">Asignación de Lote</label>
             <select
-              className="filter-input"
+              className="form-select"
               value={filters.conLote}
               onChange={e => onChange({ ...filters, conLote: e.target.value })}
             >
@@ -108,7 +108,7 @@ export const PotrerosFilterDrawer: React.FC<PotrerosFilterDrawerProps> = ({
           </div>
         </div>
 
-        <div className="filter-drawer-footer">
+        <div className="drawer-footer">
           <button type="button" className="btn-secondary" onClick={onReset} style={{ flex: 1 }}>
             <RotateCcw size={15} />
             <span>Restablecer</span>
@@ -117,7 +117,7 @@ export const PotrerosFilterDrawer: React.FC<PotrerosFilterDrawerProps> = ({
             <span>Aplicar</span>
           </button>
         </div>
-      </div>
+      </aside>
     </div>
   );
 };

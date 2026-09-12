@@ -92,58 +92,58 @@ export const NuevoPotreroModal: React.FC<NuevoPotreroModalProps> = ({
         {/* Form Body */}
         <form onSubmit={handleSubmit}>
           <div className="report-modal-body" style={{ maxHeight: '75vh', overflowY: 'auto' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 14, marginBottom: 14 }}>
-              <div>
-                <label className="filter-label">Código *</label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 16, marginBottom: 16 }}>
+              <div className="form-field">
+                <label className="form-label">Código *</label>
                 <input
                   type="text"
                   required
                   placeholder="ej. POT9"
-                  className="filter-input"
+                  className="form-input"
                   value={formData.codigo}
                   onChange={e => setFormData({ ...formData, codigo: e.target.value })}
                 />
               </div>
-              <div>
-                <label className="filter-label">Descripción / Nombre *</label>
+              <div className="form-field">
+                <label className="form-label">Descripción / Nombre *</label>
                 <input
                   type="text"
                   required
                   placeholder="ej. Potrero El Rincón"
-                  className="filter-input"
+                  className="form-input"
                   value={formData.descripcion}
                   onChange={e => setFormData({ ...formData, descripcion: e.target.value })}
                 />
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
-              <div>
-                <label className="filter-label">Superficie (ha) *</label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+              <div className="form-field">
+                <label className="form-label">Superficie (ha) *</label>
                 <input
                   type="number"
                   step="0.1"
                   required
-                  className="filter-input"
+                  className="form-input"
                   value={formData.areaHa}
                   onChange={e => setFormData({ ...formData, areaHa: parseFloat(e.target.value) || 0 })}
                 />
               </div>
-              <div>
-                <label className="filter-label">Perímetro Lineal (m)</label>
+              <div className="form-field">
+                <label className="form-label">Perímetro Lineal (m)</label>
                 <input
                   type="number"
-                  className="filter-input"
+                  className="form-input"
                   value={formData.perimetroM}
                   onChange={e => setFormData({ ...formData, perimetroM: parseInt(e.target.value, 10) || 0 })}
                 />
               </div>
             </div>
 
-            <div style={{ marginBottom: 14 }}>
-              <label className="filter-label">Especie Forrajera Dominante</label>
+            <div className="form-field" style={{ marginBottom: 16 }}>
+              <label className="form-label">Especie Forrajera Dominante</label>
               <select
-                className="filter-input"
+                className="form-select"
                 value={formData.especieForrajera}
                 onChange={e => setFormData({ ...formData, especieForrajera: e.target.value })}
               >
@@ -153,55 +153,55 @@ export const NuevoPotreroModal: React.FC<NuevoPotreroModalProps> = ({
               </select>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
-              <div>
-                <label className="filter-label">Aforo Estimado (kg MV/m²)</label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+              <div className="form-field">
+                <label className="form-label">Aforo Estimado (kg MV/m²)</label>
                 <input
                   type="number"
                   step="0.1"
-                  className="filter-input"
+                  className="form-input"
                   value={formData.aforoKgM2}
                   onChange={e => setFormData({ ...formData, aforoKgM2: parseFloat(e.target.value) || 0 })}
                 />
               </div>
-              <div>
-                <label className="filter-label">Carga Máxima (UGG/ha)</label>
+              <div className="form-field">
+                <label className="form-label">Carga Máxima (UGG/ha)</label>
                 <input
                   type="number"
                   step="0.1"
-                  className="filter-input"
+                  className="form-input"
                   value={formData.cargaRecomendadaUggHa}
                   onChange={e => setFormData({ ...formData, cargaRecomendadaUggHa: parseFloat(e.target.value) || 0 })}
                 />
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
-              <div>
-                <label className="filter-label">Días Ocupación Máx.</label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+              <div className="form-field">
+                <label className="form-label">Días Ocupación Máx.</label>
                 <input
                   type="number"
-                  className="filter-input"
+                  className="form-input"
                   value={formData.diasOcupacionMax}
                   onChange={e => setFormData({ ...formData, diasOcupacionMax: parseInt(e.target.value, 10) || 0 })}
                 />
               </div>
-              <div>
-                <label className="filter-label">Días Descanso Requeridos</label>
+              <div className="form-field">
+                <label className="form-label">Días Descanso Requeridos</label>
                 <input
                   type="number"
-                  className="filter-input"
+                  className="form-input"
                   value={formData.diasDescansoRequeridos}
                   onChange={e => setFormData({ ...formData, diasDescansoRequeridos: parseInt(e.target.value, 10) || 0 })}
                 />
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-              <div>
-                <label className="filter-label">Estatus Inicial</label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <div className="form-field">
+                <label className="form-label">Estatus Inicial</label>
                 <select
-                  className="filter-input"
+                  className="form-select"
                   value={formData.estatus}
                   onChange={e => setFormData({ ...formData, estatus: e.target.value as EstatusPotrero })}
                 >
@@ -211,12 +211,12 @@ export const NuevoPotreroModal: React.FC<NuevoPotreroModalProps> = ({
                   <option value="En siembra">En siembra</option>
                 </select>
               </div>
-              <div>
-                <label className="filter-label">Lote Asignado (opcional)</label>
+              <div className="form-field">
+                <label className="form-label">Lote Asignado (opcional)</label>
                 <input
                   type="text"
                   placeholder="ej. Lote 01 (Ordeño)"
-                  className="filter-input"
+                  className="form-input"
                   value={formData.loteAsignado}
                   onChange={e => setFormData({ ...formData, loteAsignado: e.target.value })}
                 />

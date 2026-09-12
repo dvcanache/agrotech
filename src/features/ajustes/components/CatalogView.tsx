@@ -248,40 +248,40 @@ export const CatalogView: React.FC<CatalogViewProps> = ({ catalogType }) => {
             </div>
             <form onSubmit={handleAddItem}>
               <div className="report-modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                <div className="filter-group">
-                  <label className="filter-label">{config.col1} *</label>
+                <div className="form-field">
+                  <label className="form-label">{config.col1} *</label>
                   <input
                     type="text"
                     required
-                    className="filter-input"
+                    className="form-input"
                     value={newItem.codigo}
                     onChange={e => setNewItem({ ...newItem, codigo: e.target.value })}
                   />
                 </div>
-                <div className="filter-group">
-                  <label className="filter-label">{config.col2} *</label>
+                <div className="form-field">
+                  <label className="form-label">{config.col2} *</label>
                   <input
                     type="text"
                     required
-                    className="filter-input"
+                    className="form-input"
                     value={newItem.nombre}
                     onChange={e => setNewItem({ ...newItem, nombre: e.target.value })}
                   />
                 </div>
-                <div className="filter-group">
-                  <label className="filter-label">{config.col3}</label>
+                <div className="form-field">
+                  <label className="form-label">{config.col3}</label>
                   <input
                     type="text"
-                    className="filter-input"
+                    className="form-input"
                     value={newItem.detalle}
                     onChange={e => setNewItem({ ...newItem, detalle: e.target.value })}
                   />
                 </div>
-                <div className="filter-group">
-                  <label className="filter-label">{config.col4}</label>
+                <div className="form-field">
+                  <label className="form-label">{config.col4}</label>
                   <input
                     type="text"
-                    className="filter-input"
+                    className="form-input"
                     value={newItem.extra}
                     onChange={e => setNewItem({ ...newItem, extra: e.target.value })}
                   />

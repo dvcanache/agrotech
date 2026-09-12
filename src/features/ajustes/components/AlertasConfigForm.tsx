@@ -36,55 +36,55 @@ export const AlertasConfigForm: React.FC = () => {
         </span>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
-        <div className="filter-group">
-          <label className="filter-label">Aviso Previo a Fecha Probable de Parto (Días)</label>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+        <div className="form-field">
+          <label className="form-label">Aviso Previo a Fecha Probable de Parto (Días)</label>
           <input
             type="number"
-            className="filter-input"
+            className="form-input"
             value={alertas.diasAvisoPreparto}
             onChange={e => setAlertas({ ...alertas, diasAvisoPreparto: parseInt(e.target.value, 10) || 0 })}
           />
-          <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
+          <span className="form-hint">
             Días de anticipación para trasladar el vientre al lote de maternidad.
           </span>
         </div>
 
-        <div className="filter-group">
-          <label className="filter-label">Días Post-Servicio para Diagnóstico de Preñez (Días)</label>
+        <div className="form-field">
+          <label className="form-label">Días Post-Servicio para Diagnóstico de Preñez (Días)</label>
           <input
             type="number"
-            className="filter-input"
+            className="form-input"
             value={alertas.diasPostServicioDiagnostico}
             onChange={e => setAlertas({ ...alertas, diasPostServicioDiagnostico: parseInt(e.target.value, 10) || 0 })}
           />
-          <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
+          <span className="form-hint">
             Días tras la inseminación o monta para programar palpación/ecografía.
           </span>
         </div>
 
-        <div className="filter-group">
-          <label className="filter-label">Aviso Previo a Fecha de Secado (Días)</label>
+        <div className="form-field">
+          <label className="form-label">Aviso Previo a Fecha de Secado (Días)</label>
           <input
             type="number"
-            className="filter-input"
+            className="form-input"
             value={alertas.diasAvisoPresecado}
             onChange={e => setAlertas({ ...alertas, diasAvisoPresecado: parseInt(e.target.value, 10) || 0 })}
           />
-          <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
+          <span className="form-hint">
             Días de anticipación para programar el cese de ordeño y terapia intramamaria.
           </span>
         </div>
 
-        <div className="filter-group">
-          <label className="filter-label">Alerta de Celos Repetidos (Servicios fallidos)</label>
+        <div className="form-field">
+          <label className="form-label">Alerta de Celos Repetidos (Servicios fallidos)</label>
           <input
             type="number"
-            className="filter-input"
+            className="form-input"
             value={alertas.umbralCelosRepetidos}
             onChange={e => setAlertas({ ...alertas, umbralCelosRepetidos: parseInt(e.target.value, 10) || 0 })}
           />
-          <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
+          <span className="form-hint">
             Marca a la hembra como "problema reproductivo" tras este número de fallos.
           </span>
         </div>

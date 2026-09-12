@@ -59,21 +59,21 @@ export const AutomatizacionConfigForm: React.FC = () => {
           </p>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginLeft: 24 }}>
-            <div>
-              <label className="filter-label">Pase Becerra/Becerro a Mauta/Maute (Meses)</label>
+            <div className="form-field">
+              <label className="form-label">Pase Becerra/Becerro a Mauta/Maute (Meses)</label>
               <input
                 type="number"
-                className="filter-input"
+                className="form-input"
                 value={rules.mesesBecerraMauta}
                 disabled={!rules.transicionEtariaAutomatica}
                 onChange={e => setRules({ ...rules, mesesBecerraMauta: parseInt(e.target.value, 10) || 0 })}
               />
             </div>
-            <div>
-              <label className="filter-label">Pase Mauta a Novilla de Vientre (Meses)</label>
+            <div className="form-field">
+              <label className="form-label">Pase Mauta a Novilla de Vientre (Meses)</label>
               <input
                 type="number"
-                className="filter-input"
+                className="form-input"
                 value={rules.mesesMautaNovilla}
                 disabled={!rules.transicionEtariaAutomatica}
                 onChange={e => setRules({ ...rules, mesesMautaNovilla: parseInt(e.target.value, 10) || 0 })}
