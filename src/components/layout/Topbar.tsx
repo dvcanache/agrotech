@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { HardwareSyncModal } from './HardwareSyncModal';
 import { offlineSyncService } from '../../services/offlineSyncService';
 import { AgroGanLogo } from '../common/AgroGanLogo';
+import { AgroGanWordmark } from '../common/AgroGanWordmark';
 
 export const Topbar: React.FC = () => {
   const {
@@ -45,9 +46,9 @@ export const Topbar: React.FC = () => {
     <header className="topbar">
       {/* Left Logo & Herd Name */}
       <div className="topbar-left">
-        <Link to="/dashboard" className="logo-container" style={{ textDecoration: 'none' }}>
+        <Link to="/dashboard" className="logo-container" style={{ textDecoration: 'none' }} title="AGROGAN - Ir al Inicio">
           <AgroGanLogo size={36} />
-          <span className="logo-text">AGROGAN</span>
+          <AgroGanWordmark height={23} />
         </Link>
         <div className="topbar-divider"></div>
         <span className="scope-text">{config.nombre || 'Rebaño de Prueba'}</span>
