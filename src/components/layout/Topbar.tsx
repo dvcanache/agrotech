@@ -4,6 +4,7 @@ import { useApp } from '../../context/AppContext';
 import { Link } from 'react-router-dom';
 import { HardwareSyncModal } from './HardwareSyncModal';
 import { offlineSyncService } from '../../services/offlineSyncService';
+import { AgroGanLogo } from '../common/AgroGanLogo';
 
 export const Topbar: React.FC = () => {
   const {
@@ -45,46 +46,7 @@ export const Topbar: React.FC = () => {
       {/* Left Logo & Herd Name */}
       <div className="topbar-left">
         <Link to="/dashboard" className="logo-container" style={{ textDecoration: 'none', color: 'inherit' }}>
-          {/* Customized Cow Head Logo */}
-          <svg viewBox="0 0 100 100" width="32" height="32" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M20 30C20 18 32 10 50 18C68 10 80 18 80 30C80 42 75 52 70 58C65 62 60 78 50 78C40 78 35 62 30 58C25 52 20 42 20 30Z"
-              stroke="#52b788"
-              strokeWidth="7"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M22 35C15 35 12 40 15 45C18 50 24 45 25 43"
-              stroke="#52b788"
-              strokeWidth="7"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M78 35C85 35 88 40 85 45C82 50 76 45 75 43"
-              stroke="#52b788"
-              strokeWidth="7"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M30 20C28 12 20 8 18 8"
-              stroke="#52b788"
-              strokeWidth="7"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M70 20C72 12 80 8 82 8"
-              stroke="#52b788"
-              strokeWidth="7"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <circle cx="40" cy="64" r="3" fill="#2d6a4f" />
-            <circle cx="60" cy="64" r="3" fill="#2d6a4f" />
-          </svg>
+          <AgroGanLogo size={36} />
           <span className="logo-text">AgroGan</span>
         </Link>
         <div className="topbar-divider"></div>

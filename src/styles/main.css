@@ -159,11 +159,21 @@ body {
 .logo-container {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.logo-container .agrogan-logo-img {
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+.logo-container:hover .agrogan-logo-img {
+  transform: scale(1.06);
+  filter: drop-shadow(0 2px 8px rgba(9, 84, 49, 0.35));
 }
 
 .logo-text {
-  font-size: 20px;
+  font-size: 21px;
   font-weight: 700;
   color: var(--primary-light);
   letter-spacing: -0.5px;
