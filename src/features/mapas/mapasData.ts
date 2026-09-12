@@ -159,6 +159,6 @@ export const GIS_POINTS_OF_INTEREST: GisPointOfInterest[] = [
   { id: 'poi-1', nombre: 'Vaquera & Sala de Ordeño', tipo: 'vaquera', x: 230, y: 260 },
   { id: 'poi-2', nombre: 'Tanque Australiano & Molino', tipo: 'tanque', x: 450, y: 275 },
   { id: 'poi-3', nombre: 'Laguna & Abrevadero Central', tipo: 'laguna', x: 550, y: 310 },
-  { id: 'poi-4', nombre: 'Manga de Manejo y Báscula', tipo: 'manga', x: 670, y: 410 },
+  { id: 'poi-4', nombre: 'Manga de Manejo y Báscula', tipo: 'manga', x: 670, y: 495 },
   { id: 'poi-5', nombre: 'Silos de Forraje & Heno', tipo: 'silo', x: 250, y: 300 }
 ];

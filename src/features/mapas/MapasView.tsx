@@ -71,9 +71,9 @@ export const MapasView: React.FC = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20, width: '100%' }}>
       {/* Header */}
-      <div className="events-header">
-        <div className="events-header-left">
-          <h2 className="toolbar-title">Cartografía GIS & Potreros</h2>
+      <div className="events-header" style={{ flexWrap: 'wrap', gap: 12 }}>
+        <div className="events-header-left" style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+          <h2 className="toolbar-title" style={{ margin: 0 }}>Cartografía GIS & Potreros</h2>
           <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
             Visualizador satelital georreferenciado y delimitación de pasturas
           </span>
@@ -90,9 +90,10 @@ export const MapasView: React.FC = () => {
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: 16
+        gap: 16,
+        width: '100%'
       }}>
-        <div className="kpi-card" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div className="kpi-card" style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
           <div style={{
             width: 44,
             height: 44,
@@ -101,11 +102,12 @@ export const MapasView: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#2d6a4f'
+            color: '#2d6a4f',
+            flexShrink: 0
           }}>
             <Trees size={22} />
           </div>
-          <div>
+          <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 500 }}>Superficie Predial</div>
             <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)' }}>
               {totalSuperficie.toFixed(1)} ha
@@ -113,7 +115,7 @@ export const MapasView: React.FC = () => {
           </div>
         </div>
 
-        <div className="kpi-card" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div className="kpi-card" style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
           <div style={{
             width: 44,
             height: 44,
@@ -122,11 +124,12 @@ export const MapasView: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#1976d2'
+            color: '#1976d2',
+            flexShrink: 0
           }}>
             <CheckCircle2 size={22} />
           </div>
-          <div>
+          <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 500 }}>Potreros en Pastoreo</div>
             <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)' }}>
               {potrerosActivos} de {GIS_PADDOCKS.length}
@@ -134,7 +137,7 @@ export const MapasView: React.FC = () => {
           </div>
         </div>
 
-        <div className="kpi-card" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div className="kpi-card" style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
           <div style={{
             width: 44,
             height: 44,
@@ -143,11 +146,12 @@ export const MapasView: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#f57c00'
+            color: '#f57c00',
+            flexShrink: 0
           }}>
             <Moon size={22} />
           </div>
-          <div>
+          <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 500 }}>Potreros en Descanso</div>
             <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)' }}>
               {potrerosDescanso} parcelas
@@ -155,7 +159,7 @@ export const MapasView: React.FC = () => {
           </div>
         </div>
 
-        <div className="kpi-card" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div className="kpi-card" style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
           <div style={{
             width: 44,
             height: 44,
@@ -164,11 +168,12 @@ export const MapasView: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#7b1fa2'
+            color: '#7b1fa2',
+            flexShrink: 0
           }}>
             <Activity size={22} />
           </div>
-          <div>
+          <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 500 }}>Animales en Pastoreo</div>
             <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)' }}>
               {animalesTotales} cabezas
@@ -178,12 +183,7 @@ export const MapasView: React.FC = () => {
       </div>
 
       {/* Main Map Workspace with Two Columns */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'minmax(0, 1fr) 340px',
-        gap: 20,
-        alignItems: 'start'
-      }}>
+      <div className="gis-workspace-grid">
         {/* Map Container */}
         <div style={{
           position: 'relative',
@@ -191,7 +191,10 @@ export const MapasView: React.FC = () => {
           borderRadius: 14,
           overflow: 'hidden',
           boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
-          border: '1px solid #23422a'
+          border: '1px solid #23422a',
+          minWidth: 0,
+          width: '100%',
+          boxSizing: 'border-box'
         }}>
           {/* Top Floating Map Controls */}
           <div style={{
@@ -359,18 +362,29 @@ export const MapasView: React.FC = () => {
             justifyContent: 'center',
             overflow: 'hidden',
             cursor: 'grab',
-            transition: 'background 0.4s ease'
+            transition: 'background 0.4s ease',
+            position: 'relative'
           }}>
             <div style={{
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               transform: `scale(${zoomLevel})`,
               transformOrigin: 'center center',
               transition: 'transform 0.25s ease-out'
             }}>
               <svg
                 viewBox="0 0 950 720"
-                width={950}
-                height={720}
-                style={{ overflow: 'visible', userSelect: 'none' }}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  maxWidth: '100%',
+                  maxHeight: '100%',
+                  userSelect: 'none'
+                }}
+                preserveAspectRatio="xMidYMid meet"
               >
                 {/* Defs for gradients & patterns */}
                 <defs>
@@ -466,18 +480,25 @@ export const MapasView: React.FC = () => {
                     <circle
                       cx={poi.x}
                       cy={poi.y}
-                      r={7}
+                      r={6}
                       fill="#ef4444"
                       stroke="#ffffff"
                       strokeWidth={2}
                     />
+                    <rect
+                      x={poi.x + 8}
+                      y={poi.y - 9}
+                      width={poi.nombre.length * 6.4 + 10}
+                      height={18}
+                      rx={4}
+                      fill="rgba(15, 23, 42, 0.85)"
+                    />
                     <text
-                      x={poi.x + 10}
+                      x={poi.x + 13}
                       y={poi.y + 4}
                       fill="#ffffff"
                       fontSize="10"
                       fontWeight="600"
-                      style={{ textShadow: '0 1px 4px rgba(0,0,0,0.9)' }}
                     >
                       {poi.nombre}
                     </text>
@@ -489,11 +510,11 @@ export const MapasView: React.FC = () => {
         </div>
 
         {/* Selected Paddock Inspector Card */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, minWidth: 0, width: '100%' }}>
           {selectedPaddock ? (
-            <div className="kpi-card" style={{ padding: 20 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                <div>
+            <div className="gis-panel-card">
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, width: '100%' }}>
+                <div style={{ minWidth: 0, flex: 1 }}>
                   <span style={{
                     fontSize: 11,
                     fontWeight: 700,
@@ -503,11 +524,21 @@ export const MapasView: React.FC = () => {
                   }}>
                     Ficha de Parcela GIS
                   </span>
-                  <h3 style={{ fontSize: 20, fontWeight: 700, margin: '2px 0 0 0', color: 'var(--text-primary)' }}>
+                  <h3 style={{
+                    fontSize: 18,
+                    fontWeight: 700,
+                    margin: '3px 0 0 0',
+                    color: 'var(--text-primary)',
+                    wordBreak: 'break-word',
+                    lineHeight: 1.2
+                  }}>
                     {selectedPaddock.codigo} - {selectedPaddock.nombre}
                   </h3>
                 </div>
-                <span className={`badge-status ${selectedPaddock.estatus.toLowerCase().replace(' ', '-')}`}>
+                <span
+                  className={`badge-status ${selectedPaddock.estatus.toLowerCase().replace(' ', '-')}`}
+                  style={{ flexShrink: 0 }}
+                >
                   {selectedPaddock.estatus}
                 </span>
               </div>
@@ -519,27 +550,27 @@ export const MapasView: React.FC = () => {
                 padding: '12px 0',
                 borderTop: '1px solid var(--border-gray)',
                 borderBottom: '1px solid var(--border-gray)',
-                marginBottom: 14
+                width: '100%'
               }}>
-                <div>
+                <div style={{ minWidth: 0 }}>
                   <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Superficie</div>
                   <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>
                     {selectedPaddock.areaHa} ha
                   </div>
                 </div>
-                <div>
+                <div style={{ minWidth: 0 }}>
                   <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Perímetro</div>
                   <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>
                     {selectedPaddock.perimetroM} m
                   </div>
                 </div>
-                <div>
+                <div style={{ minWidth: 0 }}>
                   <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Carga Actual</div>
                   <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--primary-color)' }}>
                     {selectedPaddock.cargaUggHa} UGG/ha
                   </div>
                 </div>
-                <div>
+                <div style={{ minWidth: 0 }}>
                   <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Animales</div>
                   <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>
                     {selectedPaddock.animales} cabezas
@@ -547,18 +578,22 @@ export const MapasView: React.FC = () => {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, fontSize: 13, marginBottom: 16 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, fontSize: 13, width: '100%' }}>
                 <div>
-                  <strong style={{ color: 'var(--text-secondary)' }}>Forraje Dominante:</strong>
-                  <div style={{ color: 'var(--text-primary)', marginTop: 2 }}>{selectedPaddock.especieForrajera}</div>
+                  <span style={{ color: 'var(--text-secondary)', fontSize: 11, fontWeight: 600, display: 'block' }}>FORRAJE DOMINANTE</span>
+                  <div style={{ color: 'var(--text-primary)', marginTop: 2, fontWeight: 500, wordBreak: 'break-word' }}>
+                    {selectedPaddock.especieForrajera}
+                  </div>
                 </div>
                 <div>
-                  <strong style={{ color: 'var(--text-secondary)' }}>Lote Asignado:</strong>
-                  <div style={{ color: 'var(--text-primary)', marginTop: 2 }}>{selectedPaddock.lote}</div>
+                  <span style={{ color: 'var(--text-secondary)', fontSize: 11, fontWeight: 600, display: 'block' }}>LOTE ASIGNADO</span>
+                  <div style={{ color: 'var(--text-primary)', marginTop: 2, fontWeight: 500, wordBreak: 'break-word' }}>
+                    {selectedPaddock.lote}
+                  </div>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%', marginTop: 4 }}>
                 <Link
                   to="/potreros"
                   className="btn-primary"
@@ -576,18 +611,21 @@ export const MapasView: React.FC = () => {
               </div>
             </div>
           ) : (
-            <div className="kpi-card" style={{ padding: 24, textAlign: 'center', color: 'var(--text-secondary)' }}>
+            <div className="gis-panel-card" style={{ padding: 24, textAlign: 'center', color: 'var(--text-secondary)' }}>
               <Info size={32} style={{ margin: '0 auto 8px auto', opacity: 0.6 }} />
               <p>Seleccione un potrero en el mapa para inspeccionar sus métricas agronómicas.</p>
             </div>
           )}
 
           {/* Quick Paddock List */}
-          <div className="kpi-card" style={{ padding: 16 }}>
-            <h4 style={{ fontSize: 14, fontWeight: 600, marginBottom: 10, color: 'var(--text-primary)' }}>
-              Directorio de Parcelas ({GIS_PADDOCKS.length})
-            </h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 240, overflowY: 'auto' }}>
+          <div className="gis-panel-card" style={{ padding: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+              <h4 style={{ fontSize: 14, fontWeight: 600, margin: 0, color: 'var(--text-primary)' }}>
+                Directorio de Parcelas ({GIS_PADDOCKS.length})
+              </h4>
+              <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Clic para enfocar</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 240, overflowY: 'auto', width: '100%' }}>
               {GIS_PADDOCKS.map(p => (
                 <div
                   key={p.id}
@@ -603,11 +641,11 @@ export const MapasView: React.FC = () => {
                   }}
                   onClick={() => setSelectedPaddock(p)}
                 >
-                  <div>
+                  <div style={{ minWidth: 0, marginRight: 8 }}>
                     <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{p.codigo}</div>
-                    <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{p.nombre}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.nombre}</div>
                   </div>
-                  <div style={{ textAlign: 'right' }}>
+                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
                     <div style={{ fontSize: 12, fontWeight: 600 }}>{p.areaHa} ha</div>
                     <div style={{ fontSize: 10, color: 'var(--text-secondary)' }}>{p.estatus}</div>
                   </div>
