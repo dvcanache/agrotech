@@ -11,12 +11,17 @@ import { Animal } from '../../types/animal';
 export const AnimalesView: React.FC = () => {
   const {
     animals,
+    allAnimals,
     currentItems,
     selectedAnimals,
     isSelectAll,
     currentPage,
     totalPages,
     pages,
+    selectedEspecie,
+    setSelectedEspecie,
+    selectedSubcategoria,
+    setSelectedSubcategoria,
     quickFilter,
     setQuickFilter,
     advancedFilters,
@@ -47,10 +52,16 @@ export const AnimalesView: React.FC = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20, width: '100%' }}>
       <AnimalesToolbar
+        selectedEspecie={selectedEspecie}
+        onEspecieChange={setSelectedEspecie}
+        selectedSubcategoria={selectedSubcategoria}
+        onSubcategoriaChange={setSelectedSubcategoria}
         quickFilter={quickFilter}
         onQuickFilterChange={setQuickFilter}
         onOpenFilterDrawer={() => setIsFilterDrawerOpen(true)}
         activeFilterCount={activeFilterCount}
+        allAnimals={allAnimals}
+        onResetFilters={resetAllFilters}
       />
       <div className="data-table-container">
         <AnimalesTable

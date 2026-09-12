@@ -1,5 +1,5 @@
 export const PAISES = ["Venezuela", "Colombia", "Ecuador", "Panamá", "Brasil", "Argentina"];
-export const ESPECIES = ["Vacunos", "Bufalinos", "Caprinos", "Ovinos"];
+export const ESPECIES = ["Bovinos (Vacunos)", "Aves de corral", "Porcinos", "Búfalos", "Caprinos", "Equinos", "Ovinos"];
 export const TIPOS_EXPLOTACION = ["Doble propósito", "Carne", "Leche", "Cría"];
 export const TIPOS_MANEJO = ["Estabulado", "Semi-estabulado", "Pastoreo intensivo", "Pastoreo extensivo"];
 export const ZONAS_AGROECOLOGICAS = [

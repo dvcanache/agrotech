@@ -1,7 +1,99 @@
+export type EspecieAnimal = 
+  | 'Bovinos' 
+  | 'Aves de corral' 
+  | 'Porcinos' 
+  | 'Búfalos' 
+  | 'Caprinos' 
+  | 'Equinos';
+
+export interface EspecieTaxonomyItem {
+  id: EspecieAnimal;
+  nombre: string;
+  icono: string;
+  subcategorias: string[];
+}
+
+export const ESPECIES_TAXONOMY: Record<EspecieAnimal, EspecieTaxonomyItem> = {
+  'Bovinos': {
+    id: 'Bovinos',
+    nombre: 'Bovinos (Vacunos)',
+    icono: '🐮',
+    subcategorias: [
+      'Vacas',
+      'Novillas',
+      'Mautas / Mautes',
+      'Becerros / Becerras',
+      'Toros'
+    ]
+  },
+  'Aves de corral': {
+    id: 'Aves de corral',
+    nombre: 'Aves de corral',
+    icono: '🐔',
+    subcategorias: [
+      'Gallinas Ponedoras',
+      'Pollos de Engorde',
+      'Pollonas / Pollitos',
+      'Gallos Finos',
+      'Gallinas Finas',
+      'Pavos / Pavas',
+      'Patos / Patas',
+      'Pavitos / Patitos'
+    ]
+  },
+  'Porcinos': {
+    id: 'Porcinos',
+    nombre: 'Porcinos',
+    icono: '🐷',
+    subcategorias: [
+      'Cerdas Reproductoras',
+      'Verracos',
+      'Lechones',
+      'Cerdos de Ceba',
+      'Cerdas de Reemplazo'
+    ]
+  },
+  'Búfalos': {
+    id: 'Búfalos',
+    nombre: 'Búfalos',
+    icono: '🐃',
+    subcategorias: [
+      'Búfalas',
+      'Bubillas',
+      'Bucerros / Bucerras',
+      'Padrotes / Búfalos de Ceba'
+    ]
+  },
+  'Caprinos': {
+    id: 'Caprinos',
+    nombre: 'Caprinos',
+    icono: '🐐',
+    subcategorias: [
+      'Cabras Lecheras',
+      'Cabritonas / Cabritos',
+      'Chivos Reproductores',
+      'Caprinos de Ceba'
+    ]
+  },
+  'Equinos': {
+    id: 'Equinos',
+    nombre: 'Equinos',
+    icono: '🐴',
+    subcategorias: [
+      'Yeguas',
+      'Potros / Potrancas',
+      'Caballos',
+      'Padrillos / Sementales'
+    ]
+  }
+};
+
 export interface Animal {
   practico: string;
   unico: string;
   categoria: string;
+  especie?: EspecieAnimal;
+  subcategoria?: string;
   estatus: string;
   fechaNacimiento: string;
   edad: string;
@@ -31,7 +123,9 @@ export interface Animal {
 
 export interface AnimalFilterOptions {
   searchQuery?: string;
+  especie?: EspecieAnimal | string;
   categoria?: string;
+  subcategoria?: string;
   lote?: string;
 }
 
@@ -241,6 +335,7 @@ export interface Animal360 {
   unico: string;
   rfid: string;
   categoria: string;
+  subcategoria?: string;
   estatus: 'Activo' | 'Inactivo' | 'Descartado' | 'Vendido' | 'Fallecido';
   estatusReproductivo: 'Vacía' | 'Servida' | 'Preñada' | 'En espera';
   diasGestacion?: number;

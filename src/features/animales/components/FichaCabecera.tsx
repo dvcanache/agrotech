@@ -135,9 +135,21 @@ export const FichaCabecera: React.FC<FichaCabeceraProps> = ({
 
         {/* Badges y Chips Dinámicos */}
         <div className="ficha360-badges-strip">
-          <span className="ficha360-badge ficha360-badge-category">
-            {animal.categoria}
+          <span className="ficha360-badge ficha360-badge-category" style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+            <span>
+              {animal.especie === 'Aves de corral' ? '🐔' :
+               animal.especie === 'Porcinos' ? '🐷' :
+               animal.especie === 'Búfalos' ? '🐃' :
+               animal.especie === 'Caprinos' ? '🐐' :
+               animal.especie === 'Equinos' ? '🐴' : '🐮'}
+            </span>
+            <span>{animal.subcategoria || animal.categoria}</span>
           </span>
+          {animal.especie && (
+            <span className="ficha360-badge" style={{ backgroundColor: '#f1f5f9', color: '#475569', fontWeight: 600 }}>
+              {animal.especie}
+            </span>
+          )}
           <span className="ficha360-badge ficha360-badge-active">
             ● {animal.estatus}
           </span>

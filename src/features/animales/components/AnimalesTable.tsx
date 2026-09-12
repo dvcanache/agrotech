@@ -132,8 +132,36 @@ export const AnimalesTable: React.FC<AnimalesTableProps> = ({
               </td>
               <td>
                 <div className="td-inner">
-                  <span className="td-line1">{animal.categoria}</span>
-                  <span className="td-line2">{animal.estatus}</span>
+                  <span className="td-line1" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span 
+                      style={{ fontSize: 15 }} 
+                      title={animal.especie || 'Bovinos'}
+                    >
+                      {animal.especie === 'Aves de corral' ? '🐔' :
+                       animal.especie === 'Porcinos' ? '🐷' :
+                       animal.especie === 'Búfalos' ? '🐃' :
+                       animal.especie === 'Caprinos' ? '🐐' :
+                       animal.especie === 'Equinos' ? '🐴' : '🐮'}
+                    </span>
+                    <span style={{ fontWeight: 600 }}>{animal.subcategoria || animal.categoria}</span>
+                  </span>
+                  <span className="td-line2" style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
+                    <span>{animal.estatus}</span>
+                    {animal.especie && (
+                      <span 
+                        style={{ 
+                          fontSize: 10, 
+                          backgroundColor: '#f1f5f9', 
+                          color: '#475569', 
+                          padding: '1px 5px', 
+                          borderRadius: 4, 
+                          fontWeight: 600 
+                        }}
+                      >
+                        {animal.especie}
+                      </span>
+                    )}
+                  </span>
                 </div>
               </td>
               <td>
