@@ -215,7 +215,8 @@ export const CatalogView: React.FC<CatalogViewProps> = ({ catalogType }) => {
                 <td style={{ textAlign: 'center' }}>
                   <button
                     type="button"
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}
+                    className="btn-icon"
+                    style={{ color: '#ef4444' }}
                     onClick={() => handleDeleteItem(item.id)}
                     title="Eliminar"
                   >

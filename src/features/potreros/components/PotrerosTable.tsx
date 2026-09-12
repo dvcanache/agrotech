@@ -166,7 +166,7 @@ export const PotrerosTable: React.FC<PotrerosTableProps> = ({
               <td style={{ textAlign: 'center' }} onClick={e => e.stopPropagation()}>
                 <button
                   type="button"
-                  style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}
+                  className="btn-icon"
                   title="Opciones del potrero"
                   onClick={() => onSelectPotrero?.(potrero)}
                 >

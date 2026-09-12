@@ -20,6 +20,25 @@
   padding: 0;
 }
 
+button {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--primary-light);
+  outline-offset: 2px;
+}
+
 body {
   font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   background-color: var(--bg-gray);
@@ -522,14 +541,50 @@ body {
   transform: translateX(0);
 }
 
-/* Animals View Toolbar */
-.animals-toolbar {
+/* Animals / Potreros View Toolbar */
+.animals-toolbar,
+.animales-toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
   gap: 16px;
   margin-bottom: 8px;
+}
+
+.search-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-container .search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  pointer-events: none;
+}
+
+.search-container .search-input {
+  width: 100%;
+  height: 38px;
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0 16px 0 40px;
+  font-family: inherit;
+  font-size: 13.5px;
+  color: var(--text-primary);
+  outline: none;
+  transition: all var(--transition-speed) ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.search-container .search-input:focus {
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.15);
 }
 
 .toolbar-left {
@@ -873,6 +928,112 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+/* Core Button Styles */
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary-color) 0%, #1e4a37 100%);
+  color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13.5px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(45, 106, 79, 0.25);
+  transition: all var(--transition-speed) ease;
+  white-space: nowrap;
+  user-select: none;
+  text-decoration: none;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #245740 0%, #16382a 100%);
+  box-shadow: 0 4px 12px rgba(45, 106, 79, 0.35);
+  transform: translateY(-1px);
+  color: #ffffff;
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 1px 3px rgba(45, 106, 79, 0.2);
+}
+
+.btn-primary:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.65;
+}
+
+.btn-secondary {
+  background-color: #ffffff;
+  color: var(--text-primary);
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13.5px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: all var(--transition-speed) ease;
+  white-space: nowrap;
+  user-select: none;
+  text-decoration: none;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: #f9fafb;
+  border-color: #9ca3af;
+  color: var(--primary-color);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.btn-secondary:active:not(:disabled) {
+  background-color: #f3f4f6;
+  transform: translateY(0);
+}
+
+.btn-secondary.active {
+  background-color: var(--primary-ultra-light);
+  border-color: var(--primary-light);
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.btn-secondary:disabled {
+  color: #9ca3af;
+  border-color: #e5e7eb;
+  background-color: #f9fafb;
+  cursor: not-allowed;
+}
+
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  background-color: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+}
+
+.btn-icon:hover {
+  background-color: var(--bg-gray);
+  color: var(--primary-color);
+  border-color: var(--border-gray);
 }
 
 .btn-blue-dark {
@@ -1342,4 +1503,127 @@ body {
   min-width: 0;
   overflow: hidden;
 }
+
+/* GIS Map Floating Controls */
+.gis-layer-switcher {
+  display: flex;
+  background-color: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  pointer-events: auto;
+  gap: 4px;
+}
+
+.gis-layer-btn {
+  background: transparent;
+  color: #cbd5e1;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.gis-layer-btn:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.gis-layer-btn.active {
+  background: linear-gradient(135deg, #52b788 0%, #2d6a4f 100%);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.gis-coord-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 6px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  pointer-events: auto;
+}
+
+.gis-map-control-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+}
+
+.gis-map-control-btn:hover {
+  background-color: #ffffff;
+  color: var(--primary-color);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  transform: translateY(-1px);
+}
+
+.gis-map-control-btn:active {
+  transform: translateY(0);
+  background-color: #f1f5f9;
+}
+
+.gis-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--text-primary);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+  transition: all var(--transition-speed) ease;
+}
+
+.gis-toggle-btn:hover {
+  background-color: #ffffff;
+  color: var(--primary-color);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  transform: translateY(-1px);
+}
+
+.gis-toggle-btn.active {
+  background: linear-gradient(135deg, var(--primary-color) 0%, #1e4a37 100%);
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: 0 4px 14px rgba(45, 106, 79, 0.4);
+  font-weight: 600;
+}
+
 

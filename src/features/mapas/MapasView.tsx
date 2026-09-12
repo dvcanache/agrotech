@@ -209,35 +209,24 @@ export const MapasView: React.FC = () => {
             pointerEvents: 'none'
           }}>
             {/* Layer Switcher */}
-            <div style={{
-              display: 'flex',
-              backgroundColor: 'rgba(15, 23, 42, 0.85)',
-              backdropFilter: 'blur(8px)',
-              padding: 4,
-              borderRadius: 8,
-              border: '1px solid rgba(255,255,255,0.15)',
-              pointerEvents: 'auto'
-            }}>
+            <div className="gis-layer-switcher">
               <button
                 type="button"
-                className={`btn-secondary ${activeLayer === 'satelital' ? 'active' : ''}`}
-                style={{ fontSize: 12, padding: '4px 10px', height: 28, borderRadius: 6 }}
+                className={`gis-layer-btn ${activeLayer === 'satelital' ? 'active' : ''}`}
                 onClick={() => setActiveLayer('satelital')}
               >
                 Satelital ArcGIS
               </button>
               <button
                 type="button"
-                className={`btn-secondary ${activeLayer === 'topografico' ? 'active' : ''}`}
-                style={{ fontSize: 12, padding: '4px 10px', height: 28, borderRadius: 6 }}
+                className={`gis-layer-btn ${activeLayer === 'topografico' ? 'active' : ''}`}
                 onClick={() => setActiveLayer('topografico')}
               >
                 Topográfico
               </button>
               <button
                 type="button"
-                className={`btn-secondary ${activeLayer === 'ndvi' ? 'active' : ''}`}
-                style={{ fontSize: 12, padding: '4px 10px', height: 28, borderRadius: 6 }}
+                className={`gis-layer-btn ${activeLayer === 'ndvi' ? 'active' : ''}`}
                 onClick={() => setActiveLayer('ndvi')}
               >
                 Biomasa (NDVI)
@@ -245,20 +234,7 @@ export const MapasView: React.FC = () => {
             </div>
 
             {/* Coordinates & Compass */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              backgroundColor: 'rgba(15, 23, 42, 0.85)',
-              backdropFilter: 'blur(8px)',
-              padding: '4px 12px',
-              borderRadius: 8,
-              border: '1px solid rgba(255,255,255,0.15)',
-              color: '#ffffff',
-              fontSize: 12,
-              fontFamily: 'monospace',
-              pointerEvents: 'auto'
-            }}>
+            <div className="gis-coord-badge">
               <Compass size={14} color="#52b788" />
               <span>9°33'14" N, 69°12'54" W</span>
             </div>
@@ -276,16 +252,7 @@ export const MapasView: React.FC = () => {
           }}>
             <button
               type="button"
-              className="btn-secondary"
-              style={{
-                width: 36,
-                height: 36,
-                padding: 0,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: 'rgba(255,255,255,0.92)'
-              }}
+              className="gis-map-control-btn"
               onClick={handleZoomIn}
               title="Acercar (Zoom In)"
             >
@@ -293,16 +260,7 @@ export const MapasView: React.FC = () => {
             </button>
             <button
               type="button"
-              className="btn-secondary"
-              style={{
-                width: 36,
-                height: 36,
-                padding: 0,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: 'rgba(255,255,255,0.92)'
-              }}
+              className="gis-map-control-btn"
               onClick={handleZoomOut}
               title="Alejar (Zoom Out)"
             >
@@ -310,16 +268,7 @@ export const MapasView: React.FC = () => {
             </button>
             <button
               type="button"
-              className="btn-secondary"
-              style={{
-                width: 36,
-                height: 36,
-                padding: 0,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: 'rgba(255,255,255,0.92)'
-              }}
+              className="gis-map-control-btn"
               onClick={handleResetZoom}
               title="Restablecer vista"
             >
@@ -338,16 +287,10 @@ export const MapasView: React.FC = () => {
           }}>
             <button
               type="button"
-              className={`btn-secondary ${showPOIs ? 'active' : ''}`}
-              style={{
-                fontSize: 12,
-                height: 32,
-                backgroundColor: showPOIs ? 'var(--primary-color)' : 'rgba(255,255,255,0.92)',
-                color: showPOIs ? '#ffffff' : 'var(--text-primary)'
-              }}
+              className={`gis-toggle-btn ${showPOIs ? 'active' : ''}`}
               onClick={() => setShowPOIs(prev => !prev)}
             >
-              <MapPin size={14} />
+              <MapPin size={15} />
               <span>Instalaciones / Puntos</span>
             </button>
           </div>
