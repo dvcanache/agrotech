@@ -264,29 +264,41 @@
 
 .spreadsheet-tabs {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   background-color: #f1f5f9;
   padding: 4px;
   border-radius: 8px;
+  flex-wrap: wrap;
 }
 
 .spreadsheet-tab-btn {
-  padding: 6px 14px;
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
   border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
-  color: #64748b;
-  border: none;
+  color: #475569;
+  border: 1px solid transparent;
   background: transparent;
   cursor: pointer;
   transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.spreadsheet-tab-btn:hover {
+  color: #095431;
+  background-color: rgba(255, 255, 255, 0.7);
 }
 
 .spreadsheet-tab-btn.active {
   background-color: #ffffff;
-  color: var(--primary-color);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  color: #095431;
+  border-color: rgba(9, 84, 49, 0.18);
+  box-shadow: 0 1px 4px rgba(9, 84, 49, 0.12);
+  font-weight: 700;
 }
+
 
 .spreadsheet-actions-group {
   display: flex;
@@ -804,4 +816,37 @@
   background-color: #fef3c7;
   color: #b45309;
 }
+
+/* Status Badges & AgroGan Identity Accents */
+.badge-status-pill.elite {
+  background-color: #f3e8ff;
+  color: #7e22ce;
+  border: 1px solid #e9d5ff;
+}
+
+.badge-status-pill.info {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.badge-status-pill.lock {
+  background-color: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+  font-weight: 700;
+}
+
+/* Focus and AgroGan Identity Highlights */
+.spreadsheet-input:focus {
+  border-color: #52b788 !important;
+  box-shadow: 0 0 0 2px rgba(82, 183, 136, 0.25) !important;
+}
+
+.species-filter-pill.active {
+  background-color: #095431 !important;
+  color: #ffffff !important;
+  box-shadow: 0 1px 4px rgba(9, 84, 49, 0.25) !important;
+}
+
 

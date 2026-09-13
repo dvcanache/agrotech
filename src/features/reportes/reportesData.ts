@@ -1,28 +1,116 @@
-import { ReportCategory } from '../../types/reports';
+import { ReportCategory, ReportSpecies } from '../../types/reports';
+
+export interface ReportTemplateMeta {
+  nombre: string;
+  especie: ReportSpecies;
+  categoria: string;
+  descripcion: string;
+  formato: string;
+  frecuencia: string;
+  ruta?: string;
+}
 
 export const REPORT_CATEGORIES: ReportCategory[] = [
   {
-    titulo: "Gestión",
-    iconoType: "gestion",
-    reportes: ["Inventarios", "Movimientos", "Distribución normal", "Técnicos", "Reproductores"]
-  },
-  {
-    titulo: "Animales",
-    iconoType: "animales",
+    titulo: "Bovinos (Vacunos & Doble Propósito)",
+    iconoType: "bovinos",
+    especie: "bovinos",
+    subtitulo: "Lactancias Wood 305d, vientres, FPP y mastitis CMT",
     reportes: [
+      "Vientres y Producción Lechera",
+      "Próximas a Parir / Secar",
+      "Curvas de Lactancia Wood 305d",
+      "Mastitis CMT por Cuartos Mamarios",
       "Vientres",
-      "Próximas a secar",
-      "Próximas a parir",
-      "Próximas a revisar",
-      "Animales secos",
       "Animales lactando",
+      "Animales secos",
       "Animales criando",
       "No Vientres"
     ]
   },
   {
-    titulo: "Históricos",
+    titulo: "Aves de corral (Ponedoras & Pollos)",
+    iconoType: "aves",
+    especie: "aves",
+    subtitulo: "Postura, curvas genéticas, ICA broilers y galpones",
+    reportes: [
+      "Control Diario de Postura y Huevos",
+      "Curva de Postura vs Guía Genética",
+      "Conversión Alimenticia e ICA Broilers",
+      "Mortalidad Semanal en Galpón",
+      "Incubación y Eclosión por Lote",
+      "Acondicionamiento y Registro Gallos Finos"
+    ]
+  },
+  {
+    titulo: "Porcinos (Piara & Ceba Intensiva)",
+    iconoType: "porcinos",
+    especie: "porcinos",
+    subtitulo: "Camadas LNV/LNM, grasa P2 y sanidad piara",
+    reportes: [
+      "Eficiencia Reproductiva de Cerdas",
+      "Balance de Camadas (LNV / LNM / Momias)",
+      "Curva de Crecimiento y Ceba Porcina",
+      "Espesor Grasa Dorsal P2 y Magro",
+      "Monitoreo Sanitario de Piara (PPC / Circovirus)"
+    ]
+  },
+  {
+    titulo: "Búfalos (Sabana Inundable & Quesera)",
+    iconoType: "bufalos",
+    especie: "bufalos",
+    subtitulo: "Sólidos totales, lactancias 270d y bucerros",
+    reportes: [
+      "Control Lechero Bufalino y Sólidos Totales",
+      "Eficiencia en Sabanas Inundables",
+      "Crecimiento y Destete de Bucerros",
+      "Lactancias Búfalas Normalizadas 270d"
+    ]
+  },
+  {
+    titulo: "Caprinos (Aprisco & Tarima)",
+    iconoType: "caprinos",
+    especie: "caprinos",
+    subtitulo: "Tarima lechera 210d, FAMACHA podología y Boer",
+    reportes: [
+      "Control Lechero Caprino en Tarima",
+      "Evaluación FAMACHA de Anemia Parasitaria",
+      "Monitoreo Podológico de Pezuñas",
+      "Lactancias Caprinas 210d",
+      "Crecimiento y Rendimiento Cabritos Boer"
+    ]
+  },
+  {
+    titulo: "Equinos (Registro, Deporte & Faena)",
+    iconoType: "equinos",
+    especie: "equinos",
+    subtitulo: "Pasaporte, Test Coggins, herraje y vaquería",
+    reportes: [
+      "Libro de Registro y Pasaporte Equino",
+      "Cronograma de Herraje y Desvasado",
+      "Certificación Oficial AIE (Test Coggins)",
+      "Foliculometría y Fertilidad de Yeguas",
+      "Bitácora de Vaquería y Entrenamiento Deportivo"
+    ]
+  },
+  {
+    titulo: "Gestión Pecuaria General",
+    iconoType: "gestion",
+    especie: "todos",
+    subtitulo: "Censos, movimientos y genealogía",
+    reportes: [
+      "Inventarios",
+      "Movimientos",
+      "Distribución normal",
+      "Técnicos",
+      "Reproductores"
+    ]
+  },
+  {
+    titulo: "Históricos & Series de Tiempo",
     iconoType: "historicos",
+    especie: "todos",
+    subtitulo: "Curvas históricas de producción y reproducción",
     reportes: [
       "Historia de reproducciones",
       "Historia de lactancias",
@@ -31,8 +119,10 @@ export const REPORT_CATEGORIES: ReportCategory[] = [
     ]
   },
   {
-    titulo: "Multirebaños",
+    titulo: "Multirebaños & Consolidado Global",
     iconoType: "multirebanos",
+    especie: "todos",
+    subtitulo: "Auditoría entre fincas y transacciones globales",
     reportes: [
       "Inventario multirebaño",
       "Situación reproductiva actual",
@@ -43,3 +133,251 @@ export const REPORT_CATEGORIES: ReportCategory[] = [
     ]
   }
 ];
+
+export const REPORT_METADATA_MAP: Record<string, ReportTemplateMeta> = {
+  // Aves
+  'Control Diario de Postura y Huevos': {
+    nombre: 'Control Diario de Postura y Huevos',
+    especie: 'aves',
+    categoria: 'Producción',
+    descripcion: 'Recolección diaria clasificada: comerciales AAA/AA/A, fértiles, rotos y cálculo de % postura.',
+    formato: 'Matriz diaria con semáforo productivo',
+    frecuencia: 'Diario (Cierre de tarde)'
+  },
+  'Curva de Postura vs Guía Genética': {
+    nombre: 'Curva de Postura vs Guía Genética',
+    especie: 'aves',
+    categoria: 'Genética',
+    descripcion: 'Comparativo real vs estándar genético Hy-Line Brown / Lohmann Brown según semanas de edad.',
+    formato: 'Gráfico bivariado + Tabla de desvío',
+    frecuencia: 'Semanal'
+  },
+  'Conversión Alimenticia e ICA Broilers': {
+    nombre: 'Conversión Alimenticia e ICA Broilers',
+    especie: 'aves',
+    categoria: 'Crecimiento',
+    descripcion: 'Índice de Conversión Alimenticia (ICA), ganancia media diaria y consumo de pienso en pollos de engorde.',
+    formato: 'Curva de eficiencia y peso medio',
+    frecuencia: 'Semanal'
+  },
+  'Mortalidad Semanal en Galpón': {
+    nombre: 'Mortalidad Semanal en Galpón',
+    especie: 'aves',
+    categoria: 'Sanidad',
+    descripcion: 'Registro de bajas por galpón, causas de necropsia (golpe de calor, ascitis) y % acumulado.',
+    formato: 'Tablero epidemiológico de piara/galpón',
+    frecuencia: 'Semanal'
+  },
+  'Incubación y Eclosión por Lote': {
+    nombre: 'Incubación y Eclosión por Lote',
+    especie: 'aves',
+    categoria: 'Reproducción',
+    descripcion: 'Ovoscopía a 7d y 14d, porcentaje de fertilidad, nacimientos vivos y cálculo de Pasgar Score.',
+    formato: 'Ficha de lote de incubadora',
+    frecuencia: 'Por lote incubado'
+  },
+  'Acondicionamiento y Registro Gallos Finos': {
+    nombre: 'Acondicionamiento y Registro Gallos Finos',
+    especie: 'aves',
+    categoria: 'Manejo',
+    descripcion: 'Pesajes de combate, arreglo de espuelas, descreste y bitácora de entrenamiento de ejemplares finos.',
+    formato: 'Ficha individual de combate',
+    frecuencia: 'Bajo demanda'
+  },
+
+  // Porcinos
+  'Eficiencia Reproductiva de Cerdas': {
+    nombre: 'Eficiencia Reproductiva de Cerdas',
+    especie: 'porcinos',
+    categoria: 'Reproducción',
+    descripcion: 'Tasa de concepción, lechones destetados/cerda/año (LDCA) e intervalo destete-cubrición fértil.',
+    formato: 'KPIs reproductivos y ranking de reproductoras',
+    frecuencia: 'Mensual'
+  },
+  'Balance de Camadas (LNV / LNM / Momias)': {
+    nombre: 'Balance de Camadas (LNV / LNM / Momias)',
+    especie: 'porcinos',
+    categoria: 'Maternidad',
+    descripcion: 'Distribución de partos: nacidos vivos, mortinatos, momias, peso de camada y promedio al nacer.',
+    formato: 'Matriz de maternidad por sala',
+    frecuencia: 'Semanal'
+  },
+  'Curva de Crecimiento y Ceba Porcina': {
+    nombre: 'Curva de Crecimiento y Ceba Porcina',
+    especie: 'porcinos',
+    categoria: 'Crecimiento',
+    descripcion: 'Evolución ponderal de lotes en precebo y ceba hasta peso final de matadero (105-115 kg).',
+    formato: 'Curva de ganancia diaria (GDP)',
+    frecuencia: 'Quincenal'
+  },
+  'Espesor Grasa Dorsal P2 y Magro': {
+    nombre: 'Espesor Grasa Dorsal P2 y Magro',
+    especie: 'porcinos',
+    categoria: 'Calidad Canal',
+    descripcion: 'Medición ultrasonográfica del espesor de grasa dorsal P2 (mm) y estimación del porcentaje de carne magra.',
+    formato: 'Informe de tipificación y rinde en canal',
+    frecuencia: 'Por lote a beneficio'
+  },
+  'Monitoreo Sanitario de Piara (PPC / Circovirus)': {
+    nombre: 'Monitoreo Sanitario de Piara (PPC / Circovirus)',
+    especie: 'porcinos',
+    categoria: 'Sanidad',
+    descripcion: 'Cobertura vacunal contra Peste Porcina Clásica (PPC), Circovirus PCV2 y Micoplasma hyopneumoniae.',
+    formato: 'Certificado de bioseguridad y cronograma',
+    frecuencia: 'Mensual'
+  },
+
+  // Búfalos
+  'Control Lechero Bufalino y Sólidos Totales': {
+    nombre: 'Control Lechero Bufalino y Sólidos Totales',
+    especie: 'bufalos',
+    categoria: 'Producción',
+    descripcion: 'Pesajes de ordeño bufalino con grasa (7-9%), proteína y aptitud para queso Mozzarella y de mano.',
+    formato: 'Matriz de rendimiento quesero',
+    frecuencia: 'Quincenal'
+  },
+  'Eficiencia en Sabanas Inundables': {
+    nombre: 'Eficiencia en Sabanas Inundables',
+    especie: 'bufalos',
+    categoria: 'Pastoreo',
+    descripcion: 'Carga animal UGG en humedales y esteros, resistencia a parásitos de ciénaga y ganancias de peso.',
+    formato: 'Mapa de presión de sabana y aforo',
+    frecuencia: 'Mensual'
+  },
+  'Crecimiento y Destete de Bucerros': {
+    nombre: 'Crecimiento y Destete de Bucerros',
+    especie: 'bufalos',
+    categoria: 'Crecimiento',
+    descripcion: 'Desarrollo ponderal de bucerros al pie de la madre hasta el destete a los 240 días.',
+    formato: 'Curva ponderal bufalina',
+    frecuencia: 'Mensual'
+  },
+  'Lactancias Búfalas Normalizadas 270d': {
+    nombre: 'Lactancias Búfalas Normalizadas 270d',
+    especie: 'bufalos',
+    categoria: 'Producción',
+    descripcion: 'Curva de lactancia bufalina estandarizada a 270 días de duración según fisiología de la especie.',
+    formato: 'Curva de persistencia láctea bufalina',
+    frecuencia: 'Bajo demanda'
+  },
+
+  // Caprinos
+  'Control Lechero Caprino en Tarima': {
+    nombre: 'Control Lechero Caprino en Tarima',
+    especie: 'caprinos',
+    categoria: 'Producción',
+    descripcion: 'Pesajes individuales en sala de ordeño en tarima elevada con grasa (3.8-4.5%) y sólidos totales.',
+    formato: 'Ficha de producción individual en aprisco',
+    frecuencia: 'Quincenal'
+  },
+  'Evaluación FAMACHA de Anemia Parasitaria': {
+    nombre: 'Evaluación FAMACHA de Anemia Parasitaria',
+    especie: 'caprinos',
+    categoria: 'Sanidad',
+    descripcion: 'Clasificación clínica de la conjuntiva ocular (grados 1 a 5) para desparasitación selectiva de Haemonchus.',
+    formato: 'Semáforo FAMACHA y prescripción dirigida',
+    frecuencia: 'Mensual'
+  },
+  'Monitoreo Podológico de Pezuñas': {
+    nombre: 'Monitoreo Podológico de Pezuñas',
+    especie: 'caprinos',
+    categoria: 'Manejo',
+    descripcion: 'Registro de recorte funcional de pezuñas, prevención de gabarro y pododermatitis en corrales.',
+    formato: 'Cronograma podológico del rebaño',
+    frecuencia: 'Bimestral'
+  },
+  'Lactancias Caprinas 210d': {
+    nombre: 'Lactancias Caprinas 210d',
+    especie: 'caprinos',
+    categoria: 'Producción',
+    descripcion: 'Normalización de lactancias caprinas a 210 días con proyecciones por raza (Saanen, Alpina, Nubian).',
+    formato: 'Curva de lactación caprina',
+    frecuencia: 'Bajo demanda'
+  },
+  'Crecimiento y Rendimiento Cabritos Boer': {
+    nombre: 'Crecimiento y Rendimiento Cabritos Boer',
+    especie: 'caprinos',
+    categoria: 'Crecimiento',
+    descripcion: 'Ganancia diaria de peso en cabritos para carne (Boer y mestizos) hasta los 60 días de destete precoz.',
+    formato: 'Tabla de conversión cárnica caprina',
+    frecuencia: 'Quincenal'
+  },
+
+  // Equinos
+  'Libro de Registro y Pasaporte Equino': {
+    nombre: 'Libro de Registro y Pasaporte Equino',
+    especie: 'equinos',
+    categoria: 'Registro Oficial',
+    descripcion: 'Ficha oficial con identificación por microchip, señas particulares, genealogía y reseñas gráficas.',
+    formato: 'Pasaporte oficial exportable PDF',
+    frecuencia: 'Permanente'
+  },
+  'Cronograma de Herraje y Desvasado': {
+    nombre: 'Cronograma de Herraje y Desvasado',
+    especie: 'equinos',
+    categoria: 'Manejo',
+    descripcion: 'Control de aplomos, herrador responsable, tipo de herraduras y alertas de vencimiento (35-45 días).',
+    formato: 'Calendario podológico equino',
+    frecuencia: 'Mensual'
+  },
+  'Certificación Oficial AIE (Test Coggins)': {
+    nombre: 'Certificación Oficial AIE (Test Coggins)',
+    especie: 'equinos',
+    categoria: 'Sanidad Oficial',
+    descripcion: 'Vigencia de diagnósticos de Anemia Infecciosa Equina con número de protocolo de laboratorio y ente sanitario.',
+    formato: 'Certificado de movilización y vigencia',
+    frecuencia: 'Semestral'
+  },
+  'Foliculometría y Fertilidad de Yeguas': {
+    nombre: 'Foliculometría y Fertilidad de Yeguas',
+    especie: 'equinos',
+    categoria: 'Reproducción',
+    descripcion: 'Monitoreo ecográfico del diámetro folicular (mm), edema uterino y programación de inseminación.',
+    formato: 'Ficha folicular ginecológica',
+    frecuencia: 'En temporada reproductiva'
+  },
+  'Bitácora de Vaquería y Entrenamiento Deportivo': {
+    nombre: 'Bitácora de Vaquería y Entrenamiento Deportivo',
+    especie: 'equinos',
+    categoria: 'Trabajo / Deporte',
+    descripcion: 'Horas de trabajo en campo, jornadas de arreo de sabana, entrenamiento de coleo y condición atlética.',
+    formato: 'Bitácora de esfuerzo y recuperación',
+    frecuencia: 'Semanal'
+  },
+
+  // Bovinos
+  'Vientres y Producción Lechera': {
+    nombre: 'Vientres y Producción Lechera',
+    especie: 'bovinos',
+    categoria: 'Producción',
+    descripcion: 'Hembras activas en ordeño con días en leche, promedios diarios y persistencia láctea.',
+    formato: 'Resumen ejecutivo de ordeño',
+    frecuencia: 'Diario',
+    ruta: '/reports/dams'
+  },
+  'Próximas a Parir / Secar': {
+    nombre: 'Próximas a Parir / Secar',
+    especie: 'bovinos',
+    categoria: 'Reproducción',
+    descripcion: 'Alertas de traslado a maternidad y fecha de secado según días de gestación confirmada.',
+    formato: 'Cronograma de traslados a maternidad',
+    frecuencia: 'Semanal',
+    ruta: '/reports/nexttobirth'
+  },
+  'Curvas de Lactancia Wood 305d': {
+    nombre: 'Curvas de Lactancia Wood 305d',
+    especie: 'bovinos',
+    categoria: 'Producción',
+    descripcion: 'Ajuste del modelo gamma incompleto de Wood a 305 días para evaluar pico y persistencia.',
+    formato: 'Curva matemática + Datos tabulares',
+    frecuencia: 'Mensual'
+  },
+  'Mastitis CMT por Cuartos Mamarios': {
+    nombre: 'Mastitis CMT por Cuartos Mamarios',
+    especie: 'bovinos',
+    categoria: 'Sanidad',
+    descripcion: 'Puntuación California Mastitis Test (0 a 3) en cuartos AD, AI, PD, PI y tiempos de retiro.',
+    formato: 'Mapeo mamario interactivo',
+    frecuencia: 'Quincenal'
+  }
+};

@@ -19,7 +19,8 @@ import {
 export interface VientreEntity {
   practico: string;
   unico: string;
-  categoria: 'Novilla' | 'Vaca';
+  categoria: string;
+  especie?: string;
   estatus: EstatusAnimal;
   estatusReproductivo: EstatusReproductivo;
   estatusProductivo: EstatusProductivo;
@@ -38,6 +39,7 @@ export interface ProximaSecarEntity {
   practico: string;
   unico: string;
   categoria: CategoriaAnimal;
+  especie?: string;
   estatus: EstatusAnimal;
   lote: string;
   ultimoPartoAborto?: string;
@@ -58,7 +60,8 @@ export interface ProximaSecarEntity {
 export interface ProximaParirEntity {
   practico: string;
   unico: string;
-  categoria: 'Novilla' | 'Vaca';
+  categoria: string;
+  especie?: string;
   estatus: EstatusAnimal;
   lote: string;
   ultimoPartoAborto?: string;
@@ -74,6 +77,7 @@ export interface ProximaParirEntity {
   fechaUltimoPeso?: string;
   fechaSecado?: string;
   diasSeca?: number;
+  duracionGestacionDias?: number;
 }
 
 /**
@@ -82,7 +86,8 @@ export interface ProximaParirEntity {
 export interface ProximaRevisarEntity {
   practico: string;
   unico: string;
-  categoria: 'Novilla' | 'Vaca';
+  categoria: string;
+  especie?: string;
   estatus: EstatusAnimal;
   lote: string;
   ultimoPartoAborto?: string;
@@ -107,9 +112,10 @@ export interface AnimalSecoEntity {
   practico: string;
   unico: string;
   categoria: CategoriaAnimal;
+  especie?: string;
   estatus: EstatusAnimal;
   estatusReproductivo: EstatusReproductivo;
-  estatusProductivo: 'Seca';
+  estatusProductivo: string;
   lote: string;
   ultimoParto?: string;
   ultimoServicio?: string;
@@ -126,9 +132,10 @@ export interface AnimalLactandoEntity {
   practico: string;
   unico: string;
   categoria: CategoriaAnimal;
+  especie?: string;
   estatus: EstatusAnimal;
   situacionReproductivaActual: EstatusReproductivo;
-  situacionProductivaActual: 'Ordeño';
+  situacionProductivaActual: string;
   lote: string;
   ultimoParto: string;
   numeroParto: number;
@@ -149,6 +156,7 @@ export interface AnimalCriandoEntity {
   practico: string;
   unico: string;
   categoria: CategoriaAnimal;
+  especie?: string;
   estatus: EstatusAnimal;
   lote: string;
   ultimoParto: string;
@@ -162,7 +170,8 @@ export interface AnimalCriandoEntity {
 export interface NoVientreEntity {
   practico: string;
   unico: string;
-  categoria: 'Becerra' | 'Mauta' | 'Becerro' | 'Maute' | 'Novillo';
+  categoria: string;
+  especie?: string;
   estatus: EstatusAnimal;
   lote: string;
   fechaNacimiento: string;

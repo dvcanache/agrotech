@@ -5,6 +5,7 @@ import { ReportPagination } from '../../components/ReportPagination';
 import { ReportSettingsModal, ColumnSetting } from '../../components/ReportSettingsModal';
 import { FichaAnimalModal, AnimalModalData } from '../components/FichaAnimalModal';
 import { LactandoFilterDrawer, LactandoFilterValues } from '../components/LactandoFilterDrawer';
+import { SpeciesSelectorBar, SPECIES_TABS_CONFIG } from '../../components/SpeciesSelectorBar';
 import { exportToCSV } from '../../utils/exportUtils';
 import { MOCK_ANIMALES_LACTANDO } from '../animalesMockData';
 import { AnimalLactandoEntity } from '../../../../types2/entities';
@@ -12,6 +13,9 @@ import { EstatusAnimal } from '../../../../types2/common';
 
 export const AnimalesLactandoView: React.FC = () => {
   const [animales] = useState<AnimalLactandoEntity[]>(MOCK_ANIMALES_LACTANDO);
+
+  // Especie activa
+  const [selectedSpecies, setSelectedSpecies] = useState<string>('TODAS');
 
   const [selectedAnimal, setSelectedAnimal] = useState<AnimalModalData | null>(null);
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
@@ -23,8 +27,20 @@ export const AnimalesLactandoView: React.FC = () => {
   const [sortField, setSortField] = useState<keyof AnimalLactandoEntity>('diasEnProduccion');
   const [sortAsc, setSortAsc] = useState(true);
 
+  // Conteo dinámico por especie
+  const speciesCounts = useMemo(() => {
+    const counts: Record<string, number> = { TODAS: animales.length };
+    SPECIES_TABS_CONFIG.forEach(t => {
+      if (t.id !== 'TODAS') {
+        counts[t.id] = animales.filter(a => (a.especie || 'Bovinos') === t.id).length;
+      }
+    });
+    return counts;
+  }, [animales]);
+
   const [columns, setColumns] = useState<ColumnSetting[]>([
     { key: 'practico', label: 'Práctico', visible: true },
+    { key: 'especie', label: 'Especie', visible: true },
     { key: 'unico', label: 'Único', visible: true },
     { key: 'categoria', label: 'Categoría', visible: true },
     { key: 'estatus', label: 'Estatus', visible: true },
@@ -46,14 +62,14 @@ export const AnimalesLactandoView: React.FC = () => {
   const [filters, setFilters] = useState<LactandoFilterValues>({
     diasProduccionMaximo: undefined,
     estatus: ['Activo'] as EstatusAnimal[],
-    lotes: ['01', 'ESCT', 'POT1', 'SEC1']
+    lotes: ['01', 'ESCT', 'POT1', 'SEC1', 'GALP-01', 'GALP-02', 'PIARA-01', 'APR-01', 'BUF-01', 'CAB-01']
   });
 
   const activeFiltersCount = useMemo(() => {
     let count = 0;
     if (filters.diasProduccionMaximo !== undefined) count++;
     if (filters.estatus.length < 3) count++;
-    if (filters.lotes.length < 4) count++;
+    if (filters.lotes.length < 10) count++;
     return count;
   }, [filters]);
 
@@ -79,15 +95,22 @@ export const AnimalesLactandoView: React.FC = () => {
   const filteredAnimales = useMemo(() => {
     return animales
       .filter(item => {
+        // Filtro por Especie activa
+        const sp = item.especie || 'Bovinos';
+        if (selectedSpecies !== 'TODAS' && sp !== selectedSpecies) {
+          return false;
+        }
+
         if (searchQuery.trim()) {
           const q = searchQuery.toLowerCase();
           const matchCode = item.practico.toLowerCase().includes(q) || item.unico.toLowerCase().includes(q);
           const matchLot = item.lote.toLowerCase().includes(q);
-          if (!matchCode && !matchLot) return false;
+          const matchCat = item.categoria.toLowerCase().includes(q);
+          if (!matchCode && !matchLot && !matchCat) return false;
         }
 
         if (!filters.estatus.includes(item.estatus)) return false;
-        if (!filters.lotes.includes(item.lote)) return false;
+        if (filters.lotes.length > 0 && !filters.lotes.includes(item.lote)) return false;
         if (
           filters.diasProduccionMaximo !== undefined &&
           item.diasEnProduccion > filters.diasProduccionMaximo
@@ -107,11 +130,11 @@ export const AnimalesLactandoView: React.FC = () => {
           ? String(valA || '').localeCompare(String(valB || ''))
           : String(valB || '').localeCompare(String(valA || ''));
       });
-  }, [animales, searchQuery, filters, sortField, sortAsc]);
+  }, [animales, selectedSpecies, searchQuery, filters, sortField, sortAsc]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [filters, searchQuery]);
+  }, [selectedSpecies, filters, searchQuery]);
 
   const totalPages = Math.ceil(filteredAnimales.length / pageSize) || 1;
   const paginatedAnimales = useMemo(() => {
@@ -192,6 +215,13 @@ export const AnimalesLactandoView: React.FC = () => {
         }
       />
 
+      {/* Barra Selectora Multiespecie */}
+      <SpeciesSelectorBar
+        selectedSpecies={selectedSpecies}
+        onSelectSpecies={setSelectedSpecies}
+        speciesCounts={speciesCounts}
+      />
+
       {/* Tabla */}
       <div className="report-table-wrapper">
         <table className="report-grid-table">
@@ -201,6 +231,14 @@ export const AnimalesLactandoView: React.FC = () => {
                 <th onClick={() => handleSort('practico')}>
                   <div className="th-content">
                     <span>Práctico</span>
+                    <Filter size={12} />
+                  </div>
+                </th>
+              )}
+              {isColVisible('especie') && (
+                <th onClick={() => handleSort('especie' as any)}>
+                  <div className="th-content">
+                    <span>Especie</span>
                     <Filter size={12} />
                   </div>
                 </th>
@@ -303,6 +341,20 @@ export const AnimalesLactandoView: React.FC = () => {
                 >
                   {isColVisible('practico') && (
                     <td style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{a.practico}</td>
+                  )}
+                  {isColVisible('especie') && (
+                    <td>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600 }}>
+                        <span>
+                          {a.especie === 'Aves de corral' ? '🐔' :
+                           a.especie === 'Porcinos' ? '🐷' :
+                           a.especie === 'Búfalos' ? '🐃' :
+                           a.especie === 'Caprinos' ? '🐐' :
+                           a.especie === 'Equinos' ? '🐴' : '🐮'}
+                        </span>
+                        <span>{a.especie || 'Bovinos'}</span>
+                      </span>
+                    </td>
                   )}
                   {isColVisible('unico') && <td>{a.unico}</td>}
                   {isColVisible('categoria') && <td>{a.categoria}</td>}

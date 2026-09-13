@@ -3,7 +3,7 @@ import { ReportFilterDrawer } from '../../components/ReportFilterDrawer';
 import { EstatusAnimal, EstatusReproductivo, EstatusProductivo } from '../../../../types2/common';
 
 export interface VientresFilterValues {
-  categorias: ('Novilla' | 'Vaca')[];
+  categorias: string[];
   estatus: EstatusAnimal[];
   estatusReproductivo: EstatusReproductivo[];
   estatusProductivo: EstatusProductivo[];
@@ -16,24 +16,35 @@ interface VientresFilterDrawerProps {
   filters: VientresFilterValues;
   onFilterChange: (newFilters: VientresFilterValues) => void;
   onReset: () => void;
+  availableCategorias?: string[];
 }
 
-const ALL_CATEGORIAS: ('Novilla' | 'Vaca')[] = ['Novilla', 'Vaca'];
+const DEFAULT_CATEGORIAS: string[] = [
+  'Novilla', 'Vaca',
+  'Cerda Reproductora', 'Cerda de Reemplazo',
+  'Búfala', 'Bubilla',
+  'Cabra Lechera', 'Cabritona',
+  'Yegua',
+  'Gallina Ponedora', 'Pava', 'Pata', 'Gallina Fina'
+];
 const ALL_ESTATUS: EstatusAnimal[] = ['Activo', 'Inactivo', 'Referencia'];
 const ALL_REPRODUCTIVO: EstatusReproductivo[] = ['Vacía', 'Preñada', 'En espera'];
-const ALL_PRODUCTIVO: EstatusProductivo[] = ['Criando', 'Ordeño', 'Seca'];
-const ALL_LOTES = ['01', 'ESCT', 'POT1', 'SEC1', 'TERM1'];
+const ALL_PRODUCTIVO: EstatusProductivo[] = ['Criando', 'Ordeño', 'Seca', 'Lactancia', 'Postura', 'En Producción'];
+const ALL_LOTES = ['01', 'ESCT', 'POT1', 'SEC1', 'TERM1', 'GALP-01', 'GALP-02', 'PIARA-01', 'CAB-01', 'APR-01'];
 
 export const VientresFilterDrawer: React.FC<VientresFilterDrawerProps> = ({
   isOpen,
   onClose,
   filters,
   onFilterChange,
-  onReset
+  onReset,
+  availableCategorias
 }) => {
   const toggleArrayItem = <T,>(list: T[], item: T): T[] => {
     return list.includes(item) ? list.filter(i => i !== item) : [...list, item];
   };
+
+  const catsToRender = availableCategorias || DEFAULT_CATEGORIAS;
 
   return (
     <ReportFilterDrawer
@@ -46,7 +57,7 @@ export const VientresFilterDrawer: React.FC<VientresFilterDrawerProps> = ({
       <div className="filter-section">
         <div className="filter-section-title">Categoría</div>
         <div className="filter-checkbox-list">
-          {ALL_CATEGORIAS.map(cat => (
+          {catsToRender.map(cat => (
             <label key={cat} className="filter-checkbox-label">
               <input
                 type="checkbox"

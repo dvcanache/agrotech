@@ -8,30 +8,25 @@ import {
   Scale, 
   Heart, 
   ShieldAlert, 
-  Wifi, 
   Sparkles, 
-  Clock, 
   Baby, 
   Layers, 
   Stethoscope,
-  Radio,
   Egg,
-  Search
+  Scissors,
+  Wrench,
+  Eye,
+  Activity,
+  FileCheck,
+  FileText
 } from 'lucide-react';
 import { useApp } from '../../../context/AppContext';
 import { Animal, EspecieAnimal, ESPECIES_TAXONOMY } from '../../../types/animal';
+import { EVENT_CATEGORIES } from '../eventosData';
+import { EventoItem } from '../../../types/events';
 import './eventosSpreadsheet.css';
 
-export interface EventoItem {
-  id: string;
-  fecha: string;
-  codigoAnimal: string;
-  categoria: string;
-  tipoEvento: string;
-  vencimiento: string;
-  tecnico?: string;
-  observaciones?: string;
-}
+export type { EventoItem };
 
 interface NuevoEventoModalProps {
   isOpen: boolean;
@@ -75,11 +70,11 @@ const SEMEN_CATALOG_BY_SPECIES: Record<string, Array<{ id: string; nombre: strin
 // Species-tailored Vaccination and Vademécum plans
 const VACCINE_PLANS_BY_SPECIES: Record<string, string[]> = {
   'Aves de corral': [
-    'Vacunación Newcastle (Cepa LaSota ocular/agua)',
+    'Vacunación Newcastle (Cepa LaSota ocular/agua/aspersión)',
     'Vacunación Gumboro (Enfermedad de la Bolsa IBD)',
     'Vacunación Bronquitis Infecciosa (Cepa H-120)',
     'Vacunación Viruela Aviar (Punción alar)',
-    'Vacunación Marek (Al 1er día en incubadora)',
+    'Vacunación Marek (Al 1er día en incubadora subcutánea)',
     'Vacunación Coriza Infecciosa Aviar (Inactivada)'
   ],
   'Porcinos': [
@@ -93,7 +88,7 @@ const VACCINE_PLANS_BY_SPECIES: Record<string, string[]> = {
     'Prueba Serológica Anemia Infecciosa Equina (AIE - Test Coggins)',
     'Vacunación Encefalomielitis Equina Venezolana (EEV)',
     'Vacunación Toxoide Tetánico (Prevención Tétanos)',
-    'Vacunación Influenza Equina (Gripe A)',
+    'Vacunación Influenza Equina (Gripe A1/A2)',
     'Vacunación Rinoneumonitis Equina (Herpesvirus EHV-1/4)'
   ],
   'Bovinos': [
@@ -108,10 +103,10 @@ const VACCINE_PLANS_BY_SPECIES: Record<string, string[]> = {
     'Vacunación Brucelosis Bubalina (RB-51 oficial)',
     'Vacunación Rabia Paresiante de los Llanos',
     'Vacunación Clostridiosis y Mancha Negra',
-    'Desparasitación Estratégica Antiparasitaria L.A.'
+    'Desparasitación Estratégica Antiparasitaria L.A. (Fasciola)'
   ],
   'Caprinos': [
-    'Vacunación Clostridiosis Polivalente (Enterotoxemia)',
+    'Vacunación Clostridiosis Polivalente (Enterotoxemia tipo C y D)',
     'Vacunación Linfadenitis Caseosa (Pseudotuberculosis)',
     'Vacunación Fiebre Aftosa / Rabia de Pequeños Rumiantes',
     'Tratamiento Ectima Contagioso (Boquera caprina)',
@@ -173,11 +168,30 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
   const [filterSpecies, setFilterSpecies] = useState<'Todas' | EspecieAnimal>('Todas');
   const [manualCodeMode, setManualCodeMode] = useState(false);
 
+  // Active Category & Type in state (initialized from props)
+  const [categoria, setCategoria] = useState(categoriaInicial);
+  const [tipoEvento, setTipoEvento] = useState(tipoInicial);
+
   // Common fields
   const [fecha, setFecha] = useState(new Date().toISOString().split('T')[0]);
   const [codigoAnimal, setCodigoAnimal] = useState(codigoAnimalInicial || '0001');
   const [tecnico, setTecnico] = useState('Dr. Carlos Mendoza');
   const [observaciones, setObservaciones] = useState('');
+
+  // Sync props when modal is triggered
+  useEffect(() => {
+    if (isOpen) {
+      setCategoria(categoriaInicial);
+      setTipoEvento(tipoInicial);
+      if (codigoAnimalInicial) {
+        setCodigoAnimal(codigoAnimalInicial);
+        const matched = animals.find(a => a.practico.toUpperCase() === codigoAnimalInicial.toUpperCase());
+        if (matched?.especie) {
+          setFilterSpecies(matched.especie);
+        }
+      }
+    }
+  }, [isOpen, tipoInicial, categoriaInicial, codigoAnimalInicial, animals]);
 
   // Selected animal reference
   const selectedAnimalObj = useMemo(() => {
@@ -188,11 +202,11 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
   const currentSpecies: EspecieAnimal = useMemo(() => {
     if (selectedAnimalObj?.especie) return selectedAnimalObj.especie;
     const tag = codigoAnimal.toUpperCase();
-    if (tag.startsWith('AVE-') || tag.startsWith('GALP-')) return 'Aves de corral';
-    if (tag.startsWith('POR-')) return 'Porcinos';
-    if (tag.startsWith('BUF-')) return 'Búfalos';
-    if (tag.startsWith('CAP-')) return 'Caprinos';
-    if (tag.startsWith('EQU-')) return 'Equinos';
+    if (tag.startsWith('AVE-') || tag.startsWith('GALP-') || tag.startsWith('INC-') || tag.startsWith('GF-')) return 'Aves de corral';
+    if (tag.startsWith('POR-') || tag.startsWith('LECH-') || tag.startsWith('VERR-')) return 'Porcinos';
+    if (tag.startsWith('BUF-') || tag.startsWith('BUC-') || tag.startsWith('PAD-BUF')) return 'Búfalos';
+    if (tag.startsWith('CAP-') || tag.startsWith('CHIV-') || tag.startsWith('CAB-')) return 'Caprinos';
+    if (tag.startsWith('EQU-') || tag.startsWith('POT-') || tag.startsWith('PADR-')) return 'Equinos';
     return 'Bovinos';
   }, [selectedAnimalObj, codigoAnimal]);
 
@@ -202,6 +216,7 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
   const isPoultry = currentSpecies === 'Aves de corral';
   const isSwine = currentSpecies === 'Porcinos';
   const isEquine = currentSpecies === 'Equinos';
+  const isCaprine = currentSpecies === 'Caprinos';
   const isRuminant = currentSpecies === 'Bovinos' || currentSpecies === 'Búfalos' || currentSpecies === 'Caprinos';
 
   // Filtered animal list for dropdown
@@ -210,17 +225,29 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
     return animals.filter(a => a.especie === filterSpecies || (!a.especie && filterSpecies === 'Bovinos'));
   }, [animals, filterSpecies]);
 
+  // Available event types for selected category
+  const availableEventTypes = useMemo(() => {
+    const cat = EVENT_CATEGORIES.find(c => c.titulo.toLowerCase() === categoria.toLowerCase());
+    return cat ? cat.enlaces : [tipoEvento];
+  }, [categoria, tipoEvento]);
+
   // Semen catalog for current species
   const semenOptions = useMemo(() => {
     return SEMEN_CATALOG_BY_SPECIES[currentSpecies] || SEMEN_CATALOG_BY_SPECIES['Bovinos'];
   }, [currentSpecies]);
 
-  // Reproductivos - Servicios (Bovinos, Búfalos, Caprinos, Equinos)
+  // -------------------------------------------------------------
+  // REPRODUCTIVOS STATES
+  // -------------------------------------------------------------
+  // Servicios & Celos
   const [selectedSemenId, setSelectedSemenId] = useState('SM01');
   const [modalidadServicio, setModalidadServicio] = useState('Inseminación Artificial (IA)');
   const [turnoServicio, setTurnoServicio] = useState<'AM' | 'PM'>('AM');
+  const [turnoDeteccionCelo, setTurnoDeteccionCelo] = useState<'AM' | 'PM'>('AM');
+  const [intensidadCelo, setIntensidadCelo] = useState('Franco (Excelente manifestación)');
+  const [signosCelo, setSignosCelo] = useState('Reflejo de inmovilidad, secreción mucosa transparente');
 
-  // Reproductivos - Partos (Ruminants & Equines)
+  // Partos (Bovinos, Búfalos, Equinos)
   const [tipoParto, setTipoParto] = useState('Eutócico (Normal sin asistencia)');
   const [condicionCria, setCondicionCria] = useState<'Viva' | 'Nacimuerta'>('Viva');
   const [crearCriaAtomics, setCrearCriaAtomics] = useState(true);
@@ -230,75 +257,111 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
   const [criaColor, setCriaColor] = useState('Color característico racial');
   const [criaLote, setCriaLote] = useState('POT1');
 
-  // Reproductivos Porcinos: Camada de Lechones
-  const [lechonesVivos, setLechonesVivos] = useState(12);
+  // Porcino: Camadas de Lechones
+  const [lechonesVivos, setLechonesVivos] = useState(13);
   const [lechonesMuertos, setLechonesMuertos] = useState(1);
   const [momias, setMomias] = useState(0);
-  const [pesoCamadaKg, setPesoCamadaKg] = useState(16.8);
+  const [pesoCamadaKg, setPesoCamadaKg] = useState(18.2);
   const [pezonesFuncionales, setPezonesFuncionales] = useState(14);
   const [salaMaternidad, setSalaMaternidad] = useState('GALP-PAR');
   const [adopcionesNodriza, setAdopcionesNodriza] = useState(0);
 
-  // Reproductivos Aves: Incubación / Eclosión
+  // Aves: Incubación / Eclosión
   const [huevosFertilesIncubados, setHuevosFertilesIncubados] = useState(150);
   const [diasIncubacion, setDiasIncubacion] = useState(21);
+  const [ovoscopia7d, setOvoscopia7d] = useState(94);
+  const [ovoscopia14d, setOvoscopia14d] = useState(91);
   const [pollitosVivos, setPollitosVivos] = useState(138);
   const [huevosInfertiles, setHuevosInfertiles] = useState(8);
   const [muerteEmbrionaria, setMuerteEmbrionaria] = useState(4);
   const [salaIncubacion, setSalaIncubacion] = useState('INC-01');
   const [calidadPollito, setCalidadPollito] = useState('Grado 1 Élite (Pasgar Score 9+)');
 
-  // Reproductivos - Revisiones
+  // Equinos: Foliculometría & Parto Equino
+  const [diametroFolículoMm, setDiametroFolículoMm] = useState(42);
+  const [edemaUterinoGrado, setEdemaUterinoGrado] = useState(3);
+  const [ovarioActivo, setOvarioActivo] = useState('Ovario Izquierdo');
+  const [tipoSemenEquino, setTipoSemenEquino] = useState('Semen refrigerado (diluyente 24-48h)');
+  const [tiempoExpulsionPlacentaMin, setTiempoExpulsionPlacentaMin] = useState(45);
+  const [placentaIntegra, setPlacentaIntegra] = useState(true);
+  const [expulsionMeconio, setExpulsionMeconio] = useState('Expulsado espontáneo normal (< 3h)');
+
+  // Caprinos: Parto Múltiple & Desbotonado
+  const [tipoPartoCaprino, setTipoPartoCaprino] = useState<'Simple' | 'Mellizos' | 'Trillizos'>('Mellizos');
+  const [pesoCabrito1, setPesoCabrito1] = useState(3.8);
+  const [pesoCabrito2, setPesoCabrito2] = useState(3.5);
+  const [pesoCabrito3, setPesoCabrito3] = useState(3.2);
+  const [desbotonadoRealizado, setDesbotonadoRealizado] = useState(true);
+  const [encalostradoAsistido, setEncalostradoAsistido] = useState(true);
+
+  // Revisiones / Abortos
   const [diagnosticoPrenez, setDiagnosticoPrenez] = useState('Preñada');
   const [diasGestacion, setDiasGestacion] = useState(45);
   const [estructuraOvarica, setEstructuraOvarica] = useState('Cuerpo Lúteo en Ovario Derecho');
-
-  // Reproductivos - Abortos
   const [diasGestacionAborto, setDiasGestacionAborto] = useState(120);
   const [causaAborto, setCausaAborto] = useState('Infecciosa (Sospecha Neospora/Brucella)');
-  const [protocoloSanitarioAborto, setProtocoloSanitarioAborto] = useState('Aislamiento en corral de enfermería + Lavado intrauterino + Muestra serológica');
 
-  // Reproductivos - Celos
-  const [turnoDeteccionCelo, setTurnoDeteccionCelo] = useState<'AM' | 'PM'>('AM');
-  const [intensidadCelo, setIntensidadCelo] = useState('Franco (Excelente manifestación)');
-  const [signosCelo, setSignosCelo] = useState('Reflejo de inmovilidad, secreción mucosa transparente');
-
-  // Productivos - Pesajes Leche (Dairy Species)
-  const [pesajeAmKg, setPesajeAmKg] = useState<number>(7.5);
-  const [pesajePmKg, setPesajePmKg] = useState<number>(6.2);
+  // -------------------------------------------------------------
+  // PRODUCTIVOS STATES
+  // -------------------------------------------------------------
+  // Dairy milk
+  const [pesajeAmKg, setPesajeAmKg] = useState<number>(7.8);
+  const [pesajePmKg, setPesajePmKg] = useState<number>(6.4);
   const [grasaPorcentaje, setGrasaPorcentaje] = useState(3.8);
-  const [rcsConteo, setRcsConteo] = useState(140);
+  const [rcsConteo, setRcsConteo] = useState(145);
 
-  // Productivos - Postura de Huevos (Poultry)
-  const [huevosComercialesAvicola, setHuevosComercialesAvicola] = useState<number>(2380);
+  // Poultry eggs
+  const [huevosAAA, setHuevosAAA] = useState<number>(1820);
+  const [huevosAA, setHuevosAA] = useState<number>(560);
+  const [huevosA, setHuevosA] = useState<number>(120);
+  const [huevosFertiles, setHuevosFertiles] = useState<number>(150);
   const [huevosRotosAvicola, setHuevosRotosAvicola] = useState<number>(35);
   const [pesoHuevoAvicola, setPesoHuevoAvicola] = useState<number>(62.5);
-  const [calidadCascara, setCalidadCascara] = useState('Excelente Comercial (Cáscara A)');
+  const [avesAlojadasGalpon, setAvesAlojadasGalpon] = useState<number>(2500);
+  const [calidadCascara, setCalidadCascara] = useState('Excelente Comercial (Cáscara A - Firme)');
 
-  // Productivos - Secados
-  const [motivoSecado, setMotivoSecado] = useState('Programado por Gestación (60 d preparto)');
-  const [terapiaVacaSeca, setTerapiaVacaSeca] = useState('Sellador interno de pezones + Antibiótico intramamario');
-  const [destetarSimultaneo, setDestetarSimultaneo] = useState(false);
-  const [criaDesteteArete, setCriaDesteteArete] = useState('CRIA-01');
-  const [criaDestetePesoKg, setCriaDestetePesoKg] = useState(195);
-  const [criaDesteteLote, setCriaDesteteLote] = useState('POT1');
+  // Swine growth & P2 dorsal fat
+  const [espesorGrasaDorsalP2, setEspesorGrasaDorsalP2] = useState(13.8);
+  const [porcentajeMagro, setPorcentajeMagro] = useState(58.4);
+  const [consumoPiensoDiarioKg, setConsumoPiensoDiarioKg] = useState(2.8);
 
-  // Productivos - Crecimientos (All species)
+  // General weight growth
   const [pesoCorporalKg, setPesoCorporalKg] = useState(460);
   const [condicionCorporal, setCondicionCorporal] = useState(3.25);
   const [gdpEstimada, setGdpEstimada] = useState(650);
 
-  // Veterinarios - Mastitis
+  // Secados
+  const [motivoSecado, setMotivoSecado] = useState('Programado por Gestación (60 d preparto)');
+  const [terapiaVacaSeca, setTerapiaVacaSeca] = useState('Sellador interno de pezones + Cloxacilina intramamaria');
+
+  // -------------------------------------------------------------
+  // SANITARIOS & VETERINARIOS STATES
+  // -------------------------------------------------------------
+  // Mastitis CMT (4 quarters or 2 glands)
   const [cuartosCMT, setCuartosCMT] = useState<{ [key: string]: string }>({
     AD: 'Negativo',
     AI: 'Negativo',
     PD: 'Grado 2',
     PI: 'Negativo'
   });
-  const [tratamientoMastitis, setTratamientoMastitis] = useState('Cefa-Lak Intramamario cada 12h x 3 días');
+  const [tratamientoMastitis, setTratamientoMastitis] = useState('Cefa-Lak Intramamario cada 12h x 2 dosis');
   const [diasRetiroLecheMastitis, setDiasRetiroLecheMastitis] = useState(5);
 
-  // Veterinarios - Clínicos & Planes Sanitarios
+  // FAMACHA Caprino (1 to 5)
+  const [famachaScore, setFamachaScore] = useState<1 | 2 | 3 | 4 | 5>(2);
+  const [recortePezunasCaprino, setRecortePezunasCaprino] = useState('Recorte de mantenimiento preventivo');
+  const [pediluvioSulfato, setPediluvioSulfato] = useState(true);
+
+  // Equinos: Test de Coggins & Vacunas
+  const [cogginsResultado, setCogginsResultado] = useState('Negativo (Apto para movilización oficial)');
+  const [cogginsNumeroDictamen, setCogginsNumeroDictamen] = useState('INSAI-AIE-2026-8924');
+  const [cogginsLaboratorio, setCogginsLaboratorio] = useState('Laboratorio Sanidad Animal INSAI Oficial');
+  const [cogginsVigenciaMeses, setCogginsVigenciaMeses] = useState(6);
+
+  // Aves: Vía de Aplicación
+  const [viaAplicacionAviar, setViaAplicacionAviar] = useState('Aspersión (gota gruesa)');
+
+  // General vaccine and clinic
   const [tipoPlanSanitario, setTipoPlanSanitario] = useState('');
   const [biologicoLote, setBiologicoLote] = useState('B-2026-OFICIAL');
   const [fechaRevacunacion, setFechaRevacunacion] = useState('2027-03-15');
@@ -308,21 +371,48 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
   const [retiroLecheClinicoDias, setRetiroLecheClinicoDias] = useState(4);
   const [retiroCarneClinicoDias, setRetiroCarneClinicoDias] = useState(28);
 
-  // Synchronize defaults when species changes
+  // -------------------------------------------------------------
+  // MANEJO & RUTINA STATES
+  // -------------------------------------------------------------
+  // Porcinos: Manejo Neonatal
+  const [descolmillado, setDescolmillado] = useState(true);
+  const [corteCola, setCorteCola] = useState(true);
+  const [muescadoTatuaje, setMuescadoTatuaje] = useState(true);
+  const [hierroDextrano200, setHierroDextrano200] = useState(true);
+  const [castracionQuirurgica, setCastracionQuirurgica] = useState(false);
+  const [anticoccidialOral, setAnticoccidialOral] = useState(true);
+
+  // Equinos: Herraje y Doma
+  const [herradorResponsable, setHerradorResponsable] = useState('Manuel Pantoja (Maestro Herrador)');
+  const [tipoHerraduras, setTipoHerraduras] = useState('Herradura de acero con pestaña (toe clip)');
+  const [estadoCascos, setEstadoCascos] = useState('Aplomos óptimos y balanceados');
+  const [diasProximoHerraje, setDiasProximoHerraje] = useState(40);
+  const [odontologiaEquina, setOdontologiaEquina] = useState('Limado de odontofitos (puntas de muela)');
+  const [faenaEquina, setFaenaEquina] = useState('Vaquería y faena de sabana');
+  const [etapaDoma, setEtapaDoma] = useState('Etapa 2: Trabajo a la cuerda y cabestro');
+
+  // Aves: Despique & Gallos Finos
+  const [despiqueAviar, setDespiqueAviar] = useState(true);
+  const [tipoDespique, setTipoDespique] = useState('Infrarrojo 1er día');
+  const [pesoCombateGramos, setPesoCombateGramos] = useState(2140);
+  const [tiempoCareoMin, setTiempoCareoMin] = useState(15);
+  const [arregloEspuelas, setArregloEspuelas] = useState(true);
+
+  // Synchronize species defaults when currentSpecies changes
   useEffect(() => {
     if (semenOptions.length > 0) {
       setSelectedSemenId(semenOptions[0].id);
     }
     
-    // Set typical weight defaults
+    // Set species weight & production benchmarks
     if (isPoultry) {
       setPesoCorporalKg(2.4);
       setGdpEstimada(55);
     } else if (isSwine) {
-      setPesoCorporalKg(95);
+      setPesoCorporalKg(96.5);
       setGdpEstimada(800);
       setCriaArete(`LECH-${Math.floor(100 + Math.random() * 900)}`);
-    } else if (currentSpecies === 'Caprinos') {
+    } else if (isCaprine) {
       setPesoCorporalKg(48);
       setGdpEstimada(150);
       setPesajeAmKg(2.2);
@@ -330,16 +420,16 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
       setGrasaPorcentaje(4.2);
       setRcsConteo(160);
       setCriaArete(`CAB-${Math.floor(100 + Math.random() * 900)}`);
-      setCriaPesoNacimiento(4.0);
+      setCriaPesoNacimiento(3.8);
     } else if (currentSpecies === 'Búfalos') {
       setPesoCorporalKg(580);
       setGdpEstimada(750);
-      setPesajeAmKg(4.8);
-      setPesajePmKg(3.8);
-      setGrasaPorcentaje(7.8);
+      setPesajeAmKg(5.2);
+      setPesajePmKg(3.6);
+      setGrasaPorcentaje(7.9);
       setRcsConteo(120);
       setCriaArete(`BUC-${Math.floor(100 + Math.random() * 900)}`);
-      setCriaPesoNacimiento(38.0);
+      setCriaPesoNacimiento(38.5);
     } else if (isEquine) {
       setPesoCorporalKg(490);
       setGdpEstimada(500);
@@ -348,12 +438,12 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
     } else {
       setPesoCorporalKg(460);
       setGdpEstimada(650);
-      setPesajeAmKg(7.5);
-      setPesajePmKg(6.2);
+      setPesajeAmKg(7.8);
+      setPesajePmKg(6.4);
       setGrasaPorcentaje(3.8);
-      setRcsConteo(140);
+      setRcsConteo(145);
       setCriaArete(`BCA-${Math.floor(100 + Math.random() * 900)}`);
-      setCriaPesoNacimiento(35.5);
+      setCriaPesoNacimiento(36.5);
     }
 
     // Set vaccine and vademecum defaults
@@ -369,20 +459,38 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
     }
   }, [currentSpecies]);
 
-  // Update codigoAnimal when prop changes
-  useEffect(() => {
-    if (codigoAnimalInicial) {
-      setCodigoAnimal(codigoAnimalInicial);
-      const matched = animals.find(a => a.practico.toUpperCase() === codigoAnimalInicial.toUpperCase());
-      if (matched?.especie) {
-        setFilterSpecies(matched.especie);
-      }
-    }
-  }, [codigoAnimalInicial, animals]);
+  // Computed values
+  const totalLecheDia = useMemo(() => {
+    const am = typeof pesajeAmKg === 'number' ? pesajeAmKg : 0;
+    const pm = typeof pesajePmKg === 'number' ? pesajePmKg : 0;
+    return Math.round((am + pm) * 10) / 10;
+  }, [pesajeAmKg, pesajePmKg]);
 
-  // Inbreeding check
+  const totalLechonesCamada = useMemo(() => {
+    return (Number(lechonesVivos) || 0) + (Number(lechonesMuertos) || 0) + (Number(momias) || 0);
+  }, [lechonesVivos, lechonesMuertos, momias]);
+
+  const pesoPromedioLechon = useMemo(() => {
+    return (lechonesVivos > 0 && pesoCamadaKg > 0) ? (pesoCamadaKg / lechonesVivos) : 0;
+  }, [lechonesVivos, pesoCamadaKg]);
+
+  const totalHuevosComerciales = useMemo(() => {
+    return (Number(huevosAAA) || 0) + (Number(huevosAA) || 0) + (Number(huevosA) || 0);
+  }, [huevosAAA, huevosAA, huevosA]);
+
+  const porcentajePostura = useMemo(() => {
+    if (avesAlojadasGalpon <= 0) return 0;
+    const totalRecolectados = totalHuevosComerciales + (Number(huevosFertiles) || 0) + (Number(huevosRotosAvicola) || 0);
+    return Math.min(100, Math.round((totalRecolectados / avesAlojadasGalpon) * 1000) / 10);
+  }, [totalHuevosComerciales, huevosFertiles, huevosRotosAvicola, avesAlojadasGalpon]);
+
+  const porcentajeEclosion = useMemo(() => {
+    return (huevosFertilesIncubados > 0 && pollitosVivos > 0) ? ((pollitosVivos / huevosFertilesIncubados) * 100) : 0;
+  }, [huevosFertilesIncubados, pollitosVivos]);
+
+  // Inbreeding Wright check for Bovines & Equines
   const inbreedingCheck = useMemo(() => {
-    if (!selectedAnimalObj || !isRuminant && !isEquine) return null;
+    if (!selectedAnimalObj || (!isRuminant && !isEquine)) return null;
     const selectedSemenObj = semenOptions.find(s => s.id === selectedSemenId);
     if (!selectedSemenObj) return null;
 
@@ -400,34 +508,13 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
     return {
       isHighRisk: false,
       coefficient: '0.78%',
-      reason: 'Cruce genético seguro. Coeficiente de consanguinidad F < 6.25%.'
+      reason: 'Cruce genético seguro. Coeficiente de consanguinidad de Wright F < 6.25%.'
     };
   }, [selectedAnimalObj, selectedSemenId, semenOptions, isRuminant, isEquine]);
 
-  // Computed total milk
-  const totalLecheDia = useMemo(() => {
-    const am = typeof pesajeAmKg === 'number' ? pesajeAmKg : 0;
-    const pm = typeof pesajePmKg === 'number' ? pesajePmKg : 0;
-    return Math.round((am + pm) * 10) / 10;
-  }, [pesajeAmKg, pesajePmKg]);
-
-  // Total lechones porcinos
-  const totalLechonesCamada = useMemo(() => {
-    return (Number(lechonesVivos) || 0) + (Number(lechonesMuertos) || 0) + (Number(momias) || 0);
-  }, [lechonesVivos, lechonesMuertos, momias]);
-
-  const pesoPromedioLechon = useMemo(() => {
-    return (lechonesVivos > 0 && pesoCamadaKg > 0) ? (pesoCamadaKg / lechonesVivos) : 0;
-  }, [lechonesVivos, pesoCamadaKg]);
-
-  // % Eclosión avícola
-  const porcentajeEclosion = useMemo(() => {
-    return (huevosFertilesIncubados > 0 && pollitosVivos > 0) ? ((pollitosVivos / huevosFertilesIncubados) * 100) : 0;
-  }, [huevosFertilesIncubados, pollitosVivos]);
-
   if (!isOpen) return null;
 
-  // Handle Form Submit
+  // Handle Submit
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -437,9 +524,9 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
     let eventObs = observaciones;
 
     // 1. REPRODUCTIVOS
-    if (categoriaInicial === 'Reproductivos' || tipoInicial.includes('Parto') || tipoInicial.includes('Servicio') || tipoInicial.includes('Celo')) {
+    if (categoria === 'Reproductivos' || tipoEvento.includes('Parto') || tipoEvento.includes('Servicio') || tipoEvento.includes('Camada') || tipoEvento.includes('Incubación') || tipoEvento.includes('Foliculometría')) {
       // SWINE: Camada de lechones
-      if (isSwine) {
+      if (isSwine || tipoEvento.includes('Camada')) {
         proxVencimiento = 'Destete de camada en 21 - 28 días';
         updateAnimal(animalTag, {
           estatusProductivo: 'Lactancia Porcina',
@@ -447,39 +534,54 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
           partos: dam ? (dam.partos || 0) + 1 : 1,
           ultimoParto: fecha
         });
-
-        eventObs = eventObs || `Parto Porcino (Camada): ${lechonesVivos} nacidos vivos, ${lechonesMuertos} mortinatos, ${momias} momias (Total: ${totalLechonesCamada} lechones | Peso Camada: ${pesoCamadaKg} kg | Prom: ${pesoPromedioLechon.toFixed(2)} kg/lechón) | Pezones: ${pezonesFuncionales} | Sala: ${salaMaternidad}`;
-      } 
+        eventObs = eventObs || `Parto Porcino (Camada): ${lechonesVivos} LNV vivos, ${lechonesMuertos} LNM, ${momias} momias (Total: ${totalLechonesCamada} lechones | Peso Camada: ${pesoCamadaKg} kg | Prom: ${pesoPromedioLechon.toFixed(2)} kg/lechón) | Pezones: ${pezonesFuncionales} | Sala: ${salaMaternidad} ${adopcionesNodriza > 0 ? `| Adopciones: ${adopcionesNodriza}` : ''}`;
+      }
       // POULTRY: Incubación & Eclosión
-      else if (isPoultry) {
+      else if (isPoultry || tipoEvento.includes('Incubación')) {
         proxVencimiento = 'Traslado a Galpón de Cría / Sexaje (Día 21)';
         updateAnimal(animalTag, {
           estatusProductivo: 'Lote Incubado',
           estatusReproductivo: 'Eclosionado'
         });
-
-        eventObs = eventObs || `Incubación & Eclosión Avícola: ${pollitosVivos} pollitos eclosionados de ${huevosFertilesIncubados} huevos fértiles (% Eclosión: ${porcentajeEclosion.toFixed(1)}% | Calidad: ${calidadPollito} | Sala: ${salaIncubacion} | Días: ${diasIncubacion})`;
-      } 
-      // RUMINANTS & EQUINES: Servicios / Partos tradicionales
+        eventObs = eventObs || `Incubación & Eclosión Avícola: ${pollitosVivos} pollitos eclosionados de ${huevosFertilesIncubados} huevos fértiles (% Eclosión: ${porcentajeEclosion.toFixed(1)}% | Pasgar Score: ${calidadPollito} | Ovoscopía 7d: ${ovoscopia7d}% | Sala: ${salaIncubacion})`;
+      }
+      // EQUINE: Foliculometría o Parto
+      else if (isEquine) {
+        if (tipoEvento.includes('Foliculometría')) {
+          proxVencimiento = diametroFolículoMm >= 40 ? 'Servicio IA programado en 24h' : 'Monitoreo ecográfico en 48h';
+          eventObs = eventObs || `Foliculometría Equina: Folículo preovulatorio de ${diametroFolículoMm} mm en ${ovarioActivo} | Edema uterino: Grado ${edemaUterinoGrado} | Semen: ${tipoSemenEquino}`;
+        } else if (tipoEvento.includes('Parto')) {
+          proxVencimiento = 'Evaluación de potro al destete (5-6 meses)';
+          eventObs = eventObs || `Parto Equino: Expulsión de placenta a los ${tiempoExpulsionPlacentaMin} min (${placentaIntegra ? 'Íntegra' : 'Alerta: Incompleta'}) | Meconio potro: ${expulsionMeconio}`;
+        } else {
+          proxVencimiento = 'Diagnóstico ecográfico a los 14-16 días';
+          eventObs = eventObs || `Servicio Equino (${modalidadServicio}) | Reproductor: ${selectedSemenId} | Turno: ${turnoServicio}`;
+        }
+      }
+      // CAPRINE: Parto Múltiple
+      else if (isCaprine && tipoEvento.includes('Parto')) {
+        proxVencimiento = 'Desbotonado térmico de cabritos en 7 días';
+        eventObs = eventObs || `Parto Múltiple Caprino (${tipoPartoCaprino}): ${tipoPartoCaprino === 'Mellizos' ? `Cabrito 1 (${pesoCabrito1} kg), Cabrito 2 (${pesoCabrito2} kg)` : `${criaPesoNacimiento} kg`} | Encalostrado asistido: ${encalostradoAsistido ? 'Sí' : 'No'} | Desbotonado programado: ${desbotonadoRealizado ? 'Sí' : 'No'}`;
+      }
+      // BOVINE / BUFFALO: Servicios / Partos
       else {
-        if (tipoInicial.includes('Servicio')) {
-          proxVencimiento = isEquine ? 'Ecografía gestacional en 14-18 días' : 'Palpación / Ecografía en 45 días';
+        if (tipoEvento.includes('Servicio')) {
+          proxVencimiento = currentSpecies === 'Búfalos' ? 'Ecografía gestacional a 35 días' : 'Palpación / Ecografía a 45 días';
           updateAnimal(animalTag, {
             estatusReproductivo: `Servida (${modalidadServicio})`,
             padre: selectedSemenId
           });
-          eventObs = eventObs || `Servicio ${modalidadServicio} (${turnoServicio}) | Reproductor: ${selectedSemenId} | Especie: ${currentSpecies}`;
-        } else if (tipoInicial.includes('Parto')) {
-          proxVencimiento = isDairySpecies ? 'Fin DEV en 50 días (Celo)' : 'Revisión puerperal post-parto';
-          
+          eventObs = eventObs || `Servicio ${modalidadServicio} (${turnoServicio}) | Reproductor: ${selectedSemenId} | Consanguinidad: ${inbreedingCheck?.coefficient || 'N/A'}`;
+        } else if (tipoEvento.includes('Parto')) {
+          proxVencimiento = isDairySpecies ? 'Fin período de espera voluntario (PEV) a 50 días' : 'Revisión puerperal post-parto';
           updateAnimal(animalTag, {
             estatusProductivo: isDairySpecies ? 'Ordeño' : 'Criando',
-            estatusReproductivo: 'Lactando / Vientre en DEV',
+            estatusReproductivo: 'Lactando',
             partos: dam ? (dam.partos || 2) + 1 : 1,
             ultimoParto: fecha
           });
 
-          // Atomic Newborn Creation
+          // Atomic newborn registration
           if (crearCriaAtomics && condicionCria === 'Viva') {
             const categoriaCria = currentSpecies === 'Búfalos' 
               ? (criaSexo === 'Hembra' ? 'Bucerra' : 'Bucerro')
@@ -514,56 +616,48 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
           }
 
           eventObs = eventObs || `Parto ${tipoParto} (${currentSpecies}). Cría ${condicionCria} (${criaArete}, ${criaSexo}, ${criaPesoNacimiento} kg)`;
-        } else if (tipoInicial.includes('Revisión')) {
-          proxVencimiento = diagnosticoPrenez === 'Preñada' ? `Parto proyectado en ${280 - diasGestacion} días` : 'Re-sincronización de celo';
-          updateAnimal(animalTag, {
-            estatusReproductivo: diagnosticoPrenez,
-            diasGestacion: diagnosticoPrenez === 'Preñada' ? diasGestacion : 0
-          });
-          eventObs = eventObs || `Diagnóstico: ${diagnosticoPrenez} (${diasGestacion} días) | Hallazgos: ${estructuraOvarica}`;
-        } else if (tipoInicial.includes('Celo')) {
-          proxVencimiento = turnoDeteccionCelo === 'AM' ? 'Inseminación programada hoy PM' : 'Inseminación programada mañana AM';
-          eventObs = eventObs || `Celo ${intensidadCelo} detectado en turno ${turnoDeteccionCelo} | Signos: ${signosCelo}`;
         }
       }
     }
 
     // 2. PRODUCTIVOS
-    else if (categoriaInicial === 'Productivos' || tipoInicial.includes('Pesaje') || tipoInicial.includes('Crecimiento') || tipoInicial.includes('Secado') || tipoInicial.includes('Postura')) {
-      if (isPoultry || tipoInicial.includes('Postura')) {
-        proxVencimiento = 'Recolección diaria programada';
-        eventObs = eventObs || `Recolección Huevos: ${huevosComercialesAvicola} comerciales, ${huevosRotosAvicola} descarte/rotos | Peso Prom: ${pesoHuevoAvicola} g | Calidad: ${calidadCascara}`;
-      } else if (isDairySpecies && tipoInicial.includes('Pesaje')) {
+    else if (categoria === 'Productivos' || tipoEvento.includes('Pesaje') || tipoEvento.includes('Postura') || tipoEvento.includes('Ceba') || tipoEvento.includes('Secado')) {
+      if (isPoultry || tipoEvento.includes('Postura')) {
+        proxVencimiento = 'Recolección diaria de postura programada';
+        eventObs = eventObs || `Control Postura Avícola: ${totalHuevosComerciales} comerciales (AAA: ${huevosAAA}, AA: ${huevosAA}, A: ${huevosA}) | Fértiles: ${huevosFertiles} | Rotos: ${huevosRotosAvicola} | % Postura: ${porcentajePostura}% | Peso Prom: ${pesoHuevoAvicola} g | ${calidadCascara}`;
+      } else if (isSwine || tipoEvento.includes('Grasa Dorsal')) {
+        proxVencimiento = 'Proyección a matadero en 14 días (110 kg)';
+        eventObs = eventObs || `Ceba Porcina: Peso báscula ${pesoCorporalKg} kg | Grasa dorsal P2: ${espesorGrasaDorsalP2} mm | % Magro: ${porcentajeMagro}% | Consumo: ${consumoPiensoDiarioKg} kg/día`;
+      } else if (isDairySpecies && tipoEvento.includes('Pesaje')) {
         proxVencimiento = `Próximo control lechero en 15 días (${totalLecheDia} kg)`;
-        updateAnimal(animalTag, {
-          ultimoPesajeLeche: totalLecheDia
-        });
-        eventObs = eventObs || `Control Lechero (${currentSpecies}): Total Día ${totalLecheDia} kg (AM: ${pesajeAmKg} + PM: ${pesajePmKg}) | Grasa: ${grasaPorcentaje}% | RCS: ${rcsConteo}k`;
-      } else if (tipoInicial.includes('Crecimiento')) {
-        proxVencimiento = isPoultry ? 'Pesaje semanal de engorde' : 'Pesaje bimestral en 60 días';
-        updateAnimal(animalTag, {
-          pesoKg: pesoCorporalKg
-        });
-        eventObs = eventObs || `Crecimiento Ponderal (${currentSpecies}): Peso ${pesoCorporalKg} kg | CC: ${condicionCorporal} | GDP: ${gdpEstimada} g/día`;
-      } else if (tipoInicial.includes('Secado')) {
+        updateAnimal(animalTag, { ultimoPesajeLeche: totalLecheDia });
+        eventObs = eventObs || `Control Lechero (${currentSpecies}): Total ${totalLecheDia} kg (AM: ${pesajeAmKg} + PM: ${pesajePmKg}) | Grasa: ${grasaPorcentaje}% | RCS: ${rcsConteo}k ${currentSpecies === 'Búfalos' ? '| Rendimiento Mozzarella' : ''}`;
+      } else if (tipoEvento.includes('Secado')) {
         proxVencimiento = 'Parto proyectado en 60 días';
-        updateAnimal(animalTag, {
-          estatusProductivo: 'Seca',
-          estatusReproductivo: 'Gestante en descanso'
-        });
+        updateAnimal(animalTag, { estatusProductivo: 'Seca', estatusReproductivo: 'Gestante en descanso' });
         eventObs = eventObs || `Secado: ${motivoSecado} | Terapia: ${terapiaVacaSeca}`;
+      } else {
+        proxVencimiento = 'Control de ganancia diaria en 60 días';
+        updateAnimal(animalTag, { pesoKg: pesoCorporalKg });
+        eventObs = eventObs || `Pesaje Ponderal (${currentSpecies}): ${pesoCorporalKg} kg | CC: ${condicionCorporal} | GDP: ${gdpEstimada} g/día`;
       }
     }
 
-    // 3. VETERINARIOS & SANITARIOS
-    else if (categoriaInicial === 'Veterinarios' || tipoInicial.includes('Mastitis') || tipoInicial.includes('Clínic') || tipoInicial.includes('Plan')) {
-      if (tipoInicial.includes('Plan')) {
-        proxVencimiento = `Refuerzo sanitario programado: ${fechaRevacunacion}`;
-        updateAnimal(animalTag, {
-          alertaSanitaria: `Inmunizado: ${tipoPlanSanitario}`
-        });
-        eventObs = eventObs || `Plan Sanitario (${currentSpecies}): ${tipoPlanSanitario} | Biológico Lote: ${biologicoLote} | Próx. Dosis: ${fechaRevacunacion}`;
-      } else if (tipoInicial.includes('Mastitis') && isDairySpecies) {
+    // 3. SANITARIOS & VETERINARIOS
+    else if (categoria === 'Sanitarios & Veterinarios' || tipoEvento.includes('Mastitis') || tipoEvento.includes('FAMACHA') || tipoEvento.includes('Plan') || tipoEvento.includes('Vacunación') || tipoEvento.includes('Herraje')) {
+      if (isCaprine && (tipoEvento.includes('FAMACHA') || famachaScore >= 3)) {
+        proxVencimiento = famachaScore >= 3 ? 'Desparasitación selectiva urgente hoy' : 'Próxima evaluación FAMACHA en 30 días';
+        eventObs = eventObs || `Evaluación FAMACHA Caprina: Grado ${famachaScore} (${famachaScore >= 3 ? 'ALERTA Haemonchus contortus - Tratamiento urgente' : 'Aceptable/Óptimo'}) | Recorte pezuñas: ${recortePezunasCaprino} | Pediluvio: ${pediluvioSulfato ? 'Sí' : 'No'}`;
+      } else if (isEquine && tipoEvento.includes('Herraje')) {
+        const nextShoeingDate = new Date();
+        nextShoeingDate.setDate(nextShoeingDate.getDate() + diasProximoHerraje);
+        const nextShoeingStr = nextShoeingDate.toLocaleDateString('es-ES');
+        proxVencimiento = `Próximo herraje profesional en ${diasProximoHerraje} días (${nextShoeingStr})`;
+        eventObs = eventObs || `Plan de Herraje Equino: ${tipoHerraduras} | Herrador: ${herradorResponsable} | Estado cascos: ${estadoCascos} | Próximo servicio en ${diasProximoHerraje} días`;
+      } else if (isEquine && tipoEvento.includes('Plan')) {
+        proxVencimiento = `Vigencia oficial Test Coggins hasta ${cogginsVigenciaMeses} meses`;
+        eventObs = eventObs || `Certificado Oficial Coggins AIE: ${cogginsResultado} | Dictamen INSAI: ${cogginsNumeroDictamen} | Lab: ${cogginsLaboratorio}`;
+      } else if (isDairySpecies && tipoEvento.includes('Mastitis')) {
         const activeQuarters = Object.entries(cuartosCMT)
           .filter(([_, val]) => val !== 'Negativo')
           .map(([q, val]) => `${q}:${val}`);
@@ -574,19 +668,37 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
 
         proxVencimiento = `Bloqueo de Tanque activo hasta ${formattedDate}`;
         updateAnimal(animalTag, {
-          cuartosMastitis: activeQuarters,
           alertaSanitaria: `Mastitis en ${activeQuarters.join(', ')} - RETIRO HASTA ${formattedDate}`,
           retiroLecheHasta: formattedDate
         });
-        eventObs = eventObs || `Mastitis (${currentSpecies}): Cuartos ${activeQuarters.join(', ')} | Tto: ${tratamientoMastitis} | Retiro leche: ${diasRetiroLecheMastitis}d`;
+        eventObs = eventObs || `Mastitis CMT (${currentSpecies}): Cuartos afectados ${activeQuarters.join(', ')} | Tratamiento: ${tratamientoMastitis} | Retiro leche: ${diasRetiroLecheMastitis}d`;
       } else {
         const withdrawalDate = new Date();
         withdrawalDate.setDate(withdrawalDate.getDate() + retiroCarneClinicoDias);
-        proxVencimiento = `Fin retiro fármaco: ${withdrawalDate.toLocaleDateString('es-ES')}`;
-        updateAnimal(animalTag, {
-          alertaSanitaria: `Tratamiento: ${patologiaClinica} (${medicamentoClinico})`
-        });
-        eventObs = eventObs || `Caso Clínico (${currentSpecies}): ${patologiaClinica} | Fármaco: ${medicamentoClinico} (${dosisClinica}) | Retiro Carne: ${retiroCarneClinicoDias}d ${isDairySpecies ? `| Leche: ${retiroLecheClinicoDias}d` : ''}`;
+        proxVencimiento = `Fin retiro carne: ${withdrawalDate.toLocaleDateString('es-ES')}`;
+        eventObs = eventObs || `Plan Sanitario / Clínico (${currentSpecies}): ${tipoPlanSanitario} | Fármaco: ${medicamentoClinico} (${dosisClinica}) | Vía: ${isPoultry ? viaAplicacionAviar : 'Parenteral'} | Retiro Carne: ${retiroCarneClinicoDias}d`;
+      }
+    }
+
+    // 4. MANEJO & RUTINA
+    else if (categoria === 'Manejo & Rutina' || tipoEvento.includes('Neonatal') || tipoEvento.includes('Doma') || tipoEvento.includes('Gallos') || tipoEvento.includes('Despique')) {
+      if (isSwine) {
+        proxVencimiento = 'Castración de machos a los 7 días';
+        eventObs = eventObs || `Manejo Neonatal Porcino: Descolmillado: ${descolmillado ? 'Sí' : 'No'} | Caudectomía: ${corteCola ? 'Sí' : 'No'} | Muescado: ${muescadoTatuaje ? 'Sí' : 'No'} | Hierro Dextrano 200mg: ${hierroDextrano200 ? 'Aplicado' : 'No'} | Castración: ${castracionQuirurgica ? 'Sí' : 'No'}`;
+      } else if (isEquine) {
+        proxVencimiento = 'Siguiente jornada de trabajo / entrenamiento';
+        eventObs = eventObs || `Manejo Equino: ${etapaDoma} | Odontología: ${odontologiaEquina} | Faena: ${faenaEquina}`;
+      } else if (isPoultry) {
+        if (tipoEvento.includes('Gallos')) {
+          proxVencimiento = 'Próxima sesión de entrenamiento en 5 días';
+          eventObs = eventObs || `Acondicionamiento Gallo Fino: Peso combate ${pesoCombateGramos} g | Careo: ${tiempoCareoMin} min | Arreglo espuelas: ${arregloEspuelas ? 'Sí' : 'No'}`;
+        } else {
+          proxVencimiento = 'Pase a galpón de desarrollo';
+          eventObs = eventObs || `Manejo Aviar: Despique ${tipoDespique} (${despiqueAviar ? 'Completado' : 'No'}) | Vía vacunación: ${viaAplicacionAviar}`;
+        }
+      } else {
+        proxVencimiento = 'Cicatrización completa en 15 días';
+        eventObs = eventObs || `Manejo de Rutina (${currentSpecies}): ${tipoEvento} | Técnico: ${tecnico}`;
       }
     }
 
@@ -594,8 +706,9 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
       id: `ev-${Date.now()}`,
       fecha,
       codigoAnimal: animalTag,
-      categoria: categoriaInicial,
-      tipoEvento: tipoInicial,
+      especie: currentSpecies,
+      categoria,
+      tipoEvento,
       vencimiento: proxVencimiento,
       tecnico,
       observaciones: eventObs
@@ -607,28 +720,28 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
 
   return (
     <div className="report-modal-backdrop" onClick={onClose}>
-      <div className="report-modal-dialog" onClick={e => e.stopPropagation()} style={{ maxWidth: 700 }}>
+      <div className="report-modal-dialog" onClick={e => e.stopPropagation()} style={{ maxWidth: 740 }}>
         {/* Header */}
         <div className="report-modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{
-              width: 42,
-              height: 42,
+              width: 44,
+              height: 44,
               borderRadius: 10,
               backgroundColor: 'var(--primary-ultra-light)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: 20
+              fontSize: 22
             }}>
               {speciesTaxonomy.icono}
             </div>
             <div>
               <h3 className="report-modal-title" style={{ fontSize: 18, fontWeight: 700 }}>
-                Registrar {tipoInicial}
+                Registrar {tipoEvento}
               </h3>
               <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: 0 }}>
-                Categoría: <strong>{categoriaInicial}</strong> • Operación Multi-Especie ({currentSpecies})
+                Categoría: <strong>{categoria}</strong> • Especie: <strong>{currentSpecies}</strong>
               </p>
             </div>
           </div>
@@ -641,7 +754,7 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
         <form onSubmit={handleSubmit}>
           <div className="report-modal-body" style={{ maxHeight: '76vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 16 }}>
             
-            {/* 1. ANIMAL SELECTOR MULTI-ESPECIE */}
+            {/* 1. ANIMAL SELECTOR & SPECIES FILTER BAR */}
             <div style={{
               backgroundColor: '#f8fafc',
               border: '1px solid #e2e8f0',
@@ -652,13 +765,14 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
               gap: 12
             }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                   <span style={{ fontSize: 12, fontWeight: 700, color: '#1e293b' }}>
-                    Filtrar Especie:
+                    Filtrar por Especie:
                   </span>
                   <div className="species-filter-nav" style={{ padding: '2px 4px' }}>
-                    {(['Todas', 'Bovinos', 'Porcinos', 'Aves de corral', 'Búfalos', 'Caprinos', 'Equinos'] as const).map(sp => {
-                      const icon = sp === 'Todas' ? '🌐' : ESPECIES_TAXONOMY[sp]?.icono || '🐾';
+                    {(['Todas', 'Bovinos', 'Aves de corral', 'Porcinos', 'Búfalos', 'Caprinos', 'Equinos'] as const).map(sp => {
+                      const icon = sp === 'Todas' ? '🐾' : ESPECIES_TAXONOMY[sp]?.icono || '🐾';
+                      const label = sp === 'Aves de corral' ? 'Aves' : sp;
                       return (
                         <button
                           key={sp}
@@ -668,7 +782,7 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
                           style={{ padding: '4px 8px', fontSize: 11 }}
                         >
                           <span>{icon}</span>
-                          <span>{sp === 'Aves de corral' ? 'Aves' : sp}</span>
+                          <span>{label}</span>
                         </button>
                       );
                     })}
@@ -692,7 +806,7 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
                     <input
                       type="text"
                       required
-                      placeholder="ej. 0001, POR-CR01, AVE-GP01"
+                      placeholder="ej. 0001, POR-CR01, GALP-01, BUF-01"
                       className="form-input"
                       value={codigoAnimal}
                       onChange={e => setCodigoAnimal(e.target.value)}
@@ -709,7 +823,7 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
                         const icon = a.especie ? ESPECIES_TAXONOMY[a.especie]?.icono : '🐮';
                         return (
                           <option key={a.practico} value={a.practico}>
-                            {icon} {a.practico} — {a.categoria} • {a.composicion || a.racial} ({a.lote ? `Lote ${a.lote}` : 'Sin lote'})
+                            {icon} {a.practico} — {a.categoria} • {a.composicion || a.racial || 'Racial'} ({a.lote ? `Lote ${a.lote}` : 'General'})
                           </option>
                         );
                       })}
@@ -764,9 +878,47 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
               )}
             </div>
 
+            {/* Category & Event Type Selectors */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div className="form-field">
+                <label className="form-label">Categoría del Evento</label>
+                <select
+                  className="form-select"
+                  value={categoria}
+                  onChange={e => {
+                    const newCat = e.target.value;
+                    setCategoria(newCat);
+                    const catObj = EVENT_CATEGORIES.find(c => c.titulo === newCat);
+                    if (catObj && catObj.enlaces.length > 0) {
+                      setTipoEvento(catObj.enlaces[0]);
+                    }
+                  }}
+                  style={{ fontWeight: 600 }}
+                >
+                  {EVENT_CATEGORIES.map(c => (
+                    <option key={c.titulo} value={c.titulo}>{c.titulo}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-field">
+                <label className="form-label">Tipo de Evento / Submódulo</label>
+                <select
+                  className="form-select"
+                  value={tipoEvento}
+                  onChange={e => setTipoEvento(e.target.value)}
+                  style={{ fontWeight: 600 }}
+                >
+                  {availableEventTypes.map(t => (
+                    <option key={t} value={t}>{t}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
             {/* Technical Specialist */}
             <div className="form-field">
-              <label className="form-label">Técnico / Especialista Responsable</label>
+              <label className="form-label">Técnico / Responsable</label>
               <select
                 className="form-select"
                 value={tecnico}
@@ -775,6 +927,7 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
                 <option value="Dr. Carlos Mendoza">Dr. Carlos Mendoza (Médico Veterinario Zootecnista)</option>
                 <option value="Dra. Elena Rivas">Dra. Elena Rivas (Especialista en Reproducción &amp; Biotecnología)</option>
                 <option value="Ing. Agr. Marcos Solís">Ing. Agr. Marcos Solís (Especialista en Producción Avícola / Porcina)</option>
+                <option value="Manuel Pantoja (Maestro Herrador)">Manuel Pantoja (Maestro Herrador Profesional)</option>
                 <option value="Juan Pérez">Juan Pérez (Técnico Inseminador Artificial)</option>
                 <option value="Luis Martínez">Luis Martínez (Mayordomo de Manga y Campo)</option>
               </select>
@@ -783,7 +936,7 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
             {/* =========================================================================
                 2. DYNAMIC REPRODUCTIVOS SECTION BY SPECIES
                ========================================================================= */}
-            {(categoriaInicial === 'Reproductivos' || tipoInicial.includes('Parto') || tipoInicial.includes('Servicio') || tipoInicial.includes('Celo') || tipoInicial.includes('Revisión')) && (
+            {(categoria === 'Reproductivos' || tipoEvento.includes('Parto') || tipoEvento.includes('Servicio') || tipoEvento.includes('Camada') || tipoEvento.includes('Incubación') || tipoEvento.includes('Foliculometría') || tipoEvento.includes('Celo')) && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                 
                 {/* A) PORCINOS: CAMADA DE LECHONES */}
@@ -799,7 +952,7 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, color: '#9a3412', fontSize: 13 }}>
                       <span>🐷</span>
-                      <span>Registro de Camada Porcina (Cerda {codigoAnimal})</span>
+                      <span>Registro de Camada Porcina Completa (Cerda {codigoAnimal})</span>
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1.2fr', gap: 10, alignItems: 'center' }}>
@@ -842,9 +995,9 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
                         border: '1px solid #fed7aa'
                       }}>
                         <span style={{ fontSize: 10, fontWeight: 700, color: '#c2410c', textTransform: 'uppercase' }}>
-                          Total Nacidos
+                          Total Camada
                         </span>
-                        <div style={{ fontSize: 20, fontWeight: 800, color: '#9a3412', fontFamily: 'JetBrains Mono' }}>
+                        <div style={{ fontSize: 18, fontWeight: 800, color: '#9a3412', fontFamily: 'JetBrains Mono' }}>
                           {totalLechonesCamada} lechones
                         </div>
                       </div>
@@ -852,10 +1005,11 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1.2fr', gap: 10 }}>
                       <div className="form-field">
-                        <label className="form-label">Peso Total Camada (kg)</label>
+                        <label className="form-label">Peso Camada (kg) *</label>
                         <input
                           type="number"
                           step="0.1"
+                          required
                           className="form-input num"
                           value={pesoCamadaKg}
                           onChange={e => setPesoCamadaKg(parseFloat(e.target.value) || 0)}
@@ -880,16 +1034,15 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                       <div className="form-field">
-                        <label className="form-label">Verraco / Dosis Seminal IA</label>
-                        <select
-                          className="form-select"
-                          value={selectedSemenId}
-                          onChange={e => setSelectedSemenId(e.target.value)}
-                        >
-                          {semenOptions.map(s => (
-                            <option key={s.id} value={s.id}>{s.nombre}</option>
-                          ))}
-                        </select>
+                        <label className="form-label">Adopciones / Nodriza</label>
+                        <input
+                          type="number"
+                          min="0"
+                          className="form-input num"
+                          value={adopcionesNodriza}
+                          onChange={e => setAdopcionesNodriza(parseInt(e.target.value, 10) || 0)}
+                          placeholder="0 lechones cedidos"
+                        />
                       </div>
                       <div className="form-field">
                         <label className="form-label">Sala de Maternidad Destino</label>
@@ -923,7 +1076,7 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1.2fr', gap: 10, alignItems: 'center' }}>
                       <div className="form-field">
-                        <label className="form-label">Huevos Fértiles Cargados *</label>
+                        <label className="form-label">Carga Huevos Fértiles *</label>
                         <input
                           type="number"
                           min="1"
@@ -934,7 +1087,7 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
                         />
                       </div>
                       <div className="form-field">
-                        <label className="form-label">Pollitos Eclosionados Vivos *</label>
+                        <label className="form-label">Pollitos Vivos Eclosionados *</label>
                         <input
                           type="number"
                           min="0"
@@ -964,24 +1117,33 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
                         <span style={{ fontSize: 10, fontWeight: 700, color: '#713f12', textTransform: 'uppercase' }}>
                           % Eclosión
                         </span>
-                        <div style={{ fontSize: 20, fontWeight: 800, color: '#854d0e', fontFamily: 'JetBrains Mono' }}>
+                        <div style={{ fontSize: 18, fontWeight: 800, color: '#854d0e', fontFamily: 'JetBrains Mono' }}>
                           {porcentajeEclosion.toFixed(1)}%
                         </div>
                       </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 10 }}>
                       <div className="form-field">
-                        <label className="form-label">Días en Incubadora</label>
+                        <label className="form-label">Ovoscopía 7d (%)</label>
                         <input
                           type="number"
                           className="form-input num"
-                          value={diasIncubacion}
-                          onChange={e => setDiasIncubacion(parseInt(e.target.value, 10) || 0)}
+                          value={ovoscopia7d}
+                          onChange={e => setOvoscopia7d(parseInt(e.target.value, 10) || 0)}
                         />
                       </div>
                       <div className="form-field">
-                        <label className="form-label">Calidad / Pasgar Score</label>
+                        <label className="form-label">Ovoscopía 14d (%)</label>
+                        <input
+                          type="number"
+                          className="form-input num"
+                          value={ovoscopia14d}
+                          onChange={e => setOvoscopia14d(parseInt(e.target.value, 10) || 0)}
+                        />
+                      </div>
+                      <div className="form-field">
+                        <label className="form-label">Pasgar Score de Calidad</label>
                         <select
                           className="form-select"
                           value={calidadPollito}
@@ -993,7 +1155,7 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
                         </select>
                       </div>
                       <div className="form-field">
-                        <label className="form-label">Sala / Incubadora</label>
+                        <label className="form-label">Sala / Máquina</label>
                         <input
                           type="text"
                           className="form-input"
@@ -1003,10 +1165,205 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
                       </div>
                     </div>
                   </div>
+                ) : isEquine ? (
+                  /* C) EQUINOS: FOLICULOMETRÍA, SERVICIOS & PARTO */
+                  <div style={{
+                    backgroundColor: '#faf5ff',
+                    border: '1px solid #e9d5ff',
+                    borderRadius: 10,
+                    padding: 14,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 12
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, color: '#6b21a8', fontSize: 13 }}>
+                      <span>🐴</span>
+                      <span>Biotecnología Reproductiva Equina (Yegua {codigoAnimal})</span>
+                    </div>
+
+                    {tipoEvento.includes('Foliculometría') ? (
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
+                        <div className="form-field">
+                          <label className="form-label">Diámetro Folículo Dominante (mm) *</label>
+                          <input
+                            type="number"
+                            min="10"
+                            max="70"
+                            required
+                            className="form-input num"
+                            value={diametroFolículoMm}
+                            onChange={e => setDiametroFolículoMm(parseInt(e.target.value, 10) || 0)}
+                          />
+                        </div>
+                        <div className="form-field">
+                          <label className="form-label">Edema Uterino (Grado 0-4)</label>
+                          <select
+                            className="form-select"
+                            value={edemaUterinoGrado}
+                            onChange={e => setEdemaUterinoGrado(parseInt(e.target.value, 10) || 0)}
+                          >
+                            <option value="0">Grado 0 - Sin edema (Anestro/Diestro)</option>
+                            <option value="1">Grado 1 - Edema leve inicial</option>
+                            <option value="2">Grado 2 - Edema moderado creciente</option>
+                            <option value="3">Grado 3 - Rueda de carreta (Preovulatorio óptimo)</option>
+                            <option value="4">Grado 4 - Edema patológico</option>
+                          </select>
+                        </div>
+                        <div className="form-field">
+                          <label className="form-label">Ovario Activo</label>
+                          <select
+                            className="form-select"
+                            value={ovarioActivo}
+                            onChange={e => setOvarioActivo(e.target.value)}
+                          >
+                            <option value="Ovario Izquierdo">Ovario Izquierdo</option>
+                            <option value="Ovario Derecho">Ovario Derecho</option>
+                            <option value="Ambos Ovarios">Ambos Ovarios</option>
+                          </select>
+                        </div>
+                      </div>
+                    ) : tipoEvento.includes('Parto') ? (
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
+                        <div className="form-field">
+                          <label className="form-label">Expulsión Placenta (minutos)</label>
+                          <input
+                            type="number"
+                            className="form-input num"
+                            value={tiempoExpulsionPlacentaMin}
+                            onChange={e => setTiempoExpulsionPlacentaMin(parseInt(e.target.value, 10) || 0)}
+                          />
+                        </div>
+                        <div className="form-field">
+                          <label className="form-label">Revisión Placenta Íntegra</label>
+                          <select
+                            className="form-select"
+                            value={placentaIntegra ? 'si' : 'no'}
+                            onChange={e => setPlacentaIntegra(e.target.value === 'si')}
+                          >
+                            <option value="si">Sí - Placenta Completa e Íntegra</option>
+                            <option value="no">No - Sospecha de retención parcial</option>
+                          </select>
+                        </div>
+                        <div className="form-field">
+                          <label className="form-label">Expulsión Meconio del Potro</label>
+                          <select
+                            className="form-select"
+                            value={expulsionMeconio}
+                            onChange={e => setExpulsionMeconio(e.target.value)}
+                          >
+                            <option value="Expulsado espontáneo normal (< 3h)">Expulsado espontáneo normal (&lt; 3h)</option>
+                            <option value="Enema preventivo administrado">Enema preventivo administrado</option>
+                          </select>
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 10 }}>
+                        <div className="form-field">
+                          <label className="form-label">Tipo de Semen Equino</label>
+                          <select
+                            className="form-select"
+                            value={tipoSemenEquino}
+                            onChange={e => setTipoSemenEquino(e.target.value)}
+                          >
+                            <option value="Semen refrigerado (diluyente 24-48h)">Semen refrigerado (diluyente 24-48h)</option>
+                            <option value="Semen fresco post-coleta inmediata">Semen fresco post-coleta inmediata</option>
+                            <option value="Semen congelado pajuela 0.5ml">Semen congelado pajuela 0.5ml</option>
+                            <option value="Monta natural dirigida con padrillo">Monta natural dirigida con padrillo</option>
+                          </select>
+                        </div>
+                        <div className="form-field">
+                          <label className="form-label">Padrillo / Semental</label>
+                          <select
+                            className="form-select"
+                            value={selectedSemenId}
+                            onChange={e => setSelectedSemenId(e.target.value)}
+                          >
+                            {semenOptions.map(s => (
+                              <option key={s.id} value={s.id}>{s.nombre}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : isCaprine && tipoEvento.includes('Parto') ? (
+                  /* D) CAPRINOS: PARTO MÚLTIPLE & DESBOTONADO */
+                  <div style={{
+                    backgroundColor: '#f0fdfa',
+                    border: '1px solid #ccfbf1',
+                    borderRadius: 10,
+                    padding: 14,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 12
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, color: '#115e59', fontSize: 13 }}>
+                      <span>🐐</span>
+                      <span>Parto Múltiple Caprino &amp; Manejo de Cabritos ({codigoAnimal})</span>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
+                      <div className="form-field">
+                        <label className="form-label">Tipo de Parto Caprino</label>
+                        <select
+                          className="form-select"
+                          value={tipoPartoCaprino}
+                          onChange={e => setTipoPartoCaprino(e.target.value as any)}
+                        >
+                          <option value="Simple">Simple (1 Cabrito)</option>
+                          <option value="Mellizos">Mellizos (2 Cabritos)</option>
+                          <option value="Trillizos">Trillizos (3 Cabritos)</option>
+                        </select>
+                      </div>
+
+                      <div className="form-field">
+                        <label className="form-label">Peso Cabrito 1 (kg)</label>
+                        <input
+                          type="number"
+                          step="0.1"
+                          className="form-input num"
+                          value={pesoCabrito1}
+                          onChange={e => setPesoCabrito1(parseFloat(e.target.value) || 0)}
+                        />
+                      </div>
+
+                      {tipoPartoCaprino !== 'Simple' && (
+                        <div className="form-field">
+                          <label className="form-label">Peso Cabrito 2 (kg)</label>
+                          <input
+                            type="number"
+                            step="0.1"
+                            className="form-input num"
+                            value={pesoCabrito2}
+                            onChange={e => setPesoCabrito2(parseFloat(e.target.value) || 0)}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={desbotonadoRealizado}
+                          onChange={e => setDesbotonadoRealizado(e.target.checked)}
+                        />
+                        <span>Desbotonado térmico programado (5-10 días)</span>
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={encalostradoAsistido}
+                          onChange={e => setEncalostradoAsistido(e.target.checked)}
+                        />
+                        <span>Encalostrado asistido inmediato</span>
+                      </label>
+                    </div>
+                  </div>
                 ) : (
-                  /* C) RUMINANTS & EQUINES: SERVICIOS IA, MONTA Y PARTOS ATÓMICOS */
+                  /* E) RUMINANTES (BOVINOS/BÚFALOS): SERVICIOS Y PARTOS */
                   <>
-                    {tipoInicial.includes('Servicio') && (
+                    {tipoEvento.includes('Servicio') && (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                           <div className="form-field">
@@ -1060,7 +1417,7 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
                           </select>
                         </div>
 
-                        {/* Inbreeding Warning Box */}
+                        {/* Inbreeding Warning Box (Wright F check) */}
                         {inbreedingCheck && (
                           <div className={`inbreeding-warning-banner ${inbreedingCheck.isHighRisk ? '' : 'bg-emerald-50 border-emerald-200 text-emerald-800'}`}>
                             <AlertTriangle size={18} color={inbreedingCheck.isHighRisk ? '#d97706' : '#059669'} />
@@ -1077,7 +1434,7 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
                       </div>
                     )}
 
-                    {tipoInicial.includes('Parto') && (
+                    {tipoEvento.includes('Parto') && (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                           <div className="form-field">
@@ -1162,7 +1519,7 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
                                       type="number"
                                       step="0.5"
                                       required
-                                      className="form-input"
+                                      className="form-input num"
                                       value={criaPesoNacimiento}
                                       onChange={e => setCriaPesoNacimiento(parseFloat(e.target.value) || 0)}
                                     />
@@ -1203,25 +1560,26 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
             {/* =========================================================================
                 3. DYNAMIC PRODUCTIVOS SECTION BY SPECIES
                ========================================================================= */}
-            {(categoriaInicial === 'Productivos' || tipoInicial.includes('Pesaje') || tipoInicial.includes('Crecimiento') || tipoInicial.includes('Secado') || tipoInicial.includes('Postura')) && (
+            {(categoria === 'Productivos' || tipoEvento.includes('Pesaje') || tipoEvento.includes('Postura') || tipoEvento.includes('Ceba') || tipoEvento.includes('Secado') || tipoEvento.includes('Crecimiento')) && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                 
                 {/* A) MILK WEIGHING FOR DAIRY SPECIES */}
-                {isDairySpecies && (tipoInicial.includes('Pesaje') || tipoInicial.includes('leche')) && (
+                {isDairySpecies && (tipoEvento.includes('Pesaje') || tipoEvento.includes('leche')) && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1.2fr', gap: 14, alignItems: 'center' }}>
                       <div className="form-field">
-                        <label className="form-label">Turno Mañana (kg)</label>
+                        <label className="form-label">Ordeño Mañana (AM kg) *</label>
                         <input
                           type="number"
                           step="0.1"
+                          required
                           className="form-input num"
                           value={pesajeAmKg}
                           onChange={e => setPesajeAmKg(parseFloat(e.target.value) || 0)}
                         />
                       </div>
                       <div className="form-field">
-                        <label className="form-label">Turno Tarde (kg)</label>
+                        <label className="form-label">Ordeño Tarde (PM kg)</label>
                         <input
                           type="number"
                           step="0.1"
@@ -1241,7 +1599,7 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
                         border: '1px solid #c8e6c9'
                       }}>
                         <span style={{ fontSize: 11, fontWeight: 600, color: '#2e7d32', textTransform: 'uppercase' }}>
-                          Total Diario ({currentSpecies})
+                          Total Día ({currentSpecies})
                         </span>
                         <span style={{ fontSize: 22, fontWeight: 800, color: 'var(--primary-color)', fontFamily: 'JetBrains Mono' }}>
                           {totalLecheDia} kg
@@ -1275,7 +1633,7 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
                 )}
 
                 {/* B) EGG COLLECTION FOR POULTRY */}
-                {(isPoultry || tipoInicial.includes('Postura')) && (
+                {(isPoultry || tipoEvento.includes('Postura')) && (
                   <div style={{
                     backgroundColor: '#ecfdf5',
                     border: '1px solid #a7f3d0',
@@ -1286,24 +1644,70 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
                     gap: 12
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, color: '#065f46', fontSize: 13 }}>
-                      <span>🥚</span>
-                      <span>Recolección de Huevos &amp; Postura Diaria (Lote {codigoAnimal})</span>
+                      <Egg size={18} color="#059669" />
+                      <span>Recolección de Huevos &amp; Clasificación Comercial (Galpón {codigoAnimal})</span>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: 12 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1.2fr', gap: 10 }}>
                       <div className="form-field">
-                        <label className="form-label">Huevos Comerciales (Uds) *</label>
+                        <label className="form-label">Huevos AAA (&gt;67g)</label>
                         <input
                           type="number"
                           min="0"
-                          required
                           className="form-input num"
-                          value={huevosComercialesAvicola}
-                          onChange={e => setHuevosComercialesAvicola(parseInt(e.target.value, 10) || 0)}
+                          value={huevosAAA}
+                          onChange={e => setHuevosAAA(parseInt(e.target.value, 10) || 0)}
                         />
                       </div>
                       <div className="form-field">
-                        <label className="form-label">Descarte / Rotos (Uds)</label>
+                        <label className="form-label">Huevos AA (60-66g)</label>
+                        <input
+                          type="number"
+                          min="0"
+                          className="form-input num"
+                          value={huevosAA}
+                          onChange={e => setHuevosAA(parseInt(e.target.value, 10) || 0)}
+                        />
+                      </div>
+                      <div className="form-field">
+                        <label className="form-label">Huevos A (53-59g)</label>
+                        <input
+                          type="number"
+                          min="0"
+                          className="form-input num"
+                          value={huevosA}
+                          onChange={e => setHuevosA(parseInt(e.target.value, 10) || 0)}
+                        />
+                      </div>
+                      <div style={{
+                        backgroundColor: '#d1fae5',
+                        borderRadius: 8,
+                        padding: '8px 10px',
+                        textAlign: 'center',
+                        border: '1px solid #a7f3d0'
+                      }}>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: '#047857', textTransform: 'uppercase' }}>
+                          Total Comerciales
+                        </span>
+                        <div style={{ fontSize: 18, fontWeight: 800, color: '#065f46', fontFamily: 'JetBrains Mono' }}>
+                          {totalHuevosComerciales} uds
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1.2fr', gap: 10, alignItems: 'center' }}>
+                      <div className="form-field">
+                        <label className="form-label">Huevos Fértiles</label>
+                        <input
+                          type="number"
+                          min="0"
+                          className="form-input num"
+                          value={huevosFertiles}
+                          onChange={e => setHuevosFertiles(parseInt(e.target.value, 10) || 0)}
+                        />
+                      </div>
+                      <div className="form-field">
+                        <label className="form-label">Rotos / Cáscara Blanda</label>
                         <input
                           type="number"
                           min="0"
@@ -1313,7 +1717,7 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
                         />
                       </div>
                       <div className="form-field">
-                        <label className="form-label">Peso Promedio Huevo (g)</label>
+                        <label className="form-label">Peso Prom. Huevo (g)</label>
                         <input
                           type="number"
                           step="0.1"
@@ -1322,25 +1726,87 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
                           onChange={e => setPesoHuevoAvicola(parseFloat(e.target.value) || 0)}
                         />
                       </div>
-                    </div>
-
-                    <div className="form-field">
-                      <label className="form-label">Calidad de Cáscara</label>
-                      <select
-                        className="form-select"
-                        value={calidadCascara}
-                        onChange={e => setCalidadCascara(e.target.value)}
-                      >
-                        <option value="Excelente Comercial (Cáscara A - Firme)">Excelente Comercial (Cáscara A - Firme)</option>
-                        <option value="Normal Comercial (Cáscara B)">Normal Comercial (Cáscara B)</option>
-                        <option value="Cáscara Frágil / Porosa (Revisar Calcio/Fósforo)">Cáscara Frágil / Porosa (Revisar Calcio)</option>
-                      </select>
+                      <div style={{
+                        backgroundColor: '#bbf7d0',
+                        borderRadius: 8,
+                        padding: '8px 10px',
+                        textAlign: 'center',
+                        border: '1px solid #86efac'
+                      }}>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: '#15803d', textTransform: 'uppercase' }}>
+                          % Postura Calculado
+                        </span>
+                        <div style={{ fontSize: 18, fontWeight: 800, color: '#14532d', fontFamily: 'JetBrains Mono' }}>
+                          {porcentajePostura}%
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}
 
-                {/* C) WEIGHT GROWTH (CRECIMIENTOS) */}
-                {tipoInicial.includes('Crecimiento') && (
+                {/* C) SWINE: CEBA & GRASA DORSAL P2 */}
+                {(isSwine || tipoEvento.includes('Grasa Dorsal') || tipoEvento.includes('Ceba')) && (
+                  <div style={{
+                    backgroundColor: '#fff7ed',
+                    border: '1px solid #fed7aa',
+                    borderRadius: 10,
+                    padding: 14,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 12
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, color: '#9a3412', fontSize: 13 }}>
+                      <Scale size={18} color="#c2410c" />
+                      <span>Ceba Porcina &amp; Espesor de Grasa Dorsal P2 (Cerdo {codigoAnimal})</span>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 10 }}>
+                      <div className="form-field">
+                        <label className="form-label">Peso en Báscula (kg)</label>
+                        <input
+                          type="number"
+                          step="0.5"
+                          className="form-input num"
+                          value={pesoCorporalKg}
+                          onChange={e => setPesoCorporalKg(parseFloat(e.target.value) || 0)}
+                        />
+                      </div>
+                      <div className="form-field">
+                        <label className="form-label">Grasa Dorsal P2 (mm)</label>
+                        <input
+                          type="number"
+                          step="0.1"
+                          className="form-input num"
+                          value={espesorGrasaDorsalP2}
+                          onChange={e => setEspesorGrasaDorsalP2(parseFloat(e.target.value) || 0)}
+                        />
+                      </div>
+                      <div className="form-field">
+                        <label className="form-label">% Magro Estimado</label>
+                        <input
+                          type="number"
+                          step="0.1"
+                          className="form-input num"
+                          value={porcentajeMagro}
+                          onChange={e => setPorcentajeMagro(parseFloat(e.target.value) || 0)}
+                        />
+                      </div>
+                      <div className="form-field">
+                        <label className="form-label">Consumo Pienso (kg/d)</label>
+                        <input
+                          type="number"
+                          step="0.1"
+                          className="form-input num"
+                          value={consumoPiensoDiarioKg}
+                          onChange={e => setConsumoPiensoDiarioKg(parseFloat(e.target.value) || 0)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* D) GENERAL WEIGHT GROWTH */}
+                {tipoEvento.includes('Crecimiento') && (
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14 }}>
                     <div className="form-field">
                       <label className="form-label">Peso Báscula (kg) *</label>
@@ -1383,12 +1849,201 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
             )}
 
             {/* =========================================================================
-                4. DYNAMIC VETERINARIOS & PLANES SANITARIOS SECTION
+                4. DYNAMIC SANITARIOS & VETERINARIOS SECTION BY SPECIES
                ========================================================================= */}
-            {(categoriaInicial === 'Veterinarios' || tipoInicial.includes('Mastitis') || tipoInicial.includes('Clínic') || tipoInicial.includes('Plan')) && (
+            {(categoria === 'Sanitarios & Veterinarios' || tipoEvento.includes('Mastitis') || tipoEvento.includes('FAMACHA') || tipoEvento.includes('Plan') || tipoEvento.includes('Vacunación') || tipoEvento.includes('Clínic') || tipoEvento.includes('Herraje')) && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                 
-                {/* SPECIES-TAILORED VACCINATION & SANITARY PLANS */}
+                {/* CAPRINOS: EVALUACIÓN FAMACHA */}
+                {isCaprine && (tipoEvento.includes('FAMACHA') || categoria.includes('Sanitari')) && (
+                  <div style={{
+                    backgroundColor: famachaScore >= 3 ? '#fff1f2' : '#f0fdfa',
+                    border: famachaScore >= 3 ? '1px solid #fecdd3' : '1px solid #ccfbf1',
+                    borderRadius: 10,
+                    padding: 14,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 12
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, color: famachaScore >= 3 ? '#9f1239' : '#0f766e', fontSize: 13 }}>
+                        <Eye size={18} color={famachaScore >= 3 ? '#e11d48' : '#0d9488'} />
+                        <span>Evaluación Ocular FAMACHA (Control de Haemonchus contortus)</span>
+                      </div>
+                      <span style={{
+                        fontSize: 11,
+                        fontWeight: 700,
+                        padding: '2px 8px',
+                        borderRadius: 12,
+                        backgroundColor: famachaScore >= 3 ? '#ffe4e6' : '#ccfbf1',
+                        color: famachaScore >= 3 ? '#be123c' : '#115e59'
+                      }}>
+                        {famachaScore >= 3 ? '⚠️ DESPARASITACIÓN SELECTIVA REQUERIDA' : '✓ GRADO SEGURO (NO TRATAR)'}
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8 }}>
+                      {[
+                        { score: 1, label: '1 - Rojo Óptimo', desc: 'No desparasitar (Ht > 28%)', color: '#dc2626' },
+                        { score: 2, label: '2 - Rosado Rojizo', desc: 'Aceptable (Ht 23-27%)', color: '#f87171' },
+                        { score: 3, label: '3 - Rosado Pálido', desc: 'Alerta (Ht 18-22%)', color: '#fda4af' },
+                        { score: 4, label: '4 - Casi Blanco', desc: 'Peligro (Ht 13-17%)', color: '#fecdd3' },
+                        { score: 5, label: '5 - Blanco Tiza', desc: 'Fatal (Ht < 12%)', color: '#ffffff' }
+                      ].map(item => (
+                        <div
+                          key={item.score}
+                          onClick={() => setFamachaScore(item.score as any)}
+                          style={{
+                            padding: '8px 6px',
+                            borderRadius: 8,
+                            textAlign: 'center',
+                            cursor: 'pointer',
+                            border: famachaScore === item.score ? '2px solid #0f172a' : '1px solid #cbd5e1',
+                            backgroundColor: famachaScore === item.score ? '#f8fafc' : '#ffffff',
+                            boxShadow: famachaScore === item.score ? '0 2px 6px rgba(0,0,0,0.1)' : 'none'
+                          }}
+                        >
+                          <div style={{
+                            width: 20,
+                            height: 20,
+                            borderRadius: '50%',
+                            backgroundColor: item.color,
+                            border: '1px solid #94a3b8',
+                            margin: '0 auto 4px auto'
+                          }} />
+                          <div style={{ fontSize: 11, fontWeight: 700, color: '#1e293b' }}>{item.label}</div>
+                          <div style={{ fontSize: 9, color: '#64748b', marginTop: 2 }}>{item.desc}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 10, marginTop: 4 }}>
+                      <div className="form-field">
+                        <label className="form-label">Recorte Podológico de Pezuñas en Aprisco</label>
+                        <select
+                          className="form-select"
+                          value={recortePezunasCaprino}
+                          onChange={e => setRecortePezunasCaprino(e.target.value)}
+                        >
+                          <option value="Recorte de mantenimiento preventivo">Recorte de mantenimiento preventivo</option>
+                          <option value="Sobrecrecimiento / Pezuñas dobladas">Sobrecrecimiento / Pezuñas dobladas</option>
+                          <option value="Pododermatitis / Pietín tratado">Pododermatitis / Pietín tratado</option>
+                        </select>
+                      </div>
+                      <div className="form-field">
+                        <label className="form-label">Pediluvio Desinfectante</label>
+                        <select
+                          className="form-select"
+                          value={pediluvioSulfato ? 'si' : 'no'}
+                          onChange={e => setPediluvioSulfato(e.target.value === 'si')}
+                        >
+                          <option value="si">Sí (Sulfato de Cobre 10%)</option>
+                          <option value="no">No requerido</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* EQUINOS: TEST DE COGGINS AIE & CERTIFICACIÓN */}
+                {isEquine && (tipoEvento.includes('Coggins') || tipoEvento.includes('Plan') || tipoEvento.includes('Sanitari')) && (
+                  <div style={{
+                    backgroundColor: '#faf5ff',
+                    border: '1px solid #e9d5ff',
+                    borderRadius: 10,
+                    padding: 14,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 12
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, color: '#581c87', fontSize: 13 }}>
+                      <FileCheck size={18} color="#7c3aed" />
+                      <span>Certificación Oficial Test de Coggins (Anemia Infecciosa Equina - AIE)</span>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1.2fr', gap: 10 }}>
+                      <div className="form-field">
+                        <label className="form-label">Resultado Oficial Test Coggins</label>
+                        <select
+                          className="form-select"
+                          value={cogginsResultado}
+                          onChange={e => setCogginsResultado(e.target.value)}
+                        >
+                          <option value="Negativo (Apto para movilización oficial)">Negativo (Apto para movilización oficial)</option>
+                          <option value="Positivo (Sospechoso/Cuarentena estricta)">Positivo (Sospechoso/Cuarentena estricta)</option>
+                        </select>
+                      </div>
+                      <div className="form-field">
+                        <label className="form-label">N° Dictamen Oficial INSAI</label>
+                        <input
+                          type="text"
+                          className="form-input"
+                          value={cogginsNumeroDictamen}
+                          onChange={e => setCogginsNumeroDictamen(e.target.value)}
+                        />
+                      </div>
+                      <div className="form-field">
+                        <label className="form-label">Laboratorio Autorizado</label>
+                        <input
+                          type="text"
+                          className="form-input"
+                          value={cogginsLaboratorio}
+                          onChange={e => setCogginsLaboratorio(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* AVES: VACUNACIÓN POR VÍA ESPECIALIZADA */}
+                {isPoultry && (
+                  <div style={{
+                    backgroundColor: '#fefce8',
+                    border: '1px solid #fef08a',
+                    borderRadius: 10,
+                    padding: 14,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 12
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, color: '#854d0e', fontSize: 13 }}>
+                      <Activity size={18} color="#ca8a04" />
+                      <span>Vía de Aplicación &amp; Bioseguridad Avícola</span>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 10 }}>
+                      <div className="form-field">
+                        <label className="form-label">Vía Especializada de Inmunización</label>
+                        <select
+                          className="form-select"
+                          value={viaAplicacionAviar}
+                          onChange={e => setViaAplicacionAviar(e.target.value)}
+                        >
+                          <option value="Ocular (gota en ojo)">Ocular (gota en ojo)</option>
+                          <option value="Aspersión (gota gruesa)">Aspersión (gota gruesa en galpón)</option>
+                          <option value="Agua de bebida">Agua de bebida con colorante estabilizador</option>
+                          <option value="Punción alar (pliegue del ala)">Punción alar (pliegue del ala - Viruela)</option>
+                          <option value="Subcutánea (cuello)">Subcutánea en cuello (Marek)</option>
+                        </select>
+                      </div>
+
+                      <div className="form-field">
+                        <label className="form-label">Plan / Biológico Aviar</label>
+                        <select
+                          className="form-select"
+                          value={tipoPlanSanitario}
+                          onChange={e => setTipoPlanSanitario(e.target.value)}
+                        >
+                          {VACCINE_PLANS_BY_SPECIES['Aves de corral'].map(v => (
+                            <option key={v} value={v}>{v}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* VADEMÉCUM Y RETIROS MULTI-ESPECIE */}
                 <div style={{
                   backgroundColor: '#f0fdf4',
                   border: '1px solid #bbf7d0',
@@ -1400,7 +2055,7 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, color: '#166534', fontSize: 13 }}>
                     <Stethoscope size={18} color="#16a34a" />
-                    <span>Plan Sanitario &amp; Vacunación Específica ({currentSpecies})</span>
+                    <span>Plan Sanitario &amp; Vademécum Específico ({currentSpecies})</span>
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 12 }}>
@@ -1429,10 +2084,9 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
                     </div>
                   </div>
 
-                  {/* SPECIES-TAILORED VADEMÉCUM */}
                   <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1.2fr', gap: 12 }}>
                     <div className="form-field">
-                      <label className="form-label">Vademécum Farmacológico Sugerido</label>
+                      <label className="form-label">Fármaco Sugerido</label>
                       <select
                         className="form-select"
                         value={medicamentoClinico}
@@ -1455,7 +2109,7 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
                     </div>
 
                     <div className="form-field">
-                      <label className="form-label">Dosis &amp; Vía Aplicada</label>
+                      <label className="form-label">Dosis &amp; Vía</label>
                       <input
                         type="text"
                         className="form-input"
@@ -1465,7 +2119,6 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
                     </div>
                   </div>
 
-                  {/* Withdrawal periods banner */}
                   <div style={{ display: 'grid', gridTemplateColumns: isDairySpecies ? '1fr 1fr' : '1fr', gap: 12 }}>
                     {isDairySpecies && (
                       <div className="form-field">
@@ -1490,8 +2143,8 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
                   </div>
                 </div>
 
-                {/* MASTITIS (FOR DAIRY SPECIES ONLY) */}
-                {isDairySpecies && tipoInicial.includes('Mastitis') && (
+                {/* MASTITIS CMT (4 QUARTERS FOR BOVINE/BUFFALO) */}
+                {isDairySpecies && tipoEvento.includes('Mastitis') && (
                   <div className="udder-diagram-container">
                     <div style={{ fontWeight: 700, fontSize: 13, color: '#334155' }}>
                       Evaluación CMT ({currentSpecies === 'Caprinos' ? '2 Glándulas Mamarias' : '4 Cuartos Mamarios'})
@@ -1575,12 +2228,249 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
               </div>
             )}
 
+            {/* =========================================================================
+                5. DYNAMIC MANEJO & RUTINA SECTION BY SPECIES
+               ========================================================================= */}
+            {(categoria === 'Manejo & Rutina' || tipoEvento.includes('Manejo') || tipoEvento.includes('Herraje') || tipoEvento.includes('Doma') || tipoEvento.includes('Despique') || tipoEvento.includes('Gallos') || tipoEvento.includes('Descorne')) && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                
+                {/* A) PORCINOS: MANEJO NEONATAL (DÍAS 1 A 3) */}
+                {isSwine && (
+                  <div style={{
+                    backgroundColor: '#fff7ed',
+                    border: '1px solid #ffedd5',
+                    borderRadius: 10,
+                    padding: 14,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 12
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, color: '#9a3412', fontSize: 13 }}>
+                      <Scissors size={18} color="#ea580c" />
+                      <span>Manejo Neonatal Porcino (Camada {codigoAnimal})</span>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={descolmillado}
+                          onChange={e => setDescolmillado(e.target.checked)}
+                        />
+                        <span>Descolmillado profiláctico de lechones</span>
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={corteCola}
+                          onChange={e => setCorteCola(e.target.checked)}
+                        />
+                        <span>Corte y cauterización de cola (Caudectomía)</span>
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={muescadoTatuaje}
+                          onChange={e => setMuescadoTatuaje(e.target.checked)}
+                        />
+                        <span>Muescado de orejas / Tatuaje de camada</span>
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={hierroDextrano200}
+                          onChange={e => setHierroDextrano200(e.target.checked)}
+                        />
+                        <strong>Hierro Dextrano (200 mg / 2ml IM en cuello)</strong>
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={castracionQuirurgica}
+                          onChange={e => setCastracionQuirurgica(e.target.checked)}
+                        />
+                        <span>Castración quirúrgica de lechones machos (días 5-7)</span>
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={anticoccidialOral}
+                          onChange={e => setAnticoccidialOral(e.target.checked)}
+                        />
+                        <span>Toltrazuril oral (Anticoccidial preventivo)</span>
+                      </label>
+                    </div>
+                  </div>
+                )}
+
+                {/* B) EQUINOS: PLAN DE HERRAJE Y DOMA */}
+                {isEquine && (
+                  <div style={{
+                    backgroundColor: '#faf5ff',
+                    border: '1px solid #e9d5ff',
+                    borderRadius: 10,
+                    padding: 14,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 12
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, color: '#581c87', fontSize: 13 }}>
+                      <Wrench size={18} color="#7c3aed" />
+                      <span>Plan de Herraje Profesional &amp; Doma Equina ({codigoAnimal})</span>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.2fr 1fr', gap: 10 }}>
+                      <div className="form-field">
+                        <label className="form-label">Maestro Herrador Responsable</label>
+                        <input
+                          type="text"
+                          className="form-input"
+                          value={herradorResponsable}
+                          onChange={e => setHerradorResponsable(e.target.value)}
+                        />
+                      </div>
+                      <div className="form-field">
+                        <label className="form-label">Tipo de Herraduras</label>
+                        <select
+                          className="form-select"
+                          value={tipoHerraduras}
+                          onChange={e => setTipoHerraduras(e.target.value)}
+                        >
+                          <option value="Herradura de acero con pestaña (toe clip)">Herradura con pestaña (toe clip)</option>
+                          <option value="Herradura lisa de acero estándar">Herradura lisa de acero estándar</option>
+                          <option value="Herradura ortopédica / correctiva">Herradura ortopédica / correctiva</option>
+                          <option value="Desvasado natural y balance (barefoot)">Desvasado natural (barefoot)</option>
+                        </select>
+                      </div>
+                      <div className="form-field">
+                        <label className="form-label">Próximo Herraje en</label>
+                        <select
+                          className="form-select"
+                          value={diasProximoHerraje}
+                          onChange={e => setDiasProximoHerraje(parseInt(e.target.value, 10))}
+                        >
+                          <option value="35">35 Días</option>
+                          <option value="40">40 Días</option>
+                          <option value="45">45 Días</option>
+                          <option value="60">60 Días</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                      <div className="form-field">
+                        <label className="form-label">Odontología Equina</label>
+                        <select
+                          className="form-select"
+                          value={odontologiaEquina}
+                          onChange={e => setOdontologiaEquina(e.target.value)}
+                        >
+                          <option value="Limado de odontofitos (puntas de muela)">Limado de odontofitos (puntas de muela)</option>
+                          <option value="Extracción diente de lobo">Extracción diente de lobo</option>
+                          <option value="Nivelación de tablas dentarias">Nivelación de tablas dentarias</option>
+                          <option value="Revisión preventiva normal">Revisión preventiva normal</option>
+                        </select>
+                      </div>
+                      <div className="form-field">
+                        <label className="form-label">Jornada de Faena / Trabajo</label>
+                        <select
+                          className="form-select"
+                          value={faenaEquina}
+                          onChange={e => setFaenaEquina(e.target.value)}
+                        >
+                          <option value="Vaquería y faena de sabana">Vaquería y faena de sabana</option>
+                          <option value="Coleo / Deporte ecuestre">Coleo / Deporte ecuestre</option>
+                          <option value="Entrenamiento a la cuerda">Entrenamiento a la cuerda</option>
+                          <option value="Paseo y cabalgata">Paseo y cabalgata</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* C) AVES: DESPIQUE & GALLOS FINOS */}
+                {isPoultry && (
+                  <div style={{
+                    backgroundColor: '#fefce8',
+                    border: '1px solid #fef08a',
+                    borderRadius: 10,
+                    padding: 14,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 12
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, color: '#854d0e', fontSize: 13 }}>
+                      <span>🐓</span>
+                      <span>Manejo Aviar &amp; Acondicionamiento de Gallos Finos ({codigoAnimal})</span>
+                    </div>
+
+                    {tipoEvento.includes('Gallos') ? (
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, alignItems: 'center' }}>
+                        <div className="form-field">
+                          <label className="form-label">Peso Combate (gramos)</label>
+                          <input
+                            type="number"
+                            className="form-input num"
+                            value={pesoCombateGramos}
+                            onChange={e => setPesoCombateGramos(parseInt(e.target.value, 10) || 0)}
+                          />
+                        </div>
+                        <div className="form-field">
+                          <label className="form-label">Tiempo Careo / Tope (min)</label>
+                          <input
+                            type="number"
+                            className="form-input num"
+                            value={tiempoCareoMin}
+                            onChange={e => setTiempoCareoMin(parseInt(e.target.value, 10) || 0)}
+                          />
+                        </div>
+                        <div style={{ paddingTop: 18 }}>
+                          <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, cursor: 'pointer' }}>
+                            <input
+                              type="checkbox"
+                              checked={arregloEspuelas}
+                              onChange={e => setArregloEspuelas(e.target.checked)}
+                            />
+                            <span>Arreglo y afilado de espuelas</span>
+                          </label>
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                        <div className="form-field">
+                          <label className="form-label">Despique Realizado</label>
+                          <select
+                            className="form-select"
+                            value={tipoDespique}
+                            onChange={e => setTipoDespique(e.target.value)}
+                          >
+                            <option value="Infrarrojo 1er día en incubadora">Infrarrojo 1er día en incubadora</option>
+                            <option value="Corte térmico a 7-10 días">Corte térmico a 7-10 días</option>
+                            <option value="No despicar">No despicar</option>
+                          </select>
+                        </div>
+                        <div className="form-field">
+                          <label className="form-label">Vía de Aplicación Asociada</label>
+                          <input
+                            type="text"
+                            className="form-input"
+                            value={viaAplicacionAviar}
+                            onChange={e => setViaAplicacionAviar(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* General Observations */}
             <div className="form-field">
-              <label className="form-label">Observaciones y Notas de Manejo</label>
+              <label className="form-label">Observaciones y Notas Zootécnicas</label>
               <textarea
                 rows={2}
-                placeholder="Detalles zootécnicos o incidencias particulares..."
+                placeholder="Detalles particulares, incidencias zootécnicas o notas de campo..."
                 className="form-input"
                 value={observaciones}
                 onChange={e => setObservaciones(e.target.value)}

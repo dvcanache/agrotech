@@ -12,13 +12,14 @@ export type CategoriaAnimal =
   | 'Novillo'
   | 'Toro'
   | 'Semen'
-  | 'Embrión';
+  | 'Embrión'
+  | string;
 
-export type EstatusAnimal = 'Activo' | 'Inactivo' | 'Referencia';
+export type EstatusAnimal = 'Activo' | 'Inactivo' | 'Referencia' | string;
 
-export type EstatusReproductivo = 'Vacía' | 'Preñada' | 'En espera';
+export type EstatusReproductivo = 'Vacía' | 'Preñada' | 'En espera' | string;
 
-export type EstatusProductivo = 'Seca' | 'Ordeño' | 'Criando';
+export type EstatusProductivo = 'Seca' | 'Ordeño' | 'Criando' | 'Lactancia' | 'Postura' | 'En Producción' | 'Ceba' | 'Trabajo' | string;
 
 export type TipoPesaje =
   | 'General'

@@ -7,6 +7,7 @@ export interface ReporteItem {
   nombre: string;
   descripcion: string;
   categoria: string;
+  especie?: 'todos' | 'bovinos' | 'aves' | 'porcinos' | 'bufalos' | 'caprinos' | 'equinos';
   plantillaBase?: string;
   formato: string;
   frecuencia: string;
@@ -14,7 +15,8 @@ export interface ReporteItem {
   fechaCreacion: string;
 }
 
-export const REPORT_TEMPLATES: { nombre: string; categoria: string; ruta?: string; descripcionDefecto?: string }[] = [
+export const REPORT_TEMPLATES: { nombre: string; categoria: string; especie?: 'todos' | 'bovinos' | 'aves' | 'porcinos' | 'bufalos' | 'caprinos' | 'equinos'; ruta?: string; descripcionDefecto?: string }[] = [
+
   {
     nombre: 'Inventarios (Hato general y lotes)',
     categoria: 'Gestión',
@@ -128,6 +130,84 @@ export const REPORT_TEMPLATES: { nombre: string; categoria: string; ruta?: strin
     categoria: 'Potreros',
     ruta: '/potreros',
     descripcionDefecto: 'Estado agronómico, aforos de biomasa y rotación de cargas UGG.'
+  },
+  {
+    nombre: 'Control Diario de Postura y Huevos',
+    categoria: 'Aves de corral',
+    especie: 'aves',
+    descripcionDefecto: 'Recolección diaria clasificada de huevos comerciales, fértiles y porcentaje de postura.'
+  },
+  {
+    nombre: 'Curva de Postura vs Guía Genética',
+    categoria: 'Aves de corral',
+    especie: 'aves',
+    descripcionDefecto: 'Comparativo real vs estándar genético Hy-Line Brown / Lohmann Brown.'
+  },
+  {
+    nombre: 'Conversión Alimenticia e ICA Broilers',
+    categoria: 'Aves de corral',
+    especie: 'aves',
+    descripcionDefecto: 'Índice de Conversión Alimenticia (ICA) y ganancia media diaria en pollos.'
+  },
+  {
+    nombre: 'Eficiencia Reproductiva de Cerdas',
+    categoria: 'Porcinos',
+    especie: 'porcinos',
+    descripcionDefecto: 'Tasa de concepción, lechones destetados/cerda/año (LDCA) e intervalo destete-cubrición.'
+  },
+  {
+    nombre: 'Balance de Camadas (LNV / LNM / Momias)',
+    categoria: 'Porcinos',
+    especie: 'porcinos',
+    descripcionDefecto: 'Distribución de partos: nacidos vivos, mortinatos, momias y peso camada.'
+  },
+  {
+    nombre: 'Curva de Crecimiento y Ceba Porcina',
+    categoria: 'Porcinos',
+    especie: 'porcinos',
+    descripcionDefecto: 'Evolución ponderal de lotes en precebo y ceba hasta peso final de beneficio.'
+  },
+  {
+    nombre: 'Control Lechero Bufalino y Sólidos Totales',
+    categoria: 'Búfalos',
+    especie: 'bufalos',
+    descripcionDefecto: 'Pesajes de ordeño bufalino con grasa (7-9%), proteína y aptitud quesera Mozzarella.'
+  },
+  {
+    nombre: 'Crecimiento y Destete de Bucerros',
+    categoria: 'Búfalos',
+    especie: 'bufalos',
+    descripcionDefecto: 'Desarrollo ponderal de bucerros al pie de la madre hasta el destete a los 240 días.'
+  },
+  {
+    nombre: 'Control Lechero Caprino en Tarima',
+    categoria: 'Caprinos',
+    especie: 'caprinos',
+    descripcionDefecto: 'Pesajes individuales en tarima con grasa (3.8-4.5%) y sólidos totales.'
+  },
+  {
+    nombre: 'Evaluación FAMACHA de Anemia Parasitaria',
+    categoria: 'Caprinos',
+    especie: 'caprinos',
+    descripcionDefecto: 'Clasificación clínica conjuntiva ocular (1 a 5) para desparasitación selectiva.'
+  },
+  {
+    nombre: 'Libro de Registro y Pasaporte Equino',
+    categoria: 'Equinos',
+    especie: 'equinos',
+    descripcionDefecto: 'Ficha oficial con identificación por microchip, señas y genealogía equina.'
+  },
+  {
+    nombre: 'Cronograma de Herraje y Desvasado',
+    categoria: 'Equinos',
+    especie: 'equinos',
+    descripcionDefecto: 'Control de aplomos, herrador responsable y alertas de vencimiento (35-45 días).'
+  },
+  {
+    nombre: 'Certificación Oficial AIE (Test Coggins)',
+    categoria: 'Equinos',
+    especie: 'equinos',
+    descripcionDefecto: 'Vigencia de diagnósticos oficiales de Anemia Infecciosa Equina.'
   },
   {
     nombre: 'Reporte Personalizado (Sin plantilla base)',

@@ -44,6 +44,14 @@ export const EventCategoryCard: React.FC<EventCategoryCardProps> = ({ category, 
             <path d="M12 8v8M8 12h8" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" />
           </svg>
         );
+      case 'manejo':
+        return (
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+            <circle cx="12" cy="12" r="10" fill="#fef3c7" stroke="#f59e0b" />
+            <path d="M14.7 9.3a1 1 0 0 0-1.4 0l-4 4a1 1 0 0 0 0 1.4l2 2a1 1 0 0 0 1.4 0l4-4a1 1 0 0 0 0-1.4l-2-2z" />
+            <path d="M9 15l-3 3" />
+          </svg>
+        );
       case 'potreros':
         return (
           <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#2d6a4f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>

@@ -5,13 +5,26 @@ import { ReportPagination } from '../../components/ReportPagination';
 import { ReportSettingsModal, ColumnSetting } from '../../components/ReportSettingsModal';
 import { FichaAnimalModal, AnimalModalData } from '../components/FichaAnimalModal';
 import { VientresFilterDrawer, VientresFilterValues } from '../components/VientresFilterDrawer';
+import { SpeciesSelectorBar, SPECIES_TABS_CONFIG } from '../../components/SpeciesSelectorBar';
 import { exportToCSV } from '../../utils/exportUtils';
 import { MOCK_VIENTRES } from '../animalesMockData';
 import { VientreEntity } from '../../../../types2/entities';
 import { EstatusAnimal, EstatusReproductivo, EstatusProductivo } from '../../../../types2/common';
 
+const ALL_VIENTRES_CATEGORIAS = [
+  'Novilla', 'Vaca',
+  'Cerda Reproductora', 'Cerda de Reemplazo',
+  'Búfala', 'Bubilla',
+  'Cabra Lechera', 'Cabritona',
+  'Yegua', 'Potranca',
+  'Gallina Ponedora', 'Pava', 'Pata', 'Gallina Fina'
+];
+
 export const VientresView: React.FC = () => {
   const [vientres] = useState<VientreEntity[]>(MOCK_VIENTRES);
+
+  // Especie activa
+  const [selectedSpecies, setSelectedSpecies] = useState<string>('TODAS');
 
   // Estados de modales y drawers
   const [selectedAnimal, setSelectedAnimal] = useState<AnimalModalData | null>(null);
@@ -25,9 +38,21 @@ export const VientresView: React.FC = () => {
   const [sortField, setSortField] = useState<keyof VientreEntity>('practico');
   const [sortAsc, setSortAsc] = useState(true);
 
+  // Conteo dinámico por especie
+  const speciesCounts = useMemo(() => {
+    const counts: Record<string, number> = { TODAS: vientres.length };
+    SPECIES_TABS_CONFIG.forEach(t => {
+      if (t.id !== 'TODAS') {
+        counts[t.id] = vientres.filter(v => (v.especie || 'Bovinos') === t.id).length;
+      }
+    });
+    return counts;
+  }, [vientres]);
+
   // Columnas configurables
   const [columns, setColumns] = useState<ColumnSetting[]>([
     { key: 'practico', label: 'Práctico', visible: true },
+    { key: 'especie', label: 'Especie', visible: true },
     { key: 'unico', label: 'Único', visible: true },
     { key: 'categoria', label: 'Categoría', visible: true },
     { key: 'estatus', label: 'Estatus', visible: true },
@@ -43,20 +68,20 @@ export const VientresView: React.FC = () => {
 
   // Filtros aplicados
   const [filters, setFilters] = useState<VientresFilterValues>({
-    categorias: ['Novilla', 'Vaca'],
+    categorias: ALL_VIENTRES_CATEGORIAS,
     estatus: ['Activo'] as EstatusAnimal[],
     estatusReproductivo: ['Vacía', 'Preñada', 'En espera'] as EstatusReproductivo[],
-    estatusProductivo: ['Criando', 'Ordeño', 'Seca'] as EstatusProductivo[],
-    lotes: ['01', 'ESCT', 'POT1', 'SEC1', 'TERM1']
+    estatusProductivo: ['Criando', 'Ordeño', 'Seca', 'Lactancia', 'Postura', 'En Producción', 'Trabajo'] as EstatusProductivo[],
+    lotes: ['01', 'ESCT', 'POT1', 'SEC1', 'TERM1', 'GALP-01', 'GALP-02', 'GALP-03', 'PIARA-01', 'CAB-01', 'APR-01', 'BUF-01']
   });
 
   const activeFiltersCount = useMemo(() => {
     let count = 0;
-    if (filters.categorias.length < 2) count++;
+    if (filters.categorias.length < ALL_VIENTRES_CATEGORIAS.length) count++;
     if (filters.estatus.length < 3) count++;
     if (filters.estatusReproductivo.length < 3) count++;
-    if (filters.estatusProductivo.length < 3) count++;
-    if (filters.lotes.length < 5) count++;
+    if (filters.estatusProductivo.length < 7) count++;
+    if (filters.lotes.length < 12) count++;
     return count;
   }, [filters]);
 
@@ -79,22 +104,29 @@ export const VientresView: React.FC = () => {
     }
   };
 
-  // Filtrado y ordenamiento
+  // Filtrado y ordenamiento dinámico
   const filteredVientres = useMemo(() => {
     return vientres
       .filter(v => {
+        // Filtro por especie activa
+        const sp = v.especie || 'Bovinos';
+        if (selectedSpecies !== 'TODAS' && sp !== selectedSpecies) {
+          return false;
+        }
+
         if (searchQuery.trim()) {
           const q = searchQuery.toLowerCase();
           const matchCode = v.practico.toLowerCase().includes(q) || v.unico.toLowerCase().includes(q);
           const matchLot = v.lote.toLowerCase().includes(q);
-          if (!matchCode && !matchLot) return false;
+          const matchCat = v.categoria.toLowerCase().includes(q);
+          if (!matchCode && !matchLot && !matchCat) return false;
         }
 
-        if (!filters.categorias.includes(v.categoria)) return false;
+        if (filters.categorias.length > 0 && !filters.categorias.includes(v.categoria)) return false;
         if (!filters.estatus.includes(v.estatus)) return false;
         if (!filters.estatusReproductivo.includes(v.estatusReproductivo)) return false;
         if (!filters.estatusProductivo.includes(v.estatusProductivo)) return false;
-        if (!filters.lotes.includes(v.lote)) return false;
+        if (filters.lotes.length > 0 && !filters.lotes.includes(v.lote)) return false;
 
         return true;
       })
@@ -108,12 +140,12 @@ export const VientresView: React.FC = () => {
           ? String(valA || '').localeCompare(String(valB || ''))
           : String(valB || '').localeCompare(String(valA || ''));
       });
-  }, [vientres, searchQuery, filters, sortField, sortAsc]);
+  }, [vientres, selectedSpecies, searchQuery, filters, sortField, sortAsc]);
 
-  // Reset page to 1 on filter or search changes
+  // Reset page on filter, species or search changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [filters, searchQuery]);
+  }, [selectedSpecies, filters, searchQuery]);
 
   // Paginación
   const totalPages = Math.ceil(filteredVientres.length / pageSize) || 1;
@@ -186,6 +218,13 @@ export const VientresView: React.FC = () => {
         }
       />
 
+      {/* Barra Selectora Multiespecie */}
+      <SpeciesSelectorBar
+        selectedSpecies={selectedSpecies}
+        onSelectSpecies={setSelectedSpecies}
+        speciesCounts={speciesCounts}
+      />
+
       {/* Tabla de Vientres */}
       <div className="report-table-wrapper">
         <table className="report-grid-table">
@@ -195,6 +234,14 @@ export const VientresView: React.FC = () => {
                 <th onClick={() => handleSort('practico')}>
                   <div className="th-content">
                     <span>Práctico</span>
+                    <Filter size={12} />
+                  </div>
+                </th>
+              )}
+              {isColVisible('especie') && (
+                <th onClick={() => handleSort('especie' as any)}>
+                  <div className="th-content">
+                    <span>Especie</span>
                     <Filter size={12} />
                   </div>
                 </th>
@@ -293,6 +340,20 @@ export const VientresView: React.FC = () => {
                   {isColVisible('practico') && (
                     <td style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{v.practico}</td>
                   )}
+                  {isColVisible('especie') && (
+                    <td>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600 }}>
+                        <span>
+                          {v.especie === 'Aves de corral' ? '🐔' :
+                           v.especie === 'Porcinos' ? '🐷' :
+                           v.especie === 'Búfalos' ? '🐃' :
+                           v.especie === 'Caprinos' ? '🐐' :
+                           v.especie === 'Equinos' ? '🐴' : '🐮'}
+                        </span>
+                        <span>{v.especie || 'Bovinos'}</span>
+                      </span>
+                    </td>
+                  )}
                   {isColVisible('unico') && <td>{v.unico}</td>}
                   {isColVisible('categoria') && <td>{v.categoria}</td>}
                   {isColVisible('estatus') && (
@@ -388,13 +449,14 @@ export const VientresView: React.FC = () => {
         onClose={() => setIsFilterDrawerOpen(false)}
         filters={filters}
         onFilterChange={setFilters}
+        availableCategorias={ALL_VIENTRES_CATEGORIAS}
         onReset={() =>
           setFilters({
-            categorias: ['Novilla', 'Vaca'],
+            categorias: ALL_VIENTRES_CATEGORIAS,
             estatus: ['Activo'] as EstatusAnimal[],
             estatusReproductivo: ['Vacía', 'Preñada', 'En espera'] as EstatusReproductivo[],
-            estatusProductivo: ['Criando', 'Ordeño', 'Seca'] as EstatusProductivo[],
-            lotes: ['01', 'ESCT', 'POT1', 'SEC1', 'TERM1']
+            estatusProductivo: ['Criando', 'Ordeño', 'Seca', 'Lactancia', 'Postura', 'En Producción', 'Trabajo'] as EstatusProductivo[],
+            lotes: ['01', 'ESCT', 'POT1', 'SEC1', 'TERM1', 'GALP-01', 'GALP-02', 'GALP-03', 'PIARA-01', 'CAB-01', 'APR-01', 'BUF-01']
           })
         }
       />

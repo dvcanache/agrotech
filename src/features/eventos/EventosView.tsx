@@ -1,100 +1,85 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Sliders, Plus, CheckCircle2, Zap, FileSpreadsheet, FolderTree } from 'lucide-react';
-import { EVENT_CATEGORIES } from './eventosData';
+import { EVENT_CATEGORIES, INITIAL_EVENTS } from './eventosData';
 import { EventCategoryCard } from './components/EventCategoryCard';
 import { NuevoEventoModal, EventoItem } from './components/NuevoEventoModal';
 import { SpreadsheetGridMode } from './components/SpreadsheetGridMode';
 import { QuickActionModal } from './components/QuickActionModal';
 import { Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
-import { ESPECIES_TAXONOMY } from '../../types/animal';
+import { EspecieAnimal, ESPECIES_TAXONOMY } from '../../types/animal';
 import './components/eventosSpreadsheet.css';
-
-const INITIAL_EVENTS: EventoItem[] = [
-  {
-    id: 'ev-1',
-    fecha: '11/09/2026',
-    codigoAnimal: '0001',
-    categoria: 'Productivos',
-    tipoEvento: 'Pesajes de leche',
-    vencimiento: 'Próximo control lechero en 15 días (14.2 kg)',
-    tecnico: 'Dr. Carlos Mendoza',
-    observaciones: 'AM: 7.8 kg | PM: 6.4 kg | Grasa: 3.8% | RCS: 145k'
-  },
-  {
-    id: 'ev-2',
-    fecha: '10/09/2026',
-    codigoAnimal: 'GALP-01',
-    categoria: 'Productivos',
-    tipoEvento: 'Control de Postura',
-    vencimiento: 'Recolección diaria programada (% postura: 95.2%)',
-    tecnico: 'Control Avícola Masivo',
-    observaciones: 'Galpón 01: 2,500 aves | 2,380 comerciales | 35 rotos | Peso Prom: 62.5 g'
-  },
-  {
-    id: 'ev-3',
-    fecha: '09/09/2026',
-    codigoAnimal: 'POR-CR01',
-    categoria: 'Reproductivos',
-    tipoEvento: 'Partos',
-    vencimiento: 'Destete de camada en 21 días (12 lechones)',
-    tecnico: 'Ing. Agr. Marcos Solís',
-    observaciones: 'Parto Porcino: 12 vivos, 1 mortinato (Total: 13 | Camada: 16.8 kg | Prom: 1.40 kg)'
-  },
-  {
-    id: 'ev-4',
-    fecha: '08/09/2026',
-    codigoAnimal: 'BUF-01',
-    categoria: 'Productivos',
-    tipoEvento: 'Pesajes de leche',
-    vencimiento: 'Próximo control lechero búfala (8.6 kg)',
-    tecnico: 'Roberto Gómez',
-    observaciones: 'Ordeño Búfala: 8.6 kg/día | Grasa butirométrica 7.8% | RCS: 120k'
-  },
-  {
-    id: 'ev-5',
-    fecha: '05/09/2026',
-    codigoAnimal: 'EQU-YG01',
-    categoria: 'Veterinarios',
-    tipoEvento: 'Planes sanitarios',
-    vencimiento: 'Prueba Serológica AIE (Test Coggins) en 6 meses',
-    tecnico: 'Dr. Carlos Mendoza',
-    observaciones: 'Certificación de Anemia Infecciosa Equina Negativa • INSAI'
-  },
-  {
-    id: 'ev-6',
-    fecha: '01/09/2026',
-    codigoAnimal: 'CAP-CL01',
-    categoria: 'Veterinarios',
-    tipoEvento: 'Planes sanitarios',
-    vencimiento: 'Refuerzo Clostridiosis caprina en 6 meses',
-    tecnico: 'Luis Martínez',
-    observaciones: 'Vacunación polivalente de enterotoxemia caprina en aprisco'
-  }
-];
 
 export const EventosView: React.FC = () => {
   const { animals } = useApp();
   const [eventos, setEventos] = useState<EventoItem[]>(INITIAL_EVENTS);
   const [viewMode, setViewMode] = useState<'directorio' | 'spreadsheet'>('directorio');
 
-  const getAnimalSpeciesMeta = (code: string) => {
+  // Species Tabs specification
+  const SPECIES_TABS: Array<{ id: 'Todas' | EspecieAnimal; label: string; icon: string }> = [
+    { id: 'Todas', label: 'Todas las Especies', icon: '🐾' },
+    { id: 'Bovinos', label: 'Bovinos', icon: '🐮' },
+    { id: 'Aves de corral', label: 'Aves de corral', icon: '🐔' },
+    { id: 'Porcinos', label: 'Porcinos', icon: '🐷' },
+    { id: 'Búfalos', label: 'Búfalos', icon: '🐃' },
+    { id: 'Caprinos', label: 'Caprinos', icon: '🐐' },
+    { id: 'Equinos', label: 'Equinos', icon: '🐴' }
+  ];
+
+  const [selectedSpeciesTab, setSelectedSpeciesTab] = useState<'Todas' | EspecieAnimal>('Todas');
+
+  const getEventSpecies = (ev: EventoItem): EspecieAnimal => {
+    if (ev.especie) return ev.especie;
+    const match = animals.find(a => a.practico.toUpperCase() === ev.codigoAnimal.toUpperCase());
+    if (match?.especie) return match.especie;
+    const c = ev.codigoAnimal.toUpperCase();
+    if (c.startsWith('AVE-') || c.startsWith('GALP-') || c.startsWith('INC-') || c.startsWith('GF-') || c.startsWith('POLL-')) return 'Aves de corral';
+    if (c.startsWith('POR-') || c.startsWith('LECH-') || c.startsWith('VERR-')) return 'Porcinos';
+    if (c.startsWith('BUF-') || c.startsWith('BUC-') || c.startsWith('PAD-BUF')) return 'Búfalos';
+    if (c.startsWith('CAP-') || c.startsWith('CHIV-') || c.startsWith('CAB-')) return 'Caprinos';
+    if (c.startsWith('EQU-') || c.startsWith('POT-') || c.startsWith('PADR-')) return 'Equinos';
+    return 'Bovinos';
+  };
+
+  const getAnimalSpeciesMeta = (code: string, explicitSpecies?: EspecieAnimal) => {
+    if (explicitSpecies && ESPECIES_TAXONOMY[explicitSpecies]) {
+      return ESPECIES_TAXONOMY[explicitSpecies];
+    }
     const match = animals.find(a => a.practico.toUpperCase() === code.toUpperCase());
     if (match?.especie) {
       return ESPECIES_TAXONOMY[match.especie];
     }
     const c = code.toUpperCase();
-    if (c.startsWith('AVE-') || c.startsWith('GALP-')) return ESPECIES_TAXONOMY['Aves de corral'];
-    if (c.startsWith('POR-')) return ESPECIES_TAXONOMY['Porcinos'];
-    if (c.startsWith('BUF-')) return ESPECIES_TAXONOMY['Búfalos'];
-    if (c.startsWith('CAP-')) return ESPECIES_TAXONOMY['Caprinos'];
-    if (c.startsWith('EQU-')) return ESPECIES_TAXONOMY['Equinos'];
+    if (c.startsWith('AVE-') || c.startsWith('GALP-') || c.startsWith('INC-') || c.startsWith('GF-')) return ESPECIES_TAXONOMY['Aves de corral'];
+    if (c.startsWith('POR-') || c.startsWith('LECH-') || c.startsWith('VERR-')) return ESPECIES_TAXONOMY['Porcinos'];
+    if (c.startsWith('BUF-') || c.startsWith('BUC-') || c.startsWith('PAD-BUF')) return ESPECIES_TAXONOMY['Búfalos'];
+    if (c.startsWith('CAP-') || c.startsWith('CHIV-') || c.startsWith('CAB-')) return ESPECIES_TAXONOMY['Caprinos'];
+    if (c.startsWith('EQU-') || c.startsWith('POT-') || c.startsWith('PADR-')) return ESPECIES_TAXONOMY['Equinos'];
     return ESPECIES_TAXONOMY['Bovinos'];
+  };
+
+  const getSpeciesBadgeStyle = (species: EspecieAnimal) => {
+    switch (species) {
+      case 'Bovinos':
+        return { bg: '#ecfdf5', color: '#065f46', border: '#a7f3d0' };
+      case 'Aves de corral':
+        return { bg: '#fef3c7', color: '#92400e', border: '#fde68a' };
+      case 'Porcinos':
+        return { bg: '#ffedd5', color: '#9a3412', border: '#fed7aa' };
+      case 'Búfalos':
+        return { bg: '#e0e7ff', color: '#3730a3', border: '#c7d2fe' };
+      case 'Caprinos':
+        return { bg: '#ccfbf1', color: '#115e59', border: '#99f6e4' };
+      case 'Equinos':
+        return { bg: '#ede9fe', color: '#5b21b6', border: '#ddd6fe' };
+      default:
+        return { bg: '#f1f5f9', color: '#334155', border: '#cbd5e1' };
+    }
   };
   
   // Modals state
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalTipo, setModalTipo] = useState('Servicios');
+  const [modalTipo, setModalTipo] = useState('Servicios IA / Monta');
   const [modalCategoria, setModalCategoria] = useState('Reproductivos');
   const [modalAnimal, setModalAnimal] = useState('0001');
 
@@ -117,20 +102,37 @@ export const EventosView: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategoryTab, setSelectedCategoryTab] = useState('Todos');
 
-  const CATEGORY_TABS = ['Todos', 'Reproductivos', 'Productivos', 'Veterinarios', 'Sanitarios'];
+  const CATEGORY_TABS = [
+    'Todos',
+    'Reproductivos',
+    'Productivos',
+    'Sanitarios & Veterinarios',
+    'Manejo & Rutina',
+    'Inventarios & Movimientos'
+  ];
 
   const filteredEventos = useMemo(() => {
     return eventos.filter(ev => {
-      // Filtro por tab de categoría
+      // 1. Filtro por Especie
+      if (selectedSpeciesTab !== 'Todas') {
+        const evSpecies = getEventSpecies(ev);
+        if (evSpecies !== selectedSpeciesTab) return false;
+      }
+
+      // 2. Filtro por Categoría
       if (selectedCategoryTab !== 'Todos') {
-        if (selectedCategoryTab === 'Sanitarios') {
-          if (ev.categoria !== 'Sanitarios' && ev.categoria !== 'Veterinarios') return false;
-        } else if (ev.categoria !== selectedCategoryTab) {
+        if (selectedCategoryTab === 'Sanitarios & Veterinarios') {
+          if (!ev.categoria.includes('Sanitari') && !ev.categoria.includes('Veterinari')) return false;
+        } else if (selectedCategoryTab === 'Manejo & Rutina') {
+          if (!ev.categoria.includes('Manejo') && !ev.categoria.includes('Rutina')) return false;
+        } else if (selectedCategoryTab === 'Inventarios & Movimientos') {
+          if (!ev.categoria.includes('Inventario') && !ev.categoria.includes('Movimiento')) return false;
+        } else if (!ev.categoria.toLowerCase().includes(selectedCategoryTab.toLowerCase())) {
           return false;
         }
       }
 
-      // Filtro por término de búsqueda
+      // 3. Filtro por término de búsqueda
       if (searchTerm.trim()) {
         const q = searchTerm.toLowerCase().trim();
         const matchAnimal = ev.codigoAnimal.toLowerCase().includes(q);
@@ -138,12 +140,14 @@ export const EventosView: React.FC = () => {
         const matchCategory = ev.categoria.toLowerCase().includes(q);
         const matchTech = (ev.tecnico || '').toLowerCase().includes(q);
         const matchVenc = ev.vencimiento.toLowerCase().includes(q);
-        if (!matchAnimal && !matchType && !matchCategory && !matchTech && !matchVenc) return false;
+        const matchObs = (ev.observaciones || '').toLowerCase().includes(q);
+        const matchSpecies = (ev.especie || '').toLowerCase().includes(q);
+        if (!matchAnimal && !matchType && !matchCategory && !matchTech && !matchVenc && !matchObs && !matchSpecies) return false;
       }
 
       return true;
     });
-  }, [eventos, selectedCategoryTab, searchTerm]);
+  }, [eventos, selectedSpeciesTab, selectedCategoryTab, searchTerm]);
 
   const handleSelectLink = (link: string, category: string, animal = '0001') => {
     setModalTipo(link);
@@ -162,6 +166,7 @@ export const EventosView: React.FC = () => {
 
   const handleResetFilters = () => {
     setSearchTerm('');
+    setSelectedSpeciesTab('Todas');
     setSelectedCategoryTab('Todos');
   };
 
@@ -170,9 +175,9 @@ export const EventosView: React.FC = () => {
       {/* Header */}
       <div className="events-header" style={{ flexWrap: 'wrap', gap: 12 }}>
         <div className="events-header-left">
-          <h2 className="toolbar-title">Centro de Eventos</h2>
+          <h2 className="toolbar-title">Centro de Eventos Multi-Especie</h2>
           <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-            Registro transaccional de operaciones zootécnicas, productivas y sanitarias
+            Registro transaccional de operaciones zootécnicas, reproductivas, productivas, sanitarias y de manejo
           </span>
         </div>
 
@@ -214,7 +219,7 @@ export const EventosView: React.FC = () => {
           <button
             type="button"
             className="btn-primary"
-            onClick={() => handleSelectLink('Servicios', 'Reproductivos')}
+            onClick={() => handleSelectLink('Servicios IA / Monta', 'Reproductivos')}
             style={{ display: 'flex', alignItems: 'center', gap: 6 }}
           >
             <Plus size={16} />
@@ -234,6 +239,89 @@ export const EventosView: React.FC = () => {
         <SpreadsheetGridMode onSaveBatch={handleSaveBatchEventos} />
       ) : (
         <>
+          {/* SPECIES FILTER BAR */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 12,
+            backgroundColor: '#ffffff',
+            padding: '12px 16px',
+            borderRadius: 10,
+            border: '1px solid var(--border-gray)',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+            flexWrap: 'wrap'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginRight: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
+                Filtrar por Especie:
+              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                {SPECIES_TABS.map(tab => {
+                  const isSelected = selectedSpeciesTab === tab.id;
+                  const count = tab.id === 'Todas'
+                    ? eventos.length
+                    : eventos.filter(ev => getEventSpecies(ev) === tab.id).length;
+
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      className={`filter-pill-btn ${isSelected ? 'active' : ''}`}
+                      onClick={() => setSelectedSpeciesTab(tab.id)}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 6,
+                        border: isSelected ? '1px solid var(--primary-color)' : '1px solid #e2e8f0',
+                        borderRadius: 20,
+                        padding: '6px 14px',
+                        fontSize: 12,
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        backgroundColor: isSelected ? 'var(--primary-color)' : '#f8fafc',
+                        color: isSelected ? '#ffffff' : '#334155',
+                        boxShadow: isSelected ? '0 2px 4px rgba(45,106,79,0.2)' : 'none',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      <span style={{ fontSize: 14 }}>{tab.icon}</span>
+                      <span>{tab.label}</span>
+                      <span style={{
+                        fontSize: 11,
+                        fontWeight: 700,
+                        padding: '1px 6px',
+                        borderRadius: 10,
+                        backgroundColor: isSelected ? 'rgba(255,255,255,0.25)' : '#e2e8f0',
+                        color: isSelected ? '#ffffff' : '#64748b'
+                      }}>
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {selectedSpeciesTab !== 'Todas' && (
+              <button
+                type="button"
+                onClick={() => setSelectedSpeciesTab('Todas')}
+                style={{
+                  fontSize: 12,
+                  color: 'var(--primary-color)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  textDecoration: 'underline'
+                }}
+              >
+                Ver todas las especies
+              </button>
+            )}
+          </div>
+
           {/* Filter and Search Bar */}
           <div style={{
             display: 'flex',
@@ -286,7 +374,7 @@ export const EventosView: React.FC = () => {
               <input
                 type="text"
                 className="form-input"
-                placeholder="Buscar por animal, evento o técnico..."
+                placeholder="Buscar por animal, especie, evento o técnico..."
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
                 style={{
@@ -334,62 +422,91 @@ export const EventosView: React.FC = () => {
               <table className="events-table">
                 <thead>
                   <tr>
-                    <th style={{ width: '20%' }}>Fecha</th>
-                    <th style={{ width: '20%' }}>Código Animal</th>
-                    <th style={{ width: '25%' }}>Tipo de Evento</th>
-                    <th style={{ width: '35%' }}>Vencimiento / Próx. Acción</th>
+                    <th style={{ width: '15%' }}>Fecha</th>
+                    <th style={{ width: '22%' }}>Semoviente / Especie</th>
+                    <th style={{ width: '33%' }}>Tipo de Evento &amp; Detalles</th>
+                    <th style={{ width: '30%' }}>Vencimiento / Próx. Acción</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredEventos.map(ev => (
-                    <tr key={ev.id}>
-                      <td style={{ fontWeight: 500 }}>{ev.fecha}</td>
-                      <td>
-                        <span style={{
-                          fontWeight: 700,
-                          color: 'var(--primary-color)',
-                          backgroundColor: 'var(--primary-ultra-light)',
-                          padding: '2px 8px',
-                          borderRadius: 4,
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: 6
-                        }}>
-                          <span>{getAnimalSpeciesMeta(ev.codigoAnimal)?.icono || '🐾'}</span>
-                          <span>{ev.codigoAnimal}</span>
-                        </span>
-                      </td>
-                      <td>
-                        <span style={{ fontWeight: 600 }}>{ev.tipoEvento}</span>
-                        <span style={{ fontSize: 11, color: 'var(--text-secondary)', display: 'block' }}>
-                          {ev.categoria} {ev.tecnico ? `• ${ev.tecnico}` : ''}
-                        </span>
-                        {ev.observaciones && (
-                          <span style={{ fontSize: 11, color: '#475569', display: 'block', marginTop: 2, fontStyle: 'italic' }}>
-                            {ev.observaciones}
+                  {filteredEventos.map(ev => {
+                    const species = getEventSpecies(ev);
+                    const speciesMeta = getAnimalSpeciesMeta(ev.codigoAnimal, ev.especie);
+                    const badgeStyle = getSpeciesBadgeStyle(species);
+
+                    return (
+                      <tr key={ev.id}>
+                        <td style={{ fontWeight: 500 }}>{ev.fecha}</td>
+                        <td>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                              <span style={{
+                                fontWeight: 700,
+                                color: 'var(--primary-color)',
+                                backgroundColor: 'var(--primary-ultra-light)',
+                                padding: '2px 8px',
+                                borderRadius: 4,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 6,
+                                fontFamily: 'JetBrains Mono'
+                              }}>
+                                <span>{speciesMeta?.icono || '🐾'}</span>
+                                <span>{ev.codigoAnimal}</span>
+                              </span>
+
+                              <span style={{
+                                fontSize: 11,
+                                fontWeight: 600,
+                                padding: '2px 8px',
+                                borderRadius: 12,
+                                backgroundColor: badgeStyle.bg,
+                                color: badgeStyle.color,
+                                border: `1px solid ${badgeStyle.border}`
+                              }}>
+                                {species}
+                              </span>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <span style={{ fontWeight: 600, fontSize: 13, color: '#1e293b' }}>
+                            {ev.tipoEvento}
                           </span>
-                        )}
-                      </td>
-                      <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <CheckCircle2 size={14} color="#16a34a" />
-                          <span>{ev.vencimiento}</span>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                          <span style={{ fontSize: 11, color: 'var(--text-secondary)', display: 'block' }}>
+                            {ev.categoria} {ev.tecnico ? `• Resp: ${ev.tecnico}` : ''}
+                          </span>
+                          {ev.observaciones && (
+                            <span style={{ fontSize: 11, color: '#475569', display: 'block', marginTop: 3, fontStyle: 'italic', lineHeight: 1.4 }}>
+                              {ev.observaciones}
+                            </span>
+                          )}
+                        </td>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+                            <CheckCircle2 size={15} color="#16a34a" style={{ marginTop: 2, flexShrink: 0 }} />
+                            <span style={{ fontSize: 12, color: '#1e293b', fontWeight: 500 }}>
+                              {ev.vencimiento}
+                            </span>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                   {filteredEventos.length === 0 && (
                     <tr>
-                      <td colSpan={4} style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '32px 16px' }}>
+                      <td colSpan={4} style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '36px 16px' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-                          <span>No se encontraron eventos con los filtros seleccionados</span>
+                          <span style={{ fontSize: 24 }}>🔍</span>
+                          <span style={{ fontWeight: 600 }}>No se encontraron eventos con los filtros seleccionados</span>
+                          <span style={{ fontSize: 12 }}>Intenta cambiando de especie o borrando el término de búsqueda</span>
                           <button
                             type="button"
                             className="btn-secondary"
                             onClick={handleResetFilters}
-                            style={{ fontSize: 12, padding: '4px 12px' }}
+                            style={{ fontSize: 12, padding: '4px 14px', marginTop: 6 }}
                           >
-                            Restablecer filtros
+                            Restablecer todos los filtros
                           </button>
                         </div>
                       </td>
@@ -399,7 +516,8 @@ export const EventosView: React.FC = () => {
               </table>
             </div>
             <div className="events-table-footer-text">
-              Mostrando {filteredEventos.length} de {eventos.length} {eventos.length === 1 ? 'registro' : 'registros'}
+              Mostrando {filteredEventos.length} de {eventos.length} {eventos.length === 1 ? 'registro transaccional' : 'registros transaccionales'}
+              {selectedSpeciesTab !== 'Todas' ? ` (Filtrado por: ${selectedSpeciesTab})` : ''}
             </div>
           </div>
 

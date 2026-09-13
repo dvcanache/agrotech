@@ -5,7 +5,7 @@ import { CategoriaAnimal, EstatusAnimal } from '../../../../types2/common';
 export interface InventariosFilterValues {
   lotes: string[];
   estatus: EstatusAnimal[];
-  categorias: CategoriaAnimal[];
+  categorias: string[];
   fechaCorte: string;
 }
 
@@ -15,19 +15,26 @@ interface InventariosFilterDrawerProps {
   filters: InventariosFilterValues;
   onFilterChange: (newFilters: InventariosFilterValues) => void;
   onReset: () => void;
+  availableLotes?: { codigo: string; nombre: string }[];
+  availableCategorias?: { key: string; label: string }[];
 }
 
-const ALL_LOTES = ['ESCT', 'POT1', 'SEC1', '01'];
+const DEFAULT_LOTES = [
+  { codigo: 'ESCT', nombre: 'ESCT - Escotero' },
+  { codigo: 'POT1', nombre: 'POT1 - Potrero 1' },
+  { codigo: 'SEC1', nombre: 'SEC1 - Secas 1' },
+  { codigo: '01', nombre: '01 - Lote 01' }
+];
 const ALL_ESTATUS: EstatusAnimal[] = ['Activo', 'Inactivo', 'Referencia'];
-const ALL_CATEGORIAS: CategoriaAnimal[] = [
-  'Becerra',
-  'Mauta',
-  'Novilla',
-  'Vaca',
-  'Becerro',
-  'Maute',
-  'Novillo',
-  'Toro'
+const DEFAULT_CATEGORIAS = [
+  { key: 'Becerra', label: 'Becerra' },
+  { key: 'Mauta', label: 'Mauta' },
+  { key: 'Novilla', label: 'Novilla' },
+  { key: 'Vaca', label: 'Vaca' },
+  { key: 'Becerro', label: 'Becerro' },
+  { key: 'Maute', label: 'Maute' },
+  { key: 'Novillo', label: 'Novillo' },
+  { key: 'Toro', label: 'Toro' }
 ];
 
 export const InventariosFilterDrawer: React.FC<InventariosFilterDrawerProps> = ({
@@ -35,7 +42,9 @@ export const InventariosFilterDrawer: React.FC<InventariosFilterDrawerProps> = (
   onClose,
   filters,
   onFilterChange,
-  onReset
+  onReset,
+  availableLotes = DEFAULT_LOTES,
+  availableCategorias = DEFAULT_CATEGORIAS
 }) => {
   const toggleLote = (lote: string) => {
     const exists = filters.lotes.includes(lote);
@@ -53,11 +62,11 @@ export const InventariosFilterDrawer: React.FC<InventariosFilterDrawerProps> = (
     onFilterChange({ ...filters, estatus: updated });
   };
 
-  const toggleCategoria = (cat: CategoriaAnimal) => {
-    const exists = filters.categorias.includes(cat);
+  const toggleCategoria = (catKey: string) => {
+    const exists = filters.categorias.includes(catKey);
     const updated = exists
-      ? filters.categorias.filter(c => c !== cat)
-      : [...filters.categorias, cat];
+      ? filters.categorias.filter(c => c !== catKey)
+      : [...filters.categorias, catKey];
     onFilterChange({ ...filters, categorias: updated });
   };
 
@@ -83,14 +92,14 @@ export const InventariosFilterDrawer: React.FC<InventariosFilterDrawerProps> = (
       <div className="filter-section">
         <div className="filter-section-title">Locaciones / Lotes</div>
         <div className="filter-checkbox-list">
-          {ALL_LOTES.map(lote => (
-            <label key={lote} className="filter-checkbox-label">
+          {availableLotes.map(lote => (
+            <label key={lote.codigo} className="filter-checkbox-label">
               <input
                 type="checkbox"
-                checked={filters.lotes.includes(lote)}
-                onChange={() => toggleLote(lote)}
+                checked={filters.lotes.includes(lote.codigo)}
+                onChange={() => toggleLote(lote.codigo)}
               />
-              <span>{lote}</span>
+              <span>{lote.nombre || lote.codigo}</span>
             </label>
           ))}
         </div>
@@ -117,14 +126,14 @@ export const InventariosFilterDrawer: React.FC<InventariosFilterDrawerProps> = (
       <div className="filter-section">
         <div className="filter-section-title">Categorías de Animal</div>
         <div className="filter-checkbox-list">
-          {ALL_CATEGORIAS.map(cat => (
-            <label key={cat} className="filter-checkbox-label">
+          {availableCategorias.map(cat => (
+            <label key={cat.key} className="filter-checkbox-label">
               <input
                 type="checkbox"
-                checked={filters.categorias.includes(cat)}
-                onChange={() => toggleCategoria(cat)}
+                checked={filters.categorias.includes(cat.key)}
+                onChange={() => toggleCategoria(cat.key)}
               />
-              <span>{cat}</span>
+              <span>{cat.label}</span>
             </label>
           ))}
         </div>

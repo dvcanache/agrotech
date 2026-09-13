@@ -5,6 +5,7 @@ import { ReportPagination } from '../../components/ReportPagination';
 import { ReportSettingsModal, ColumnSetting } from '../../components/ReportSettingsModal';
 import { FichaAnimalModal, AnimalModalData } from '../components/FichaAnimalModal';
 import { ProximosDiasFilterDrawer, ProximosDiasFilterValues } from '../components/ProximosDiasFilterDrawer';
+import { SpeciesSelectorBar, SPECIES_TABS_CONFIG } from '../../components/SpeciesSelectorBar';
 import { exportToCSV } from '../../utils/exportUtils';
 import { MOCK_PROXIMAS_PARIR } from '../animalesMockData';
 import { ProximaParirEntity } from '../../../../types2/entities';
@@ -12,6 +13,9 @@ import { EstatusAnimal } from '../../../../types2/common';
 
 export const ProximasParirView: React.FC = () => {
   const [animales] = useState<ProximaParirEntity[]>(MOCK_PROXIMAS_PARIR);
+
+  // Especie activa
+  const [selectedSpecies, setSelectedSpecies] = useState<string>('TODAS');
 
   const [selectedAnimal, setSelectedAnimal] = useState<AnimalModalData | null>(null);
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
@@ -23,8 +27,21 @@ export const ProximasParirView: React.FC = () => {
   const [sortField, setSortField] = useState<keyof ProximaParirEntity>('diasProximoParto');
   const [sortAsc, setSortAsc] = useState(true);
 
+  // Conteo dinámico por especie
+  const speciesCounts = useMemo(() => {
+    const counts: Record<string, number> = { TODAS: animales.length };
+    SPECIES_TABS_CONFIG.forEach(t => {
+      if (t.id !== 'TODAS') {
+        counts[t.id] = animales.filter(a => (a.especie || 'Bovinos') === t.id).length;
+      }
+    });
+    return counts;
+  }, [animales]);
+
   const [columns, setColumns] = useState<ColumnSetting[]>([
     { key: 'practico', label: 'Práctico', visible: true },
+    { key: 'especie', label: 'Especie', visible: true },
+    { key: 'duracionGestacionDias', label: 'Fisiología Gestación', visible: true },
     { key: 'unico', label: 'Único', visible: true },
     { key: 'categoria', label: 'Categoría', visible: true },
     { key: 'estatus', label: 'Estatus', visible: true },
@@ -47,14 +64,14 @@ export const ProximasParirView: React.FC = () => {
   const [filters, setFilters] = useState<ProximosDiasFilterValues>({
     proximosDiasMaximo: 90,
     estatus: ['Activo'] as EstatusAnimal[],
-    lotes: ['01', 'ESCT', 'POT1', 'SEC1']
+    lotes: ['01', 'ESCT', 'POT1', 'SEC1', 'GALP-01', 'GALP-03', 'PIARA-01', 'APR-01', 'BUF-01', 'CAB-01']
   });
 
   const activeFiltersCount = useMemo(() => {
     let count = 0;
     if (filters.proximosDiasMaximo < 90) count++;
     if (filters.estatus.length < 3) count++;
-    if (filters.lotes.length < 4) count++;
+    if (filters.lotes.length < 10) count++;
     return count;
   }, [filters]);
 
@@ -80,15 +97,22 @@ export const ProximasParirView: React.FC = () => {
   const filteredAnimales = useMemo(() => {
     return animales
       .filter(item => {
+        // Filtro por Especie activa
+        const sp = item.especie || 'Bovinos';
+        if (selectedSpecies !== 'TODAS' && sp !== selectedSpecies) {
+          return false;
+        }
+
         if (searchQuery.trim()) {
           const q = searchQuery.toLowerCase();
           const matchCode = item.practico.toLowerCase().includes(q) || item.unico.toLowerCase().includes(q);
           const matchLot = item.lote.toLowerCase().includes(q);
-          if (!matchCode && !matchLot) return false;
+          const matchCat = item.categoria.toLowerCase().includes(q);
+          if (!matchCode && !matchLot && !matchCat) return false;
         }
 
         if (!filters.estatus.includes(item.estatus)) return false;
-        if (!filters.lotes.includes(item.lote)) return false;
+        if (filters.lotes.length > 0 && !filters.lotes.includes(item.lote)) return false;
         if (item.diasProximoParto > filters.proximosDiasMaximo) return false;
 
         return true;
@@ -103,11 +127,11 @@ export const ProximasParirView: React.FC = () => {
           ? String(valA || '').localeCompare(String(valB || ''))
           : String(valB || '').localeCompare(String(valA || ''));
       });
-  }, [animales, searchQuery, filters, sortField, sortAsc]);
+  }, [animales, selectedSpecies, searchQuery, filters, sortField, sortAsc]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [filters, searchQuery]);
+  }, [selectedSpecies, filters, searchQuery]);
 
   const totalPages = Math.ceil(filteredAnimales.length / pageSize) || 1;
   const paginatedAnimales = useMemo(() => {
@@ -190,6 +214,13 @@ export const ProximasParirView: React.FC = () => {
         }
       />
 
+      {/* Barra Selectora Multiespecie */}
+      <SpeciesSelectorBar
+        selectedSpecies={selectedSpecies}
+        onSelectSpecies={setSelectedSpecies}
+        speciesCounts={speciesCounts}
+      />
+
       {/* Tabla */}
       <div className="report-table-wrapper">
         <table className="report-grid-table">
@@ -200,6 +231,22 @@ export const ProximasParirView: React.FC = () => {
                   <div className="th-content">
                     <span>Práctico</span>
                     <Filter size={12} />
+                  </div>
+                </th>
+              )}
+              {isColVisible('especie') && (
+                <th onClick={() => handleSort('especie' as any)}>
+                  <div className="th-content">
+                    <span>Especie</span>
+                    <Filter size={12} />
+                  </div>
+                </th>
+              )}
+              {isColVisible('duracionGestacionDias') && (
+                <th onClick={() => handleSort('duracionGestacionDias' as any)}>
+                  <div className="th-content">
+                    <span>Fisiología Gestación</span>
+                    <ArrowUpDown size={12} />
                   </div>
                 </th>
               )}
@@ -292,6 +339,35 @@ export const ProximasParirView: React.FC = () => {
                 >
                   {isColVisible('practico') && (
                     <td style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{a.practico}</td>
+                  )}
+                  {isColVisible('especie') && (
+                    <td>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600 }}>
+                        <span>
+                          {a.especie === 'Aves de corral' ? '🐔' :
+                           a.especie === 'Porcinos' ? '🐷' :
+                           a.especie === 'Búfalos' ? '🐃' :
+                           a.especie === 'Caprinos' ? '🐐' :
+                           a.especie === 'Equinos' ? '🐴' : '🐮'}
+                        </span>
+                        <span>{a.especie || 'Bovinos'}</span>
+                      </span>
+                    </td>
+                  )}
+                  {isColVisible('duracionGestacionDias') && (
+                    <td>
+                      <span
+                        className="badge-category"
+                        style={{
+                          backgroundColor: '#f1f5f9',
+                          color: '#0f172a',
+                          fontWeight: 700,
+                          fontSize: 11.5
+                        }}
+                      >
+                        {a.duracionGestacionDias || (a.especie === 'Porcinos' ? 114 : a.especie === 'Caprinos' ? 150 : a.especie === 'Búfalos' ? 310 : a.especie === 'Equinos' ? 340 : a.especie === 'Aves de corral' ? 21 : 283)} días ({a.especie === 'Aves de corral' ? 'Incubación' : 'Gestación'})
+                      </span>
+                    </td>
                   )}
                   {isColVisible('unico') && <td>{a.unico}</td>}
                   {isColVisible('categoria') && <td>{a.categoria}</td>}

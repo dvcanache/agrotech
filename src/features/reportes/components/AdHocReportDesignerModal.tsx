@@ -21,7 +21,13 @@ import {
   Milk,
   Activity,
   MapPin,
-  ListFilter
+  ListFilter,
+  Users,
+  ClipboardList,
+  Egg,
+  Baby,
+  Warehouse,
+  Trophy
 } from 'lucide-react';
 import {
   ADHOC_ENTITIES,
@@ -419,15 +425,33 @@ export const AdHocReportDesignerModal: React.FC<AdHocReportDesignerModalProps> =
                       onClick={() => handleEntityChange(key)}
                     >
                       <div className="entity-icon-box">
-                        {key === 'semovientes' && <CheckSquare size={22} />}
+                        {key === 'semovientes' && <Users size={22} />}
                         {key === 'lactancias' && <Milk size={22} />}
-                        {key === 'controles_lecheros' && <FileSpreadsheet size={22} />}
+                        {key === 'controles_lecheros' && <ClipboardList size={22} />}
+                        {key === 'postura_avicola' && <Egg size={22} />}
+                        {key === 'camadas_porcinas' && <Baby size={22} />}
                         {key === 'eventos_veterinarios' && <Activity size={22} />}
-                        {key === 'potreros' && <MapPin size={22} />}
+                        {key === 'potreros_e_instalaciones' && <Warehouse size={22} />}
+                        {key === 'faena_y_trabajo' && <Trophy size={22} />}
                       </div>
 
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                        <strong style={{ fontSize: 14.5, color: 'var(--text-primary)' }}>{ent.title}</strong>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
+                          <strong style={{ fontSize: 14, color: 'var(--text-primary)' }}>{ent.title}</strong>
+                          <span
+                            style={{
+                              fontSize: 10,
+                              fontWeight: 700,
+                              padding: '2px 6px',
+                              borderRadius: 4,
+                              backgroundColor: isSelected ? 'var(--primary-color)' : '#f1f5f9',
+                              color: isSelected ? '#ffffff' : '#475569',
+                              whiteSpace: 'nowrap'
+                            }}
+                          >
+                            {ent.speciesBadge}
+                          </span>
+                        </div>
                         <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{ent.subtitle}</span>
                       </div>
 
