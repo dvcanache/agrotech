@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Sliders, Plus, CheckCircle2, Zap, FileSpreadsheet, FolderTree } from 'lucide-react';
-import { EVENT_CATEGORIES, INITIAL_EVENTS } from './eventosData';
+import { EVENT_CATEGORIES, INITIAL_EVENTS, getEventCategoriesForSpecies } from './eventosData';
 import { EventCategoryCard } from './components/EventCategoryCard';
 import { NuevoEventoModal, EventoItem } from './components/NuevoEventoModal';
 import { SpreadsheetGridMode } from './components/SpreadsheetGridMode';
@@ -523,11 +523,18 @@ export const EventosView: React.FC = () => {
 
           {/* Grid of Event Categories */}
           <div className="events-categories-grid">
-            {EVENT_CATEGORIES.map(cat => (
+            {getEventCategoriesForSpecies(selectedSpeciesTab).map(cat => (
               <EventCategoryCard
                 key={cat.titulo}
                 category={cat}
-                onSelectLink={handleSelectLink}
+                onSelectLink={(link, catTitle) => {
+                  const defaultAnimal = selectedSpeciesTab === 'Aves de corral' ? 'GALP-01' : 
+                    selectedSpeciesTab === 'Porcinos' ? 'POR-CR01' :
+                    selectedSpeciesTab === 'Caprinos' ? 'CAP-01' :
+                    selectedSpeciesTab === 'Equinos' ? 'EQ-01' :
+                    selectedSpeciesTab === 'Búfalos' ? 'BUF-01' : '0001';
+                  handleSelectLink(link, catTitle, defaultAnimal);
+                }}
               />
             ))}
           </div>

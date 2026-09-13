@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { useApp } from '../../../context/AppContext';
 import { Animal, EspecieAnimal, ESPECIES_TAXONOMY } from '../../../types/animal';
-import { EVENT_CATEGORIES } from '../eventosData';
+import { EVENT_CATEGORIES, getEventCategoriesForSpecies } from '../eventosData';
 import { EventoItem } from '../../../types/events';
 import './eventosSpreadsheet.css';
 
@@ -225,11 +225,23 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
     return animals.filter(a => a.especie === filterSpecies || (!a.especie && filterSpecies === 'Bovinos'));
   }, [animals, filterSpecies]);
 
-  // Available event types for selected category
+  // Species-tailored event categories
+  const currentSpeciesCategories = useMemo(() => {
+    return getEventCategoriesForSpecies(currentSpecies);
+  }, [currentSpecies]);
+
+  // Available event types for selected category (zootechnically filtered by species)
   const availableEventTypes = useMemo(() => {
-    const cat = EVENT_CATEGORIES.find(c => c.titulo.toLowerCase() === categoria.toLowerCase());
+    const cat = currentSpeciesCategories.find(c => c.titulo.toLowerCase() === categoria.toLowerCase());
     return cat ? cat.enlaces : [tipoEvento];
-  }, [categoria, tipoEvento]);
+  }, [currentSpeciesCategories, categoria, tipoEvento]);
+
+  // Auto-correct event type if it does not apply to the current species (e.g. birds don't have mastitis or lactation)
+  useEffect(() => {
+    if (availableEventTypes.length > 0 && !availableEventTypes.includes(tipoEvento)) {
+      setTipoEvento(availableEventTypes[0]);
+    }
+  }, [availableEventTypes, tipoEvento]);
 
   // Semen catalog for current species
   const semenOptions = useMemo(() => {
@@ -888,14 +900,14 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
                   onChange={e => {
                     const newCat = e.target.value;
                     setCategoria(newCat);
-                    const catObj = EVENT_CATEGORIES.find(c => c.titulo === newCat);
+                    const catObj = currentSpeciesCategories.find(c => c.titulo === newCat);
                     if (catObj && catObj.enlaces.length > 0) {
                       setTipoEvento(catObj.enlaces[0]);
                     }
                   }}
                   style={{ fontWeight: 600 }}
                 >
-                  {EVENT_CATEGORIES.map(c => (
+                  {currentSpeciesCategories.map(c => (
                     <option key={c.titulo} value={c.titulo}>{c.titulo}</option>
                   ))}
                 </select>
@@ -915,6 +927,28 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
                 </select>
               </div>
             </div>
+
+            {/* Biological species notice for poultry (Aves de corral no tienen mastitis ni glándula mamaria) */}
+            {isPoultry && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '10px 14px',
+                borderRadius: 8,
+                backgroundColor: '#fef3c7',
+                border: '1px solid #fde68a',
+                color: '#92400e',
+                fontSize: 12.5,
+                fontWeight: 600,
+                marginTop: 6
+              }}>
+                <span style={{ fontSize: 18 }}>🐔</span>
+                <div>
+                  <strong>Fisiología Aviar:</strong> Las aves son ovíparas y carecen de glándulas mamarias (no tienen ubre ni sufren de mastitis, ni producen leche). Las opciones del evento se han adaptado exclusivamente a sanidad avícola, postura, incubación y manejo.
+                </div>
+              </div>
+            )}
 
             {/* Technical Specialist */}
             <div className="form-field">

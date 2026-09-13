@@ -84,6 +84,379 @@ export const EVENT_CATEGORIES: EventCategory[] = [
   }
 ];
 
+/**
+ * Obtiene las categorías y submódulos de eventos filtrados zootécnicamente por especie.
+ * Garantiza estrictamente que las especies no mamíferas / aviares NO posean eventos de glándula mamaria (Mastitis, Ordeño, Secados),
+ * ni partos de mamífero ni descorne.
+ */
+export function getEventCategoriesForSpecies(species?: string): EventCategory[] {
+  if (!species || species === 'Todas' || species === 'TODAS') {
+    return EVENT_CATEGORIES;
+  }
+
+  // 🐔 AVES DE CORRAL (Ovíparos sin glándulas mamarias ni cuernos ni herraduras)
+  if (species === 'Aves de corral' || species === 'Aves' || species.includes('Ave')) {
+    return [
+      {
+        titulo: "Reproductivos",
+        iconoType: "reproductivos",
+        enlaces: [
+          "Incubación & Eclosión Avícola",
+          "Ovoscopía & Fertilidad (7d/14d)",
+          "Carga de Huevos Fértiles",
+          "Control de Lotes Reproductores"
+        ]
+      },
+      {
+        titulo: "Productivos",
+        iconoType: "productivos",
+        enlaces: [
+          "Control de Postura Avícola",
+          "Pesaje de Lote & Crecimiento",
+          "Eficiencia Alimenticia & Conversión (ICA)",
+          "Clasificación de Huevos (AAA/AA/A)"
+        ]
+      },
+      {
+        titulo: "Sanitarios & Veterinarios",
+        iconoType: "veterinarios",
+        enlaces: [
+          "Vacunación por Vía (Avícola/Porcina/Equina)",
+          "Control de Coccidiosis & Parásitos",
+          "Planes Sanitarios de Galpón",
+          "Bioseguridad & Desinfección Aviar",
+          "Clínicos & Tiempos de Retiro"
+        ]
+      },
+      {
+        titulo: "Manejo & Rutina",
+        iconoType: "manejo",
+        enlaces: [
+          "Despique & Sexado Avícola",
+          "Acondicionamiento Gallos Finos",
+          "Pesajes de Muestreo de Aves",
+          "Mantenimiento & Sanidad de Galpón"
+        ]
+      },
+      {
+        titulo: "Inventarios & Movimientos",
+        iconoType: "inventarios",
+        enlaces: [
+          "Inventarios Físicos RFID",
+          "Cambios de Lote / Galpón / Aprisco / Caballeriza",
+          "Bajas & Mortalidad de Galpón / Piara",
+          "Despacho a Matadero / Ventas"
+        ]
+      },
+      {
+        titulo: "Potreros & Instalaciones",
+        iconoType: "potreros",
+        enlaces: [
+          "Bioseguridad de Galpones y Apriscos",
+          "Labores y Mantenimiento",
+          "Rotaciones de Pastoreo"
+        ]
+      },
+      {
+        titulo: "Otros",
+        iconoType: "otros",
+        enlaces: [
+          "Comentarios y Notas",
+          "Registro de Afiliaciones",
+          "Producciones Diarias",
+          "Auditoría de Eventos"
+        ]
+      }
+    ];
+  }
+
+  // 🐷 PORCINOS
+  if (species === 'Porcinos' || species === 'Cerdos') {
+    return [
+      {
+        titulo: "Reproductivos",
+        iconoType: "reproductivos",
+        enlaces: [
+          "Camadas Porcinas",
+          "Servicios IA / Monta",
+          "Revisiones Ováricas / Ecografías",
+          "Abortos",
+          "Celos"
+        ]
+      },
+      {
+        titulo: "Productivos",
+        iconoType: "productivos",
+        enlaces: [
+          "Ceba & Grasa Dorsal Porcina",
+          "Crecimientos",
+          "Eficiencia Alimenticia"
+        ]
+      },
+      {
+        titulo: "Sanitarios & Veterinarios",
+        iconoType: "veterinarios",
+        enlaces: [
+          "Planes Sanitarios",
+          "Vacunación por Vía (Avícola/Porcina/Equina)",
+          "Clínicos & Tiempos de Retiro"
+        ]
+      },
+      {
+        titulo: "Manejo & Rutina",
+        iconoType: "manejo",
+        enlaces: [
+          "Manejo Neonatal Porcino (Descolmillado/Caudectomía/Hierro)",
+          "Marcaje / Tatuaje / Chip"
+        ]
+      },
+      {
+        titulo: "Inventarios & Movimientos",
+        iconoType: "inventarios",
+        enlaces: [
+          "Inventarios Físicos RFID",
+          "Cambios de Lote / Galpón / Aprisco / Caballeriza",
+          "Bajas & Mortalidad de Galpón / Piara",
+          "Despacho a Matadero / Ventas"
+        ]
+      },
+      {
+        titulo: "Potreros & Instalaciones",
+        iconoType: "potreros",
+        enlaces: [
+          "Bioseguridad de Galpones y Apriscos",
+          "Labores y Mantenimiento"
+        ]
+      },
+      {
+        titulo: "Otros",
+        iconoType: "otros",
+        enlaces: [
+          "Comentarios y Notas",
+          "Registro de Afiliaciones",
+          "Producciones Diarias",
+          "Auditoría de Eventos"
+        ]
+      }
+    ];
+  }
+
+  // 🐴 EQUINOS
+  if (species === 'Equinos' || species === 'Caballos') {
+    return [
+      {
+        titulo: "Reproductivos",
+        iconoType: "reproductivos",
+        enlaces: [
+          "Foliculometría Equina",
+          "Servicios IA / Monta",
+          "Partos",
+          "Abortos",
+          "Celos"
+        ]
+      },
+      {
+        titulo: "Productivos",
+        iconoType: "productivos",
+        enlaces: [
+          "Crecimientos",
+          "Eficiencia Alimenticia"
+        ]
+      },
+      {
+        titulo: "Sanitarios & Veterinarios",
+        iconoType: "veterinarios",
+        enlaces: [
+          "Podología & Herraje Equino",
+          "Planes Sanitarios",
+          "Clínicos & Tiempos de Retiro",
+          "Vacunación por Vía (Avícola/Porcina/Equina)"
+        ]
+      },
+      {
+        titulo: "Manejo & Rutina",
+        iconoType: "manejo",
+        enlaces: [
+          "Doma Racional Equina",
+          "Marcaje / Tatuaje / Chip"
+        ]
+      },
+      {
+        titulo: "Inventarios & Movimientos",
+        iconoType: "inventarios",
+        enlaces: [
+          "Inventarios Físicos RFID",
+          "Cambios de Lote / Galpón / Aprisco / Caballeriza",
+          "Despacho a Matadero / Ventas"
+        ]
+      },
+      {
+        titulo: "Potreros & Instalaciones",
+        iconoType: "potreros",
+        enlaces: [
+          "Labores y Mantenimiento",
+          "Rotaciones de Pastoreo",
+          "Planificación Forrajera"
+        ]
+      },
+      {
+        titulo: "Otros",
+        iconoType: "otros",
+        enlaces: [
+          "Comentarios y Notas",
+          "Registro de Afiliaciones",
+          "Auditoría de Eventos"
+        ]
+      }
+    ];
+  }
+
+  // 🐐 CAPRINOS
+  if (species === 'Caprinos' || species === 'Cabras') {
+    return [
+      {
+        titulo: "Reproductivos",
+        iconoType: "reproductivos",
+        enlaces: [
+          "Servicios IA / Monta",
+          "Partos",
+          "Abortos",
+          "Celos",
+          "Revisiones Ováricas / Ecografías"
+        ]
+      },
+      {
+        titulo: "Productivos",
+        iconoType: "productivos",
+        enlaces: [
+          "Pesajes de leche",
+          "Secados",
+          "Crecimientos",
+          "Eficiencia Alimenticia"
+        ]
+      },
+      {
+        titulo: "Sanitarios & Veterinarios",
+        iconoType: "veterinarios",
+        enlaces: [
+          "Evaluación FAMACHA Caprina",
+          "Planes Sanitarios",
+          "Clínicos & Tiempos de Retiro"
+        ]
+      },
+      {
+        titulo: "Manejo & Rutina",
+        iconoType: "manejo",
+        enlaces: [
+          "Descorne / Topizado",
+          "Marcaje / Tatuaje / Chip"
+        ]
+      },
+      {
+        titulo: "Inventarios & Movimientos",
+        iconoType: "inventarios",
+        enlaces: [
+          "Inventarios Físicos RFID",
+          "Cambios de Lote / Galpón / Aprisco / Caballeriza",
+          "Despacho a Matadero / Ventas"
+        ]
+      },
+      {
+        titulo: "Potreros & Instalaciones",
+        iconoType: "potreros",
+        enlaces: [
+          "Labores y Mantenimiento",
+          "Rotaciones de Pastoreo",
+          "Bioseguridad de Galpones y Apriscos"
+        ]
+      },
+      {
+        titulo: "Otros",
+        iconoType: "otros",
+        enlaces: [
+          "Comentarios y Notas",
+          "Registro de Afiliaciones",
+          "Producciones Diarias",
+          "Auditoría de Eventos"
+        ]
+      }
+    ];
+  }
+
+  // 🐮 BOVINOS / 🐃 BÚFALOS (Especies lecheras de 4 cuartos tradicionales)
+  return [
+    {
+      titulo: "Reproductivos",
+      iconoType: "reproductivos",
+      enlaces: [
+        "Servicios IA / Monta",
+        "Revisiones Ováricas / Ecografías",
+        "Partos",
+        "Abortos",
+        "Celos",
+        "Embriones"
+      ]
+    },
+    {
+      titulo: "Productivos",
+      iconoType: "productivos",
+      enlaces: [
+        "Pesajes de leche",
+        "Secados",
+        "Crecimientos",
+        "Eficiencia Alimenticia"
+      ]
+    },
+    {
+      titulo: "Sanitarios & Veterinarios",
+      iconoType: "veterinarios",
+      enlaces: [
+        "Mastitis (CMT 4 cuartos)",
+        "Clínicos & Tiempos de Retiro",
+        "Planes Sanitarios",
+        "Vacunación por Vía (Avícola/Porcina/Equina)"
+      ]
+    },
+    {
+      titulo: "Manejo & Rutina",
+      iconoType: "manejo",
+      enlaces: [
+        "Descorne / Topizado",
+        "Marcaje / Tatuaje / Chip"
+      ]
+    },
+    {
+      titulo: "Inventarios & Movimientos",
+      iconoType: "inventarios",
+      enlaces: [
+        "Inventarios Físicos RFID",
+        "Cambios de Lote / Galpón / Aprisco / Caballeriza",
+        "Bajas & Mortalidad de Galpón / Piara",
+        "Despacho a Matadero / Ventas"
+      ]
+    },
+    {
+      titulo: "Potreros & Instalaciones",
+      iconoType: "potreros",
+      enlaces: [
+        "Labores y Mantenimiento",
+        "Rotaciones de Pastoreo",
+        "Planificación Forrajera"
+      ]
+    },
+    {
+      titulo: "Otros",
+      iconoType: "otros",
+      enlaces: [
+        "Comentarios y Notas",
+        "Registro de Afiliaciones",
+        "Producciones Diarias",
+        "Auditoría de Eventos"
+      ]
+    }
+  ];
+}
+
 export const INITIAL_EVENTS: EventoItem[] = [
   // ==========================================
   // 1. BOVINOS

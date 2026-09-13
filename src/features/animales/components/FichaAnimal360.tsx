@@ -67,13 +67,15 @@ export const FichaAnimal360: React.FC<FichaAnimal360Props> = ({
     animal360 = getAnimal360ByPractico((animal as Animal).practico);
   }
 
+  const isPoultry = animal360.especie === 'Aves de corral' || (animal360.categoria && ['Gallina', 'Pollo', 'Gallo', 'Pava', 'Pato', 'Pavito', 'Patito'].some(c => animal360.categoria.includes(c)));
+
   const TABS_CONFIG: { key: FichaAnimalTab; label: string; num: number; icon: React.ReactNode }[] = [
     { key: 'general', label: 'General & Identificación', num: 1, icon: <Info size={15} /> },
     { key: 'genealogia', label: 'Genealogía & Consanguinidad', num: 2, icon: <GitBranch size={15} /> },
-    { key: 'reproduccion', label: 'Historial Reproductivo', num: 3, icon: <Heart size={15} /> },
-    { key: 'lactancia', label: 'Curvas Lactancia (Wood)', num: 4, icon: <Milk size={15} /> },
+    { key: 'reproduccion', label: isPoultry ? 'Ciclo Reproductivo & Incubación' : 'Historial Reproductivo', num: 3, icon: <Heart size={15} /> },
+    { key: 'lactancia', label: isPoultry ? 'Curvas de Postura & Rendimiento' : 'Curvas Lactancia (Wood)', num: 4, icon: <Milk size={15} /> },
     { key: 'ponderal', label: 'Desarrollo Ponderal', num: 5, icon: <Scale size={15} /> },
-    { key: 'sanidad', label: 'Sanidad & Ubre (4Q)', num: 6, icon: <ShieldAlert size={15} /> },
+    { key: 'sanidad', label: isPoultry ? 'Sanidad & Bioseguridad Aviar' : animal360.especie === 'Caprinos' ? 'Sanidad & Ubre (2G)' : 'Sanidad & Ubre (4Q)', num: 6, icon: <ShieldAlert size={15} /> },
     { key: 'trazabilidad', label: 'Trazabilidad Espacial', num: 7, icon: <MapPin size={15} /> },
   ];
 

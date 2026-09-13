@@ -50,128 +50,192 @@ export const TabSanidadUbre: React.FC<TabSanidadUbreProps> = ({ animal }) => {
 
   const selectedQuarter = selectedQuarterKey ? cuartos[selectedQuarterKey] : null;
 
+  const isPoultry = animal.especie === 'Aves de corral' || (animal.categoria && ['Gallina', 'Pollo', 'Gallo', 'Pava', 'Pato', 'Pavito', 'Patito'].some(c => animal.categoria.includes(c)));
+
+  const effectivePlanVacunacion = isPoultry ? [
+    { id: 'vac-av-1', enfermedad: 'Enfermedad de Newcastle', producto: 'Cepa LaSota Clon 30 (Vía Ocular/Aspersión)', laboratorio: 'Ceva / Merial', lote: 'NEW-2026-X', fechaAplicacion: '2026-08-15', fechaProximaDosis: '2026-11-15', estado: 'Vigente', veterinario: 'Ing. Agr. Marcos Solís' },
+    { id: 'vac-av-2', enfermedad: 'Gumboro (Bursitis Infecciosa)', producto: 'Bursine Plus (Agua de bebida)', laboratorio: 'Zoetis', lote: 'GUM-098', fechaAplicacion: '2026-08-20', fechaProximaDosis: '2026-12-20', estado: 'Vigente', veterinario: 'Ing. Agr. Marcos Solís' },
+    { id: 'vac-av-3', enfermedad: 'Bronquitis Infecciosa', producto: 'H120 Liofilizada (Aspersión gota gruesa)', laboratorio: 'MSD Salud Animal', lote: 'BRO-112', fechaAplicacion: '2026-08-10', fechaProximaDosis: '2026-12-10', estado: 'Vigente', veterinario: 'Ing. Agr. Marcos Solís' },
+    { id: 'vac-av-4', enfermedad: 'Viruela Aviar', producto: 'Pox-Vac (Punción alar)', laboratorio: 'Boehringer Ingelheim', lote: 'POX-44', fechaAplicacion: '2026-07-05', fechaProximaDosis: '2027-07-05', estado: 'Vigente', veterinario: 'Ing. Agr. Marcos Solís' },
+  ] : planVacunacion;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      {/* 1. Mapeo Anatómico de los 4 Cuartos Mamarios */}
-      <div className="ficha360-card">
-        <div className="ficha360-card-title" style={{ justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Activity size={16} color="#2d6a4f" />
-            <span>Diagrama Anatómico de Ubre & Prueba California Mastitis Test (CMT)</span>
+      {isPoultry ? (
+        /* 1. Sanidad y Bioseguridad Aviar (Aves son ovíparas y carecen de ubre y mastitis) */
+        <div className="ficha360-card">
+          <div className="ficha360-card-title" style={{ justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <ShieldCheck size={16} color="#059669" />
+              <span>Bioseguridad &amp; Sanidad del Galpón Aviar</span>
+            </div>
+            <span style={{ fontSize: 12, color: '#059669', fontWeight: 700, backgroundColor: '#ecfdf5', padding: '2px 8px', borderRadius: 10 }}>
+              Estatus Sanitario: Óptimo
+            </span>
           </div>
-          <span style={{ fontSize: 12, color: '#64748b' }}>
-            Haga clic sobre cualquier cuarto para evaluar o cambiar el grado CMT
-          </span>
-        </div>
 
-        <div style={{ display: 'flex', gap: 24, alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <div className="udder-diagram-wrapper">
-            <span className="udder-label-indicator">▲ Vista Anterior (Cabeza) ▲</span>
-            
-            <div className="udder-grid-4">
-              {/* Anterior Derecho (AD) */}
-              <div 
-                className={`udder-quarter quarter-ad ${selectedQuarterKey === 'AD' ? 'selected' : ''}`}
-                onClick={() => setSelectedQuarterKey('AD')}
-              >
-                <div className="quarter-code">AD</div>
-                <div className="quarter-name">Anterior Der.</div>
-                <div className={`quarter-cmt-pill ${getCmtClass(cuartos.AD.cmt)}`}>
-                  CMT: {cuartos.AD.cmt}
-                </div>
+          {/* Banner explicativo zootécnico */}
+          <div style={{
+            backgroundColor: '#fef3c7',
+            border: '1px solid #fde68a',
+            borderRadius: 8,
+            padding: '12px 16px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            marginBottom: 16
+          }}>
+            <span style={{ fontSize: 24 }}>🐔</span>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: 13, color: '#92400e' }}>
+                Fisiología Aviar: Especie Ovípara (Sin Glándulas Mamarias ni Mastitis)
               </div>
-
-              {/* Anterior Izquierdo (AI) */}
-              <div 
-                className={`udder-quarter quarter-ai ${selectedQuarterKey === 'AI' ? 'selected' : ''}`}
-                onClick={() => setSelectedQuarterKey('AI')}
-              >
-                <div className="quarter-code">AI</div>
-                <div className="quarter-name">Anterior Izq.</div>
-                <div className={`quarter-cmt-pill ${getCmtClass(cuartos.AI.cmt)}`}>
-                  CMT: {cuartos.AI.cmt}
-                </div>
-              </div>
-
-              {/* Posterior Derecho (PD) */}
-              <div 
-                className={`udder-quarter quarter-pd ${selectedQuarterKey === 'PD' ? 'selected' : ''}`}
-                onClick={() => setSelectedQuarterKey('PD')}
-              >
-                <div className="quarter-code">PD</div>
-                <div className="quarter-name">Posterior Der.</div>
-                <div className={`quarter-cmt-pill ${getCmtClass(cuartos.PD.cmt)}`}>
-                  CMT: {cuartos.PD.cmt}
-                </div>
-              </div>
-
-              {/* Posterior Izquierdo (PI) */}
-              <div 
-                className={`udder-quarter quarter-pi ${selectedQuarterKey === 'PI' ? 'selected' : ''}`}
-                onClick={() => setSelectedQuarterKey('PI')}
-              >
-                <div className="quarter-code">PI</div>
-                <div className="quarter-name">Posterior Izq.</div>
-                <div className={`quarter-cmt-pill ${getCmtClass(cuartos.PI.cmt)}`}>
-                  CMT: {cuartos.PI.cmt}
-                </div>
+              <div style={{ fontSize: 12, color: '#78350f', lineHeight: 1.4 }}>
+                Las aves carecen por completo de glándulas mamarias (no poseen ubre ni pezones, ni sufren de mastitis, y no se realiza test CMT). El control zoosanitario se realiza a nivel poblacional mediante bioseguridad en el galpón, vías de vacunación y periodos de retiro en <strong>huevo</strong> y <strong>carne</strong>.
               </div>
             </div>
-
-            <span className="udder-label-indicator">▼ Vista Posterior (Cola) ▼</span>
           </div>
 
-          {/* Panel Lateral de Diagnóstico y Selector Rápido CMT */}
-          <div style={{ flex: 1, minWidth: 280, display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {selectedQuarter ? (
-              <div style={{
-                background: '#f8fafc',
-                border: '1px solid #cbd5e1',
-                borderRadius: 12,
-                padding: 16
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div style={{ fontSize: 16, fontWeight: 800, color: '#0f172a' }}>
-                    Cuarto: {selectedQuarter.nombre} ({selectedQuarter.codigo})
+          {/* Grid de Métricas de Bioseguridad y Vías */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
+            <div style={{ padding: 12, borderRadius: 8, backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Vía de Vacunación</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#1e293b', marginTop: 4 }}>Ocular / Aspersión Gota Gruesa</div>
+              <div style={{ fontSize: 12, color: '#059669', marginTop: 2 }}>Newcastle &amp; Bronquitis H120</div>
+            </div>
+
+            <div style={{ padding: 12, borderRadius: 8, backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Control de Coccidiosis</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#1e293b', marginTop: 4 }}>Toltrazuril / Ionóforos</div>
+              <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>Rotación en pienso iniciador</div>
+            </div>
+
+            <div style={{ padding: 12, borderRadius: 8, backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Estado de la Cama</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#1e293b', marginTop: 4 }}>Viruta seca (Humedad &lt; 22%)</div>
+              <div style={{ fontSize: 12, color: '#059669', marginTop: 2 }}>Sin pododermatitis (Footpad: 0)</div>
+            </div>
+
+            <div style={{ padding: 12, borderRadius: 8, backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Filtro de Bioseguridad</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#1e293b', marginTop: 4 }}>Pediluvios con Amonio Cuaternario</div>
+              <div style={{ fontSize: 12, color: '#059669', marginTop: 2 }}>Activo en acceso a galpón</div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* 1. Mapeo Anatómico de los 4 Cuartos Mamarios (Solo Rumiantes/Mamíferos) */
+        <div className="ficha360-card">
+          <div className="ficha360-card-title" style={{ justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Activity size={16} color="#2d6a4f" />
+              <span>Diagrama Anatómico de Ubre &amp; Prueba California Mastitis Test (CMT)</span>
+            </div>
+            <span style={{ fontSize: 12, color: '#64748b' }}>
+              Haga clic sobre cualquier cuarto para evaluar o cambiar el grado CMT
+            </span>
+          </div>
+
+          <div style={{ display: 'flex', gap: 24, alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <div className="udder-diagram-wrapper">
+              <span className="udder-label-indicator">▲ Vista Anterior (Cabeza) ▲</span>
+              
+              <div className="udder-grid-4">
+                {/* Anterior Derecho (AD) */}
+                <div 
+                  className={`udder-quarter quarter-ad ${selectedQuarterKey === 'AD' ? 'selected' : ''}`}
+                  onClick={() => setSelectedQuarterKey('AD')}
+                >
+                  <div className="quarter-code">AD</div>
+                  <div className="quarter-name">Anterior Der.</div>
+                  <div className={`quarter-cmt-pill ${getCmtClass(cuartos.AD.cmt)}`}>
+                    CMT: {cuartos.AD.cmt}
                   </div>
-                  <span className={`quarter-cmt-pill ${getCmtClass(selectedQuarter.cmt)}`}>
-                    {selectedQuarter.cmt}
-                  </span>
                 </div>
 
-                <div style={{ marginTop: 8, fontSize: 13, color: '#334155' }}>
-                  <strong>Diagnóstico Clínico:</strong> {selectedQuarter.estadoClinico}
+                {/* Anterior Izquierdo (AI) */}
+                <div 
+                  className={`udder-quarter quarter-ai ${selectedQuarterKey === 'AI' ? 'selected' : ''}`}
+                  onClick={() => setSelectedQuarterKey('AI')}
+                >
+                  <div className="quarter-code">AI</div>
+                  <div className="quarter-name">Anterior Izq.</div>
+                  <div className={`quarter-cmt-pill ${getCmtClass(cuartos.AI.cmt)}`}>
+                    CMT: {cuartos.AI.cmt}
+                  </div>
                 </div>
-                {selectedQuarter.conductividadMs && (
-                  <div style={{ fontSize: 12.5, color: '#64748b', marginTop: 2 }}>
-                    Conductividad Eléctrica: <strong>{selectedQuarter.conductividadMs} mS/cm</strong> (Normal &lt; 5.5)
-                  </div>
-                )}
-                {selectedQuarter.ultimoTratamiento && (
-                  <div style={{ fontSize: 12, color: '#475569', marginTop: 4 }}>
-                    Tratamiento asignado: {selectedQuarter.ultimoTratamiento}
-                  </div>
-                )}
 
-                <div style={{ marginTop: 14 }}>
-                  <span style={{ fontSize: 11.5, fontWeight: 700, textTransform: 'uppercase', color: '#64748b' }}>
-                    Actualizar Calificación CMT:
-                  </span>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
+                {/* Posterior Derecho (PD) */}
+                <div 
+                  className={`udder-quarter quarter-pd ${selectedQuarterKey === 'PD' ? 'selected' : ''}`}
+                  onClick={() => setSelectedQuarterKey('PD')}
+                >
+                  <div className="quarter-code">PD</div>
+                  <div className="quarter-name">Posterior Der.</div>
+                  <div className={`quarter-cmt-pill ${getCmtClass(cuartos.PD.cmt)}`}>
+                    CMT: {cuartos.PD.cmt}
+                  </div>
+                </div>
+
+                {/* Posterior Izquierdo (PI) */}
+                <div 
+                  className={`udder-quarter quarter-pi ${selectedQuarterKey === 'PI' ? 'selected' : ''}`}
+                  onClick={() => setSelectedQuarterKey('PI')}
+                >
+                  <div className="quarter-code">PI</div>
+                  <div className="quarter-name">Posterior Izq.</div>
+                  <div className={`quarter-cmt-pill ${getCmtClass(cuartos.PI.cmt)}`}>
+                    CMT: {cuartos.PI.cmt}
+                  </div>
+                </div>
+              </div>
+
+              <span className="udder-label-indicator">▼ Vista Posterior (Cola) ▼</span>
+            </div>
+
+            {/* Panel de Detalle del Cuarto Mamario Seleccionado */}
+            <div style={{ flex: 1, minWidth: 260, maxWidth: 380 }}>
+              {selectedQuarter ? (
+                <div style={{
+                  backgroundColor: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: 10,
+                  padding: 16
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                    <span style={{ fontWeight: 700, fontSize: 14, color: '#1e293b' }}>
+                      Cuarto {selectedQuarter.nombre} ({selectedQuarter.codigo})
+                    </span>
+                    <span className={`quarter-cmt-pill ${getCmtClass(selectedQuarter.cmt)}`}>
+                      {selectedQuarter.cmt}
+                    </span>
+                  </div>
+
+                  <div style={{ fontSize: 12, color: '#64748b', marginBottom: 8 }}>
+                    <strong>Diagnóstico:</strong> {selectedQuarter.estadoClinico}
+                  </div>
+                  <div style={{ fontSize: 12, color: '#64748b', marginBottom: 12 }}>
+                    <strong>RCS Estimado:</strong> {selectedQuarter.rcsMil.toLocaleString()} cél/ml
+                  </div>
+
+                  {/* Selector Interactivo de Grado CMT */}
+                  <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#475569', marginBottom: 6 }}>
+                    Actualizar Grado California Mastitis Test (CMT):
+                  </label>
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                     {(['Negativo', 'Trazas', 'Grado 1', 'Grado 2', 'Grado 3'] as GradoCMT[]).map(g => (
                       <button
                         key={g}
                         type="button"
-                        onClick={() => handleUpdateCMT(selectedQuarter.codigo, g)}
+                        onClick={() => handleUpdateCMT(selectedQuarterKey!, g)}
                         style={{
-                          padding: '4px 10px',
+                          fontSize: 11,
+                          padding: '4px 8px',
                           borderRadius: 6,
-                          fontSize: 12,
-                          fontWeight: 600,
-                          cursor: 'pointer',
-                          backgroundColor: selectedQuarter.cmt === g ? '#2d6a4f' : '#ffffff',
-                          color: selectedQuarter.cmt === g ? '#ffffff' : '#334155',
-                          border: '1px solid #cbd5e1'
+                          border: selectedQuarter.cmt === g ? '2px solid #2d6a4f' : '1px solid #cbd5e1',
+                          backgroundColor: selectedQuarter.cmt === g ? '#d8f3dc' : '#ffffff',
+                          fontWeight: selectedQuarter.cmt === g ? 700 : 500,
+                          cursor: 'pointer'
                         }}
                       >
                         {g}
@@ -179,47 +243,47 @@ export const TabSanidadUbre: React.FC<TabSanidadUbreProps> = ({ animal }) => {
                     ))}
                   </div>
                 </div>
-              </div>
-            ) : (
-              <div style={{
-                background: '#f8fafc',
-                border: '1px dashed #cbd5e1',
-                borderRadius: 12,
-                padding: 24,
-                textAlign: 'center',
-                color: '#64748b',
-                fontSize: 13
-              }}>
-                <Info size={28} style={{ margin: '0 auto 8px', color: '#94a3b8' }} />
-                Seleccione un cuarto en el diagrama de ubre para ver o modificar su historial clínico y grado CMT.
-              </div>
-            )}
+              ) : (
+                <div style={{
+                  backgroundColor: '#f8fafc',
+                  border: '1px dashed #cbd5e1',
+                  borderRadius: 10,
+                  padding: 20,
+                  textAlign: 'center',
+                  color: '#64748b',
+                  fontSize: 13
+                }}>
+                  <Info size={24} style={{ margin: '0 auto 8px auto', color: '#94a3b8' }} />
+                  <div>Haga clic en cualquiera de los 4 cuartos mamarios del diagrama para ver su diagnóstico y actualizar su reactivo CMT.</div>
+                </div>
+              )}
 
-            {/* Guía Rápida CMT */}
-            <div style={{
-              background: '#ffffff',
-              border: '1px solid #e2e8f0',
-              borderRadius: 8,
-              padding: 10,
-              fontSize: 11.5,
-              color: '#475569',
-              lineHeight: 1.4
-            }}>
-              <strong>Escala CMT:</strong> Negativo (sin gel) • Trazas (ligero moco) • Grado 1 (gel leve) • Grado 2 (gel definido) • Grado 3 (masa adherente firme / mastitis clínica).
+              <div style={{
+                marginTop: 12,
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: 8,
+                padding: 10,
+                fontSize: 11.5,
+                color: '#475569',
+                lineHeight: 1.4
+              }}>
+                <strong>Escala CMT:</strong> Negativo (sin gel) • Trazas (ligero moco) • Grado 1 (gel leve) • Grado 2 (gel definido) • Grado 3 (masa adherente firme / mastitis clínica).
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* 2. Vademécum de Tratamientos & Tiempos de Retiro */}
       <div className="ficha360-card">
         <div className="ficha360-card-title" style={{ justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <Pill size={16} color="#2d6a4f" />
-            <span>Vademécum de Tratamientos Farmacológicos & Inocuidad</span>
+            <span>Vademécum de Tratamientos Farmacológicos &amp; Inocuidad</span>
           </div>
           <span style={{ fontSize: 12, color: '#dc2626', fontWeight: 700 }}>
-            Retiro Leche Activo: Exclusión estricta de tanque
+            {isPoultry ? 'Retiro Activo: Exclusión estricta de huevos y carne' : 'Retiro Leche Activo: Exclusión estricta de tanque'}
           </span>
         </div>
 
@@ -230,8 +294,8 @@ export const TabSanidadUbre: React.FC<TabSanidadUbreProps> = ({ animal }) => {
                 <th>Fecha</th>
                 <th>Diagnóstico</th>
                 <th>Fármaco / Principio Activo</th>
-                <th>Dosis & Vía</th>
-                <th>Retiro Leche</th>
+                <th>Dosis &amp; Vía</th>
+                <th>{isPoultry ? 'Retiro Huevo' : 'Retiro Leche'}</th>
                 <th>Retiro Carne</th>
                 <th>Estatus Retiro</th>
                 <th>Veterinario</th>
@@ -248,11 +312,19 @@ export const TabSanidadUbre: React.FC<TabSanidadUbreProps> = ({ animal }) => {
                   </td>
                   <td>{trat.dosis} ({trat.via})</td>
                   <td>
-                    {trat.retiroLecheHoras > 0 ? (
-                      <span style={{ fontWeight: 700, color: trat.activo ? '#dc2626' : '#475569' }}>
-                        {trat.retiroLecheHoras}h (Hasta {trat.fechaFinRetiroLeche})
-                      </span>
-                    ) : '0h (Libre)'}
+                    {isPoultry ? (
+                      trat.activo ? (
+                        <span style={{ fontWeight: 700, color: '#dc2626' }}>
+                          Descarte Huevo ({trat.diasRestantesRetiro}d)
+                        </span>
+                      ) : '0d (Huevo Apto)'
+                    ) : (
+                      trat.retiroLecheHoras > 0 ? (
+                        <span style={{ fontWeight: 700, color: trat.activo ? '#dc2626' : '#475569' }}>
+                          {trat.retiroLecheHoras}h (Hasta {trat.fechaFinRetiroLeche})
+                        </span>
+                      ) : '0h (Libre)'
+                    )}
                   </td>
                   <td>
                     {trat.retiroCarneDias > 0 ? (
@@ -296,7 +368,7 @@ export const TabSanidadUbre: React.FC<TabSanidadUbreProps> = ({ animal }) => {
       <div className="ficha360-card">
         <div className="ficha360-card-title">
           <ShieldCheck size={16} color="#2d6a4f" />
-          Plan Sanitario Preventivo & Inmunizaciones
+          Plan Sanitario Preventivo &amp; Inmunizaciones
         </div>
 
         <div className="ficha360-table-wrapper">
@@ -304,7 +376,7 @@ export const TabSanidadUbre: React.FC<TabSanidadUbreProps> = ({ animal }) => {
             <thead>
               <tr>
                 <th>Enfermedad / Antígeno</th>
-                <th>Biológico & Laboratorio</th>
+                <th>Biológico &amp; Laboratorio</th>
                 <th>Lote</th>
                 <th>Última Aplicación</th>
                 <th>Próxima Dosis</th>
@@ -313,7 +385,7 @@ export const TabSanidadUbre: React.FC<TabSanidadUbreProps> = ({ animal }) => {
               </tr>
             </thead>
             <tbody>
-              {planVacunacion.map((vac) => (
+              {effectivePlanVacunacion.map((vac) => (
                 <tr key={vac.id}>
                   <td style={{ fontWeight: 700 }}>{vac.enfermedad}</td>
                   <td>{vac.producto} ({vac.laboratorio})</td>
