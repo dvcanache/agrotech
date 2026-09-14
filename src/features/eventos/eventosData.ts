@@ -35,7 +35,6 @@ export const EVENT_CATEGORIES: EventCategory[] = [
       "Mastitis (CMT 4 cuartos)",
       "Clínicos & Tiempos de Retiro",
       "Planes Sanitarios",
-      "Vacunación por Vía (Avícola/Porcina/Equina)",
       "Evaluación FAMACHA Caprina",
       "Podología & Herraje Equino"
     ]
@@ -339,9 +338,85 @@ export function getEventCategoriesForSpecies(species?: string): EventCategory[] 
         titulo: "Sanitarios & Veterinarios",
         iconoType: "veterinarios",
         enlaces: [
+          "Mastitis (CMT 2 mitades)",
           "Evaluación FAMACHA Caprina",
           "Planes Sanitarios",
-          "Clínicos & Tiempos de Retiro"
+          "Clínicos & Tiempos de Retiro",
+          "Podología de Aprisco"
+        ]
+      },
+      {
+        titulo: "Manejo & Rutina",
+        iconoType: "manejo",
+        enlaces: [
+          "Descorne / Topizado",
+          "Marcaje / Tatuaje / Chip"
+        ]
+      },
+      {
+        titulo: "Inventarios & Movimientos",
+        iconoType: "inventarios",
+        enlaces: [
+          "Inventarios Físicos RFID",
+          "Cambios de Lote / Galpón / Aprisco / Caballeriza",
+          "Despacho a Matadero / Ventas"
+        ]
+      },
+      {
+        titulo: "Potreros & Instalaciones",
+        iconoType: "potreros",
+        enlaces: [
+          "Labores y Mantenimiento",
+          "Rotaciones de Pastoreo",
+          "Bioseguridad de Galpones y Apriscos"
+        ]
+      },
+      {
+        titulo: "Otros",
+        iconoType: "otros",
+        enlaces: [
+          "Comentarios y Notas",
+          "Registro de Afiliaciones",
+          "Producciones Diarias",
+          "Auditoría de Eventos"
+        ]
+      }
+    ];
+  }
+
+  // 🐑 OVINOS
+  if (species === 'Ovinos' || species === 'Ovejas' || species.includes('Ovin')) {
+    return [
+      {
+        titulo: "Reproductivos",
+        iconoType: "reproductivos",
+        enlaces: [
+          "Servicios IA / Monta",
+          "Partos",
+          "Abortos",
+          "Celos",
+          "Revisiones Ováricas / Ecografías"
+        ]
+      },
+      {
+        titulo: "Productivos",
+        iconoType: "productivos",
+        enlaces: [
+          "Pesajes de leche",
+          "Secados",
+          "Crecimientos",
+          "Eficiencia Alimenticia"
+        ]
+      },
+      {
+        titulo: "Sanitarios & Veterinarios",
+        iconoType: "veterinarios",
+        enlaces: [
+          "Evaluación FAMACHA Ovinos",
+          "Mastitis (CMT 2 mitades)",
+          "Planes Sanitarios (Clostridiosis / Ectima)",
+          "Clínicos & Tiempos de Retiro",
+          "Podología & Foot-Rot Ovino"
         ]
       },
       {

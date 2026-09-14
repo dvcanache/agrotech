@@ -98,6 +98,23 @@ export const PotrerosTable: React.FC<PotrerosTableProps> = ({
             );
             const factorUgg = getUggFactor(potrero.especie);
 
+            /**
+             * Calibración de Carga Instantánea vs Capacidad Global (AGR-05):
+             * En PRV, la carga instantánea durante los 1-2 días de ocupación es fisiológicamente
+             * mucho mayor que la capacidad de carga global de todo el ciclo de rotación.
+             * Calculamos la capacidad instantánea máxima admisible para evitar falsas alarmas rojas.
+             */
+            const diasOcupacionMax = potrero.diasOcupacionMax || 2;
+            const factorRotacionPrv = (potrero.diasDescansoRequeridos + diasOcupacionMax) / diasOcupacionMax;
+            const capacidadInstantaneaUggHa = potrero.cargaRecomendadaUggHa > 0
+              ? Number((potrero.cargaRecomendadaUggHa * factorRotacionPrv).toFixed(1))
+              : 0;
+
+            // Alerta roja solo si se sobrepasa la capacidad instantánea admisible para el período
+            const esExcesoCargaInstantanea = capacidadInstantaneaUggHa > 0
+              ? potrero.cargaActualUggHa > capacidadInstantaneaUggHa
+              : false;
+
             return (
               <tr
                 key={potrero.codigo}
@@ -231,20 +248,24 @@ export const PotrerosTable: React.FC<PotrerosTableProps> = ({
                   </div>
                 </td>
 
-                {/* Carga Animal */}
+                {/* Carga Animal (Calibrada para PRV sin falsas alarmas) */}
                 <td>
                   <div className="td-inner">
                     <span
                       className="td-line1"
                       style={{
                         fontWeight: 700,
-                        color: potrero.cargaActualUggHa > potrero.cargaRecomendadaUggHa ? '#dc2626' : 'var(--primary-color)'
+                        color: esExcesoCargaInstantanea ? '#dc2626' : 'var(--primary-color)'
                       }}
+                      title={`Carga instantánea: ${potrero.cargaActualUggHa.toFixed(2)} UGG/ha. Capacidad instantánea PRV (para ocupación máx ${diasOcupacionMax}d): ${capacidadInstantaneaUggHa} UGG/ha. Capacidad global del ciclo: ${potrero.cargaRecomendadaUggHa.toFixed(2)} UGG/ha.`}
                     >
                       {potrero.cargaActualUggHa.toFixed(2)} UGG/ha
                     </span>
-                    <span className="td-line2">
-                      Capacidad: {potrero.cargaRecomendadaUggHa.toFixed(2)} UGG/ha
+                    <span
+                      className="td-line2"
+                      title={`Capacidad global del ciclo de rotación completo: ${potrero.cargaRecomendadaUggHa.toFixed(2)} UGG/ha. En pastoreo PRV de 1-2 días, la alta densidad instantánea es normal y deseada hasta ${capacidadInstantaneaUggHa} UGG/ha.`}
+                    >
+                      Cap. Global: {potrero.cargaRecomendadaUggHa.toFixed(2)} UGG/ha
                     </span>
                   </div>
                 </td>
@@ -263,7 +284,7 @@ export const PotrerosTable: React.FC<PotrerosTableProps> = ({
                             {potrero.diasOcupacionActual} d ocupado
                           </span>
                           {potrero.diasOcupacionActual > 2 && (potrero.tipoInstalacion === 'potrero' || potrero.tipoInstalacion === 'sabana') && (
-                            <AlertTriangle size={12} color="#dc2626" title="¡Sobrepastoreo! Superó 2 días" />
+                            <AlertTriangle size={12} color="#dc2626" title="¡Sobrepastoreo! Superó los 2 días máximos recomendados por la 2da Ley de Voisin" />
                           )}
                         </>
                       ) : (
@@ -274,7 +295,11 @@ export const PotrerosTable: React.FC<PotrerosTableProps> = ({
                       {potrero.animalesPresentes === 0 ? (
                         <span style={{
                           fontWeight: 600,
-                          color: potrero.diasDescansoActual >= potrero.diasDescansoRequeridos ? '#166534' : '#1e40af'
+                          color: potrero.diasDescansoActual > potrero.diasDescansoRequeridos * 1.35
+                            ? '#d97706'
+                            : potrero.diasDescansoActual >= potrero.diasDescansoRequeridos
+                            ? '#166534'
+                            : '#1e40af'
                         }}>
                           {potrero.diasDescansoActual} / {potrero.diasDescansoRequeridos} d descanso
                         </span>
@@ -294,6 +319,7 @@ export const PotrerosTable: React.FC<PotrerosTableProps> = ({
                       color: prvInfo.textColor,
                       borderColor: prvInfo.borderColor
                     }}
+                    title={prvInfo.description}
                   >
                     <span className="prv-chip-dot" style={{ backgroundColor: prvInfo.color }} />
                     <span>{prvInfo.shortLabel}</span>

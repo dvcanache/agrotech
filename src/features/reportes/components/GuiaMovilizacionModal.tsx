@@ -93,7 +93,8 @@ const MOCK_TRANSIT_ANIMALS: LivestockTransitItem[] = [
     especie: 'Bovinos',
     tipoIdentificacion: 'Arete SENASAG / Hierro',
     identificacionDetalle: 'Arete 0001 / Hierro Candente #12',
-    retiroFarmacoActivo: false
+    retiroFarmacoActivo: false,
+    sanitarioExtra: 'Certificado Hato Libre de Brucelosis Negativo (INSAI-BR-8821)'
   },
   {
     arete: '0002',
@@ -105,7 +106,8 @@ const MOCK_TRANSIT_ANIMALS: LivestockTransitItem[] = [
     especie: 'Bovinos',
     tipoIdentificacion: 'Arete SENASAG / Hierro',
     identificacionDetalle: 'Arete 0002 / Hierro Candente #12',
-    retiroFarmacoActivo: false
+    retiroFarmacoActivo: false,
+    sanitarioExtra: 'Certificado Hato Libre de Brucelosis Negativo (INSAI-BR-8822)'
   },
   {
     arete: 'CW002',
@@ -117,7 +119,8 @@ const MOCK_TRANSIT_ANIMALS: LivestockTransitItem[] = [
     especie: 'Bovinos',
     tipoIdentificacion: 'Arete SENASAG / Hierro',
     identificacionDetalle: 'Arete CW002 / Hierro Candente #44',
-    retiroFarmacoActivo: false
+    retiroFarmacoActivo: false,
+    sanitarioExtra: 'Certificado Hato Libre de Brucelosis Negativo (INSAI-BR-8823)'
   },
   {
     arete: 'CW003',
@@ -129,7 +132,8 @@ const MOCK_TRANSIT_ANIMALS: LivestockTransitItem[] = [
     especie: 'Bovinos',
     tipoIdentificacion: 'Arete SENASAG / Hierro',
     identificacionDetalle: 'Arete CW003 / Hierro Candente #44',
-    retiroFarmacoActivo: false
+    retiroFarmacoActivo: false,
+    sanitarioExtra: 'Certificado Hato Libre de Brucelosis Negativo (INSAI-BR-8824)'
   },
   {
     arete: 'CW008',
@@ -144,7 +148,8 @@ const MOCK_TRANSIT_ANIMALS: LivestockTransitItem[] = [
     retiroFarmacoActivo: true,
     diasRetiroRestantes: 5,
     farmaco: 'Cefalosporina Intramamaria',
-    tipoRetiro: 'Leche'
+    tipoRetiro: 'Leche',
+    sanitarioExtra: 'Certificado Hato Libre de Brucelosis Negativo (INSAI-BR-8825)'
   },
   {
     arete: 'VC-104',
@@ -159,7 +164,8 @@ const MOCK_TRANSIT_ANIMALS: LivestockTransitItem[] = [
     retiroFarmacoActivo: true,
     diasRetiroRestantes: 22,
     farmaco: 'Ivermectina 1% inyectable',
-    tipoRetiro: 'Carne'
+    tipoRetiro: 'Carne',
+    sanitarioExtra: 'Sin Certificado Oficial de Brucelosis (Muestra pendiente de laboratorio)'
   },
   {
     arete: 'NV-201',
@@ -171,7 +177,8 @@ const MOCK_TRANSIT_ANIMALS: LivestockTransitItem[] = [
     especie: 'Bovinos',
     tipoIdentificacion: 'Arete SENASAG / Hierro',
     identificacionDetalle: 'Arete NV-201 / Hierro Candente #05',
-    retiroFarmacoActivo: false
+    retiroFarmacoActivo: false,
+    sanitarioExtra: 'Certificado Hato Libre de Brucelosis Negativo (INSAI-BR-8826)'
   },
 
   // --- 🐃 BÚFALOS (Factor UGG: 1.2) ---
@@ -186,7 +193,7 @@ const MOCK_TRANSIT_ANIMALS: LivestockTransitItem[] = [
     tipoIdentificacion: 'Arete Oficial / Hierro',
     identificacionDetalle: 'Arete BUF-001 / Hierro Candente BF-10',
     retiroFarmacoActivo: false,
-    sanitarioExtra: 'Vacunación Aftosa/Rabia al día'
+    sanitarioExtra: 'Certificado Oficial Libre de Brucelosis y Aftosa al día'
   },
   {
     arete: 'BUF-02',
@@ -198,7 +205,8 @@ const MOCK_TRANSIT_ANIMALS: LivestockTransitItem[] = [
     especie: 'Búfalos',
     tipoIdentificacion: 'Arete Oficial / Hierro',
     identificacionDetalle: 'Arete BUF-002 / Hierro Candente BF-10',
-    retiroFarmacoActivo: false
+    retiroFarmacoActivo: false,
+    sanitarioExtra: 'Certificado Oficial Libre de Brucelosis y Aftosa al día'
   },
   {
     arete: 'BUF-03',
@@ -210,7 +218,8 @@ const MOCK_TRANSIT_ANIMALS: LivestockTransitItem[] = [
     especie: 'Búfalos',
     tipoIdentificacion: 'Arete Oficial / Hierro',
     identificacionDetalle: 'Arete BUF-003 / Hierro Candente BF-10',
-    retiroFarmacoActivo: false
+    retiroFarmacoActivo: false,
+    sanitarioExtra: 'Certificado Oficial Libre de Brucelosis y Aftosa al día'
   },
   {
     arete: 'BUF-04',
@@ -225,7 +234,8 @@ const MOCK_TRANSIT_ANIMALS: LivestockTransitItem[] = [
     retiroFarmacoActivo: true,
     diasRetiroRestantes: 14,
     farmaco: 'Oxitetraciclina 200 LA',
-    tipoRetiro: 'Carne'
+    tipoRetiro: 'Carne',
+    sanitarioExtra: 'Certificado Oficial Libre de Brucelosis al día'
   },
   {
     arete: 'BUF-CEB01',
@@ -237,7 +247,8 @@ const MOCK_TRANSIT_ANIMALS: LivestockTransitItem[] = [
     especie: 'Búfalos',
     tipoIdentificacion: 'Arete Oficial / Hierro',
     identificacionDetalle: 'Arete BUF-CEB-12 / Hierro BF-20',
-    retiroFarmacoActivo: false
+    retiroFarmacoActivo: false,
+    sanitarioExtra: 'Certificado Oficial Libre de Brucelosis al día'
   },
 
   // --- 🐷 PORCINOS (Factor UGG: 0.3) ---
@@ -519,6 +530,19 @@ const MOCK_TRANSIT_ANIMALS: LivestockTransitItem[] = [
     identificacionDetalle: 'Pasaporte Oficial EQ-8845 / Microchip RFID 982000218',
     retiroFarmacoActivo: false,
     sanitarioExtra: 'Test de Coggins Negativo Certificado (INSAI-2026-AIE-4495, Vence: 2027-01-10)'
+  },
+  {
+    arete: 'EQU-306',
+    nombre: 'Potro Cimarrón',
+    categoria: 'Potros / Potrancas',
+    raza: 'Criollo Venezolano',
+    sexo: 'Macho',
+    pesoKg: 280,
+    especie: 'Equinos',
+    tipoIdentificacion: 'Pasaporte / RFID + Coggins',
+    identificacionDetalle: 'Arete Provisional EQ-8846',
+    retiroFarmacoActivo: false,
+    sanitarioExtra: 'Sin Test de Coggins AIE (Prueba pendiente de laboratorio)'
   }
 ];
 
@@ -608,14 +632,31 @@ export const GuiaMovilizacionModal: React.FC<GuiaMovilizacionModalProps> = ({
   }, [selectedAnimalsList]);
 
   // Verificación sanitaria obligatoria para Equinos (Test de Coggins AIE)
-  const equinesWithoutCoggins = useMemo(() => {
+  const equinesWithoutCogginsList = useMemo(() => {
     return selectedAnimalsList.filter(
       a => a.especie === 'Equinos' && (!a.sanitarioExtra || !a.sanitarioExtra.includes('Test de Coggins Negativo'))
     );
   }, [selectedAnimalsList]);
+  const equinesWithoutCoggins = equinesWithoutCogginsList.length;
 
+  // Verificación zoosanitaria obligatoria para Bovinos y Búfalos (Brucelosis Bovina)
+  const bovinesWithoutBrucellosisList = useMemo(() => {
+    return selectedAnimalsList.filter(
+      a => (a.especie === 'Bovinos' || a.especie === 'Búfalos') &&
+           (!a.sanitarioExtra || (!a.sanitarioExtra.includes('Brucelosis') && !a.sanitarioExtra.includes('Libre de Brucelosis') && !a.sanitarioExtra.includes('Hato Libre')))
+    );
+  }, [selectedAnimalsList]);
+  const bovinesWithoutBrucellosis = bovinesWithoutBrucellosisList.length;
+
+  // Incompatibilidad con faena o sacrificio de animales en retiro
   const isSlaughterhouse = purpose === 'Faena / Matadero';
   const hasCriticalSanitaryBlock = isSlaughterhouse && animalsWithActiveWithdrawal.length > 0;
+  const hasMeatWithdrawalConflict = selectedAnimalsList.some(
+    a => a.retiroFarmacoActivo && (a.tipoRetiro === 'Carne' || a.tipoRetiro === 'Carne y Huevo' || a.tipoRetiro === 'Carne y Leche') && isSlaughterhouse
+  );
+
+  // Bloqueo Zoosanitario Federal Mandatorio (Parche 6)
+  const isSanitaryBlocked = hasCriticalSanitaryBlock || hasMeatWithdrawalConflict || equinesWithoutCoggins > 0 || bovinesWithoutBrucellosis > 0;
   const isCapacityExceeded = totalUGGTransported > truckCapacityUGG;
 
   const toggleSelectAnimal = (arete: string) => {
@@ -654,6 +695,8 @@ export const GuiaMovilizacionModal: React.FC<GuiaMovilizacionModalProps> = ({
         ? `⚠️ RETIRO ACTIVO (${a.diasRetiroRestantes}d - ${a.farmaco})`
         : a.especie === 'Equinos'
         ? `✅ APTO (Coggins Negativo)`
+        : a.especie === 'Bovinos' || a.especie === 'Búfalos'
+        ? `✅ APTO (Brucelosis Negativo)`
         : '✅ APTO ZOOSANITARIO';
 
       return [
@@ -675,9 +718,21 @@ export const GuiaMovilizacionModal: React.FC<GuiaMovilizacionModalProps> = ({
 
   // Guardar y registrar guía
   const handleSaveGuide = () => {
-    if (hasCriticalSanitaryBlock) {
+    if (hasCriticalSanitaryBlock || hasMeatWithdrawalConflict) {
       alert(
         'BLOQUEO SANITARIO CRÍTICO DE INOCUIDAD ALIMENTARIA:\nEstá estrictamente prohibido emitir guías de movilización a mataderos/faena con animales en período de retiro farmacológico activo (carne/leche).'
+      );
+      return;
+    }
+    if (equinesWithoutCoggins > 0) {
+      alert(
+        `BLOQUEO ZOOSANITARIO FEDERAL (PARCHE 6):\nExisten ${equinesWithoutCoggins} équido(s) seleccionados sin Test de Coggins (AIE) negativo vigente. La ley sanitaria prohíbe el tránsito de solípedos sin certificación negativa oficial.`
+      );
+      return;
+    }
+    if (bovinesWithoutBrucellosis > 0) {
+      alert(
+        `BLOQUEO ZOOSANITARIO FEDERAL (PARCHE 6):\nExisten ${bovinesWithoutBrucellosis} bovino(s)/búfalo(s) seleccionados sin certificado oficial de Brucelosis negativa. Tránsito inter-predial bloqueado.`
       );
       return;
     }
@@ -773,6 +828,50 @@ export const GuiaMovilizacionModal: React.FC<GuiaMovilizacionModalProps> = ({
 
         {/* Cuerpo del Modal */}
         <div className="adhoc-modal-body">
+          {/* Banner de Bloqueo Zoosanitario Federal Mandatorio (Parche 6) */}
+          {(equinesWithoutCoggins > 0 || bovinesWithoutBrucellosis > 0) && (
+            <div
+              style={{
+                backgroundColor: '#fef2f2',
+                border: '1.5px solid #ef4444',
+                borderRadius: 8,
+                padding: '12px 16px',
+                marginBottom: 16,
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: 12,
+                color: '#991b1b'
+              }}
+            >
+              <BadgeAlert size={26} style={{ flexShrink: 0, marginTop: 2, color: '#dc2626' }} />
+              <div>
+                <strong style={{ fontSize: 13.5, textTransform: 'uppercase', letterSpacing: 0.3 }}>
+                  ⛔ BLOQUEO ZOOSANITARIO FEDERAL MANDATORIO (INSAI / SENASAG / OIE - PARCHE 6)
+                </strong>
+                <p style={{ margin: '4px 0 0 0', fontSize: 12.5, lineHeight: 1.4 }}>
+                  La legislación sanitaria federal prohíbe taxativamente la emisión de guías de tránsito mientras existan semovientes en contravención sanitaria:
+                </p>
+                <ul style={{ margin: '6px 0 0 0', paddingLeft: 18, fontSize: 12.5, lineHeight: 1.5 }}>
+                  {equinesWithoutCoggins > 0 && (
+                    <li>
+                      <strong>{equinesWithoutCoggins} équido(s) sin Test de Coggins (AIE) negativo vigente:</strong> Requisito obligatorio para el tránsito de solípedos (descarte de Anemia Infecciosa Equina). Ejemplares:{' '}
+                      {equinesWithoutCogginsList.map(a => `${a.arete} (${a.nombre})`).join(', ')}.
+                    </li>
+                  )}
+                  {bovinesWithoutBrucellosis > 0 && (
+                    <li>
+                      <strong>{bovinesWithoutBrucellosis} bovino(s)/búfalo(s) sin certificación de Brucelosis Bovina:</strong> Requisito zoosanitario indispensable para evitar la diseminación de <em>Brucella abortus</em>. Ejemplares:{' '}
+                      {bovinesWithoutBrucellosisList.map(a => `${a.arete} (${a.nombre})`).join(', ')}.
+                    </li>
+                  )}
+                </ul>
+                <div style={{ marginTop: 6, fontSize: 11.5, fontWeight: 700, color: '#b91c1c' }}>
+                  El botón de emisión permanecerá deshabilitado hasta que se excluyan los animales no aptos o se regularice su expediente sanitario.
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Alerta Roja Crítica de Retiro Farmacológico */}
           {animalsWithActiveWithdrawal.length > 0 && (
             <div className={`sanitary-withdrawal-alert ${hasCriticalSanitaryBlock ? 'critical' : ''}`}>
@@ -1112,6 +1211,11 @@ export const GuiaMovilizacionModal: React.FC<GuiaMovilizacionModalProps> = ({
                 Requisito Estricto: Test de Coggins AIE Vigente
               </span>
             )}
+            {(activeSpeciesTab === 'Bovinos' || activeSpeciesTab === 'Búfalos') && (
+              <span style={{ fontWeight: 700, color: '#166534', backgroundColor: '#dcfce7', padding: '2px 8px', borderRadius: 6 }}>
+                Requisito Estricto: Certificado Libre de Brucelosis
+              </span>
+            )}
           </div>
 
           {/* Tabla de Semovientes de la Especie Activa */}
@@ -1280,15 +1384,23 @@ export const GuiaMovilizacionModal: React.FC<GuiaMovilizacionModalProps> = ({
               type="button"
               className="btn-primary"
               onClick={handleSaveGuide}
-              disabled={hasCriticalSanitaryBlock || selectedTags.length === 0}
+              disabled={isSanitaryBlocked || selectedTags.length === 0}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 6,
                 fontSize: 13,
-                opacity: hasCriticalSanitaryBlock || selectedTags.length === 0 ? 0.6 : 1,
-                backgroundColor: hasCriticalSanitaryBlock ? '#ef4444' : undefined
+                opacity: isSanitaryBlocked || selectedTags.length === 0 ? 0.6 : 1,
+                backgroundColor: isSanitaryBlocked ? '#ef4444' : undefined,
+                cursor: isSanitaryBlocked || selectedTags.length === 0 ? 'not-allowed' : 'pointer'
               }}
+              title={
+                isSanitaryBlocked
+                  ? 'Emisión bloqueada por incumplimiento zoosanitario federal mandatorio'
+                  : selectedTags.length === 0
+                  ? 'Seleccione al menos un semoviente'
+                  : 'Generar y Registrar Guía Oficial'
+              }
             >
               <Save size={15} />
               <span>Generar y Registrar Guía</span>

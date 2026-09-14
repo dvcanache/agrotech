@@ -53,7 +53,7 @@ export const matchesEspecie = (animal: Animal, especie: string): boolean => {
 };
 
 export const useAnimales = (itemsPerPage = 10) => {
-  const { searchQuery, animals, addAnimal, updateAnimal } = useApp();
+  const { searchQuery, animals, addAnimal, updateAnimal, deleteAnimalsBatch } = useApp();
   const [selectedAnimals, setSelectedAnimals] = useState<{ [key: string]: boolean }>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedEspecie, setSelectedEspecie] = useState<string>('Todas');
@@ -241,11 +241,25 @@ export const useAnimales = (itemsPerPage = 10) => {
     return list;
   }, [totalPages]);
 
+  const selectedCount = useMemo(() => {
+    return Object.values(selectedAnimals).filter(Boolean).length;
+  }, [selectedAnimals]);
+
+  const deleteSelectedAnimals = () => {
+    const selectedPracticos = Object.entries(selectedAnimals)
+      .filter(([_, isSel]) => isSel)
+      .map(([practico]) => practico);
+    if (selectedPracticos.length === 0) return;
+    deleteAnimalsBatch(selectedPracticos);
+    setSelectedAnimals({});
+  };
+
   return {
     animals: filteredAnimals,
     allAnimals: animals,
     currentItems,
     selectedAnimals,
+    selectedCount,
     isSelectAll,
     currentPage,
     totalPages,
@@ -263,6 +277,7 @@ export const useAnimales = (itemsPerPage = 10) => {
     resetAllFilters,
     toggleSelectAll,
     toggleSelect,
-    setPage
+    setPage,
+    deleteSelectedAnimals
   };
 };

@@ -153,7 +153,7 @@ export const VACCINE_PLANS_BY_SPECIES: Record<EspecieAnimal, PlanBiolPreset[]> =
     { id: 'bov-brucelosis', nombre: 'Brucelosis (Cepa 19 / RB51)', viaDefault: 'Inyectable IM/SC', dosisDefault: '2.0 mL', loteDefault: 'BRU-RB51-03', retiroLecheDefault: 0, retiroCarneDefault: 0, medicoDefault: 'Dr. Carlos Mendoza' },
     { id: 'bov-rabia', nombre: 'Rabia Paresiante Bovina', viaDefault: 'Inyectable IM/SC', dosisDefault: '2.0 mL', loteDefault: 'RAB-PAR-11', retiroLecheDefault: 0, retiroCarneDefault: 0, medicoDefault: 'Dr. Carlos Mendoza' },
     { id: 'bov-clostridiosis', nombre: 'Clostridiosis 8 Vías Polivalente', viaDefault: 'Inyectable IM/SC', dosisDefault: '5.0 mL', loteDefault: 'CLO-8V-90', retiroLecheDefault: 0, retiroCarneDefault: 14, medicoDefault: 'Dr. Carlos Mendoza' },
-    { id: 'bov-ivm', nombre: 'Ivermectina 3.15% L.A.', viaDefault: 'Inyectable IM/SC', dosisDefault: '1.0 mL/50kg', loteDefault: 'IVM-LA-882', retiroLecheDefault: 28, retiroCarneDefault: 42, medicoDefault: 'Dr. Carlos Mendoza' },
+    { id: 'bov-epri', nombre: 'Eprinomectina 0.5% (Apto Ordeño)', viaDefault: 'Tópica Pour-on / SC', dosisDefault: '1.0 mL/10kg', loteDefault: 'EPR-ORD-01', retiroLecheDefault: 0, retiroCarneDefault: 0, medicoDefault: 'Dr. Carlos Mendoza' },
     { id: 'bov-bano', nombre: 'Baño Garrapaticida / Mosquicida', viaDefault: 'Pediluvio/Baño', dosisDefault: '1:1000 dilución', loteDefault: 'ECTO-BA-15', retiroLecheDefault: 3, retiroCarneDefault: 7, medicoDefault: 'Dr. Carlos Mendoza' }
   ],
   'Búfalos': [
@@ -168,7 +168,7 @@ export const VACCINE_PLANS_BY_SPECIES: Record<EspecieAnimal, PlanBiolPreset[]> =
     { id: 'cap-tetanos', nombre: 'Tétanos Caprino', viaDefault: 'Inyectable IM/SC', dosisDefault: '1.0 mL', loteDefault: 'TET-CAP-05', retiroLecheDefault: 0, retiroCarneDefault: 0, medicoDefault: 'Dr. Carlos Mendoza' },
     { id: 'cap-agalaxia', nombre: 'Agalaxia Contagiosa Caprina', viaDefault: 'Inyectable IM/SC', dosisDefault: '1.0 mL', loteDefault: 'AGA-CAP-18', retiroLecheDefault: 3, retiroCarneDefault: 7, medicoDefault: 'Dr. Carlos Mendoza' },
     { id: 'cap-famacha', nombre: 'FAMACHA & Albendazol 10%', viaDefault: 'Oral', dosisDefault: '5.0 mL', loteDefault: 'ALB-CAP-44', retiroLecheDefault: 4, retiroCarneDefault: 10, medicoDefault: 'Dr. Carlos Mendoza' },
-    { id: 'cap-ivm', nombre: 'Ivermectina Caprina Antiparasitaria', viaDefault: 'Inyectable IM/SC', dosisDefault: '0.5 mL', loteDefault: 'IVM-CAP-09', retiroLecheDefault: 7, retiroCarneDefault: 21, medicoDefault: 'Dr. Carlos Mendoza' }
+    { id: 'cap-epri', nombre: 'Eprinomectina 0.5% Caprina (Apto Ordeño)', viaDefault: 'Tópica Pour-on', dosisDefault: '1.0 mL/10kg', loteDefault: 'EPR-CAP-02', retiroLecheDefault: 0, retiroCarneDefault: 0, medicoDefault: 'Dr. Carlos Mendoza' }
   ]
 };
 
@@ -360,7 +360,8 @@ export const SpreadsheetGridMode: React.FC<SpreadsheetGridModeProps> = ({ onSave
       if (typeof r.proteina === 'number' && r.proteina > 0) {
         totalProteina += r.proteina;
       }
-      if (typeof r.rcs === 'number' && r.rcs > 200) {
+      const rcsThreshold = selectedDairySpecies === 'Caprinos' ? 1000 : (selectedDairySpecies === 'Búfalos' ? 250 : 200);
+      if (typeof r.rcs === 'number' && r.rcs > rcsThreshold) {
         rcsAlerts++;
       }
     });
@@ -1209,7 +1210,7 @@ export const SpreadsheetGridMode: React.FC<SpreadsheetGridModeProps> = ({ onSave
                   {milkStats.averageGrasa.toFixed(1)}% G • {milkStats.rcsAlerts} Alertas
                 </span>
                 <span className="spreadsheet-kpi-sub" style={{ color: milkStats.rcsAlerts > 0 ? '#d97706' : '#16a34a' }}>
-                  {milkStats.rcsAlerts > 0 ? 'RCS > 200k (Mastitis Subclínica)' : 'Sanidad de ubre óptima'}
+                  {milkStats.rcsAlerts > 0 ? (selectedDairySpecies === 'Caprinos' ? 'RCS > 1000k (Alerta)' : selectedDairySpecies === 'Búfalos' ? 'RCS > 250k (Alerta)' : 'RCS > 200k (Mastitis Subclínica)') : 'Sanidad de ubre óptima'}
                 </span>
               </div>
             </div>
@@ -1825,8 +1826,9 @@ export const SpreadsheetGridMode: React.FC<SpreadsheetGridModeProps> = ({ onSave
                 const am = typeof row.pesajeAm === 'number' ? row.pesajeAm : 0;
                 const pm = typeof row.pesajePm === 'number' ? row.pesajePm : 0;
                 const totalDia = am + pm;
-                const hasRcsAlert = typeof row.rcs === 'number' && row.rcs > 200;
-                const isClinical = typeof row.rcs === 'number' && row.rcs > 400;
+                const rcsLimit = selectedDairySpecies === 'Caprinos' ? 1000 : (selectedDairySpecies === 'Búfalos' ? 250 : 200);
+                const hasRcsAlert = typeof row.rcs === 'number' && row.rcs > rcsLimit;
+                const isClinical = typeof row.rcs === 'number' && row.rcs > (rcsLimit * 2);
 
                 // Diagnóstico de calidad de leche
                 let calidadDiag = '✓ Estándar';

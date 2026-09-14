@@ -1,3 +1,6 @@
+import { validateBrucellosisVaccination } from '../utils/brucellosisValidator';
+import { validatePregnancyExamTiming, MetodoDiagnosticoPrenez } from '../utils/pregnancyExamValidator';
+import { validarPesoNacimiento } from '../utils/neonatalWeightValidator';
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
   X, 
@@ -94,7 +97,7 @@ const VACCINE_PLANS_BY_SPECIES: Record<string, string[]> = {
   'Bovinos': [
     'Vacunación Oficial Fiebre Aftosa (Bivalente A y O)',
     'Vacunación Brucelosis Bovina (Cepa 19 / RB-51 hembras)',
-    'Vacunación Rabia Paresiante (Vampiricida Derriengue)',
+    'Vacunación Antirrábica Bovina (Virus Inactivado)',
     'Vacunación Clostridiosis (Carbón sintomático / Triple)',
     'Vacunación Complejo Reproductivo (IBR, DVB, Leptospira)'
   ],
@@ -136,20 +139,20 @@ const VADEMECUM_BY_SPECIES: Record<string, Array<{ nombre: string; dosis: string
   'Bovinos': [
     { nombre: 'Oxitetraciclina L.A. 200 mg/ml', dosis: '20 mg/kg (1 ml/10 kg) IM profunda', retiroLeche: 4, retiroCarne: 28 },
     { nombre: 'Penicilina G Procaína + Estreptomicina', dosis: '10,000 UI/kg IM cada 24h x 3 días', retiroLeche: 3, retiroCarne: 14 },
-    { nombre: 'Ivermectina 3.15% L.A.', dosis: '1 ml/50 kg subcutánea', retiroLeche: 30, retiroCarne: 35 },
+    { nombre: 'Eprinomectina 0.5% (Apto Ordeño)', dosis: '1 ml/10 kg pour-on tópico (0.5 mg/kg)', retiroLeche: 0, retiroCarne: 0 },
     { nombre: 'Cefa-Lak Intramamario (Cefapirina sódica)', dosis: '1 jeringa por cuarto afectado cada 12h x 2 dosis', retiroLeche: 4, retiroCarne: 4 },
     { nombre: 'Ketoprofeno 10% / Flunixin', dosis: '3 mg/kg IM o IV analgésico', retiroLeche: 1, retiroCarne: 4 }
   ],
   'Búfalos': [
     { nombre: 'Oxitetraciclina L.A. 200 mg/ml', dosis: '20 mg/kg IM profunda', retiroLeche: 4, retiroCarne: 28 },
     { nombre: 'Closantel al 10% inyectable', dosis: '1 ml/20 kg subcutánea (Fasciola/Garrapata)', retiroLeche: 28, retiroCarne: 30 },
-    { nombre: 'Ivermectina 3.15% L.A.', dosis: '1 ml/50 kg subcutánea', retiroLeche: 30, retiroCarne: 35 },
+    { nombre: 'Eprinomectina 0.5% (Apto Ordeño)', dosis: '1 ml/10 kg pour-on tópico', retiroLeche: 0, retiroCarne: 0 },
     { nombre: 'Ketoprofeno 10% inyectable', dosis: '3 mg/kg IM', retiroLeche: 1, retiroCarne: 4 }
   ],
   'Caprinos': [
     { nombre: 'Oxitetraciclina L.A. 200 mg/ml', dosis: '20 mg/kg IM profunda', retiroLeche: 4, retiroCarne: 21 },
     { nombre: 'Penicilina Procaínica Caprina', dosis: '1 ml/15 kg IM cada 24h', retiroLeche: 3, retiroCarne: 14 },
-    { nombre: 'Ivermectina caprina 1%', dosis: '1 ml/50 kg subcutánea', retiroLeche: 14, retiroCarne: 21 },
+    { nombre: 'Eprinomectina 0.5% Caprina (Apto Ordeño)', dosis: '1 ml/10 kg pour-on tópico', retiroLeche: 0, retiroCarne: 0 },
     { nombre: 'Flunixin Meglumine 50 mg/ml', dosis: '1.1 mg/kg IM', retiroLeche: 2, retiroCarne: 7 }
   ]
 };
@@ -305,6 +308,10 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
   const [pesoCabrito3, setPesoCabrito3] = useState(3.2);
   const [desbotonadoRealizado, setDesbotonadoRealizado] = useState(true);
   const [encalostradoAsistido, setEncalostradoAsistido] = useState(true);
+
+  // Estados especializados (Parches Veterinarios)
+  const [metodoDiagnosticoPrenez, setMetodoDiagnosticoPrenez] = useState<MetodoDiagnosticoPrenez>('PalpacionTransrectal');
+  const [diasPostServicioDiagnostico, setDiasPostServicioDiagnostico] = useState<number>(45);
 
   // Revisiones / Abortos
   const [diagnosticoPrenez, setDiagnosticoPrenez] = useState('Preñada');
@@ -496,11 +503,30 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
     return Math.min(100, Math.round((totalRecolectados / avesAlojadasGalpon) * 1000) / 10);
   }, [totalHuevosComerciales, huevosFertiles, huevosRotosAvicola, avesAlojadasGalpon]);
 
-  const porcentajeEclosion = useMemo(() => {
-    return (huevosFertilesIncubados > 0 && pollitosVivos > 0) ? ((pollitosVivos / huevosFertilesIncubados) * 100) : 0;
-  }, [huevosFertilesIncubados, pollitosVivos]);
+  // Validaciones Zootécnicas & Veterinarias Especializadas
+  const brucellosisValidation = useMemo(() => {
+    if (!selectedAnimalObj) return null;
+    const isBrucellosis = tipoPlanSanitario.toLowerCase().includes('brucelosis') || tipoEvento.toLowerCase().includes('brucelosis');
+    if (!isBrucellosis) return null;
+    const bio = tipoPlanSanitario.includes('RB-51') || tipoPlanSanitario.includes('RB51') ? 'RB51' : 'Cepa 19';
+    return validateBrucellosisVaccination(selectedAnimalObj, bio);
+  }, [selectedAnimalObj, tipoPlanSanitario, tipoEvento]);
 
-  // Inbreeding Wright check for Bovines & Equines
+  const pregnancyTimingValidation = useMemo(() => {
+    const isExam = tipoEvento.includes('Revision') || tipoEvento.includes('Ecograf') || tipoEvento.includes('Diagnóstic') || tipoEvento.includes('Palpaci') || (categoria === 'Reproductivos' && tipoEvento.includes('Ováric'));
+    if (!isExam) return null;
+    return validatePregnancyExamTiming(diasPostServicioDiagnostico, metodoDiagnosticoPrenez);
+  }, [tipoEvento, categoria, diasPostServicioDiagnostico, metodoDiagnosticoPrenez]);
+
+  const neonatalValidation = useMemo(() => {
+    if (!tipoEvento.includes('Parto')) return null;
+    const raza = selectedAnimalObj?.racial || selectedAnimalObj?.composicion || '';
+    const esPrimipara = selectedAnimalObj ? ((selectedAnimalObj.partos || 0) <= 1) : false;
+    const pesoMadre = selectedAnimalObj?.pesoKg;
+    return validarPesoNacimiento(criaPesoNacimiento, currentSpecies, raza, esPrimipara, pesoMadre);
+  }, [tipoEvento, criaPesoNacimiento, currentSpecies, selectedAnimalObj]);
+
+  // Inbreeding Wright check for Bovines & Equines (Algoritmo 4 Niveles FAO/BIF)
   const inbreedingCheck = useMemo(() => {
     if (!selectedAnimalObj || (!isRuminant && !isEquine)) return null;
     const selectedSemenObj = semenOptions.find(s => s.id === selectedSemenId);
@@ -508,19 +534,45 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
 
     const damFather = selectedAnimalObj.padre;
     const sireFather = selectedSemenObj.padre;
-    const sharesFather = (damFather && damFather === sireFather) || (damFather === selectedSemenObj.id);
 
-    if (sharesFather || (selectedAnimalObj.practico === '0001' && selectedSemenObj.id === 'SM01')) {
+    // Nivel 4: CRÍTICO (F = 25.0%) - Padre x Hija
+    const isFatherDaughter = damFather && (damFather === selectedSemenObj.id || damFather === selectedSemenObj.nombre);
+    if (isFatherDaughter) {
       return {
         isHighRisk: true,
-        coefficient: '12.5%',
-        reason: `La hembra ${selectedAnimalObj.practico} y el reproductor ${selectedSemenObj.id} comparten ancestro común (${sireFather || 'CW012'}). Riesgo elevado de consanguinidad.`
+        level: 'Critico' as const,
+        coefficient: '25.0%',
+        reason: `⛔ APAREAMIENTO CRÍTICO (F = 25.0%): Padre x Hija detectado (${selectedSemenObj.id} es padre de ${selectedAnimalObj.practico}). Alto riesgo de malformaciones, mortalidad embrionaria y depresión endogámica severa.`
       };
     }
+
+    // Nivel 3: ALERTA (F = 12.5%) - Medios hermanos paternos
+    const sharesFather = damFather && sireFather && damFather === sireFather;
+    if (sharesFather) {
+      return {
+        isHighRisk: true,
+        level: 'Alerta' as const,
+        coefficient: '12.5%',
+        reason: `⚠️ ALERTA DE ENDOGAMIA (F = 12.5%): Medios hermanos paternos (${selectedAnimalObj.practico} y ${selectedSemenObj.id} comparten padre: ${damFather}). Supera el umbral de seguridad FAO/BIF.`
+      };
+    }
+
+    // Nivel 2: MONITOREO (F = 6.25%) - Parentesco colateral o caso 0001
+    if (selectedAnimalObj.practico === '0001' && selectedSemenObj.id === 'SM01') {
+      return {
+        isHighRisk: true,
+        level: 'Monitoreo' as const,
+        coefficient: '6.25%',
+        reason: `⚠️ MONITOREO ZOOTÉCNICO (F = 6.25%): Ancestro común en 3ra generación (CW012). En el límite máximo permisible para hato comercial.`
+      };
+    }
+
+    // Nivel 1: SEGURO (F < 3.125%)
     return {
       isHighRisk: false,
+      level: 'Seguro' as const,
       coefficient: '0.78%',
-      reason: 'Cruce genético seguro. Coeficiente de consanguinidad de Wright F < 6.25%.'
+      reason: '✓ Cruce genético seguro. Coeficiente de consanguinidad de Wright F < 3.125% (Óptimo según estándares FAO/BIF).'
     };
   }, [selectedAnimalObj, selectedSemenId, semenOptions, isRuminant, isEquine]);
 
@@ -529,6 +581,21 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
   // Handle Submit
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (brucellosisValidation && brucellosisValidation.isBlocker) {
+      alert(`${brucellosisValidation.warningTitle}\n\n${brucellosisValidation.errorMessage}`);
+      return;
+    }
+
+    if (pregnancyTimingValidation && pregnancyTimingValidation.blocker) {
+      alert(pregnancyTimingValidation.warning);
+      return;
+    }
+
+    if (tipoEvento.includes('Parto') && neonatalValidation && !neonatalValidation.valido) {
+      alert(neonatalValidation.mensaje);
+      return;
+    }
 
     let proxVencimiento = 'Completado';
     const animalTag = codigoAnimal.trim().toUpperCase();
@@ -685,10 +752,40 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
         });
         eventObs = eventObs || `Mastitis CMT (${currentSpecies}): Cuartos afectados ${activeQuarters.join(', ')} | Tratamiento: ${tratamientoMastitis} | Retiro leche: ${diasRetiroLecheMastitis}d`;
       } else {
-        const withdrawalDate = new Date();
-        withdrawalDate.setDate(withdrawalDate.getDate() + retiroCarneClinicoDias);
-        proxVencimiento = `Fin retiro carne: ${withdrawalDate.toLocaleDateString('es-ES')}`;
-        eventObs = eventObs || `Plan Sanitario / Clínico (${currentSpecies}): ${tipoPlanSanitario} | Fármaco: ${medicamentoClinico} (${dosisClinica}) | Vía: ${isPoultry ? viaAplicacionAviar : 'Parenteral'} | Retiro Carne: ${retiroCarneClinicoDias}d`;
+        // Bloqueo de tanque para CUALQUIER principio activo con retiroLeche > 0
+        const hasMilkWithdrawal = isDairySpecies && retiroLecheClinicoDias > 0;
+        const hasMeatWithdrawal = retiroCarneClinicoDias > 0;
+
+        let formattedMilkDate = '';
+        if (hasMilkWithdrawal) {
+          const milkDate = new Date();
+          milkDate.setDate(milkDate.getDate() + retiroLecheClinicoDias);
+          formattedMilkDate = milkDate.toLocaleDateString('es-ES');
+        }
+
+        let formattedMeatDate = '';
+        if (hasMeatWithdrawal) {
+          const meatDate = new Date();
+          meatDate.setDate(meatDate.getDate() + retiroCarneClinicoDias);
+          formattedMeatDate = meatDate.toLocaleDateString('es-ES');
+        }
+
+        if (hasMilkWithdrawal) {
+          proxVencimiento = `Bloqueo de Tanque hasta ${formattedMilkDate}${hasMeatWithdrawal ? ` | Retiro carne hasta ${formattedMeatDate}` : ''}`;
+          updateAnimal(animalTag, {
+            alertaSanitaria: `Tratamiento ${medicamentoClinico} - BLOQUEO TANQUE LECHE HASTA ${formattedMilkDate}${hasMeatWithdrawal ? ` (Carne: ${formattedMeatDate})` : ''}`,
+            retiroLecheHasta: formattedMilkDate
+          });
+        } else if (hasMeatWithdrawal) {
+          proxVencimiento = `Fin retiro carne: ${formattedMeatDate}`;
+          updateAnimal(animalTag, {
+            alertaSanitaria: `Tratamiento ${medicamentoClinico} - RETIRO CARNE HASTA ${formattedMeatDate}`
+          });
+        } else {
+          proxVencimiento = 'Completado (Sin retiro)';
+        }
+
+        eventObs = eventObs || `Plan Sanitario / Clínico (${currentSpecies}): ${tipoPlanSanitario} | Fármaco: ${medicamentoClinico} (${dosisClinica}) | Vía: ${isPoultry ? viaAplicacionAviar : 'Parenteral'}${hasMilkWithdrawal ? ` | Retiro Leche: ${retiroLecheClinicoDias}d (Bloqueo Tanque: ${formattedMilkDate})` : ' | Retiro Leche: 0d'}${hasMeatWithdrawal ? ` | Retiro Carne: ${retiroCarneClinicoDias}d` : ' | Retiro Carne: 0d'}`;
       }
     }
 
@@ -1562,6 +1659,20 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
 
                                 <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 10 }}>
                                   <div className="form-field">
+                                  {neonatalValidation && (
+                                    <div style={{
+                                      fontSize: 12,
+                                      padding: '8px 12px',
+                                      borderRadius: 6,
+                                      backgroundColor: neonatalValidation.nivelAlerta === 'Critico' ? '#fef2f2' : neonatalValidation.nivelAlerta === 'Advertencia' ? '#fffbeb' : '#f0fdf4',
+                                      border: `1px solid ${neonatalValidation.nivelAlerta === 'Critico' ? '#fca5a5' : neonatalValidation.nivelAlerta === 'Advertencia' ? '#fde68a' : '#bbf7d0'}`,
+                                      color: neonatalValidation.nivelAlerta === 'Critico' ? '#991b1b' : neonatalValidation.nivelAlerta === 'Advertencia' ? '#92400e' : '#166534',
+                                      marginTop: 6,
+                                      marginBottom: 10
+                                    }}>
+                                      {neonatalValidation.mensaje}
+                                    </div>
+                                  )}
                                     <label className="form-label">Color / Pelaje</label>
                                     <input
                                       type="text"

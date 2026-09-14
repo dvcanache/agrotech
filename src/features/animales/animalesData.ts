@@ -1392,10 +1392,10 @@ export const ANIMAL_360_0001: Animal360 = {
     }
   },
   consanguinidad: {
-    coeficienteWrightFx: 0.0781, // 7.81%
+    coeficienteWrightFx: 0.0625, // 6.25% (1/16)
     alertaEndogamia: true,
-    ancestroComun: 'Semental Sultán Negro (CAR-014) presente en línea paterna y materna',
-    analisis: 'El coeficiente de consanguinidad de Wright Fx calculado es de 7.81%, superando el umbral zootécnico del 6.25%. Existe riesgo de depresión endogámica (menor vigor híbrido, ligera merma de fertilidad y mayor susceptibilidad a infecciones mamarias).',
+    ancestroComun: 'Semental Sultán Negro (CAR-014) presente en línea paterna y materna (n1=1, n2=2)',
+    analisis: 'El coeficiente de consanguinidad de Wright Fx calculado es de 6.25% (1/16), alcanzando el umbral zootécnico preventivo del 6.25%. Existe riesgo de depresión endogámica leve (ligera merma de fertilidad y menor heterosis).',
     recomendacionCruzamiento: 'Evitar apareamientos con toros emparentados con la línea "Sultán Negro" (CAR-014). Se sugiere utilizar sementales no emparentados de razas divergentes como Girolando F1 o Pardo Suizo importado para maximizar heterosis.'
   },
   desgloseRacial: [

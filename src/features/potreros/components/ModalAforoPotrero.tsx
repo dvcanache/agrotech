@@ -6,7 +6,8 @@ import {
   HelpCircle,
   Plus,
   Trash2,
-  CheckCircle2
+  CheckCircle2,
+  Leaf
 } from 'lucide-react';
 import { PotreroItem } from '../potrerosData';
 import {
@@ -38,7 +39,8 @@ export const ModalAforoPotrero: React.FC<ModalAforoPotreroProps> = ({
 }) => {
   const [selectedCodigo, setSelectedCodigo] = useState<string>(paddock?.codigo || paddocksList[0]?.codigo || '');
   const [frameAreaM2, setFrameAreaM2] = useState<number>(1.0); // 1.0 m² o 0.25 m²
-  const [samplesGrams, setSamplesGrams] = useState<number[]>([2800, 3100, 2700, 3000]);
+  // Muestras iniciales calibradas en ~1.55 kg/m² para evitar sesgos de inflado
+  const [samplesGrams, setSamplesGrams] = useState<number[]>([1500, 1600, 1480, 1580]);
   const [porcentajeMS, setPorcentajeMS] = useState<number>(22);
   const [eficienciaPastoreo, setEficienciaPastoreo] = useState<number>(75);
   const [diasDescansoRequeridos, setDiasDescansoRequeridos] = useState<number>(30);
@@ -53,9 +55,18 @@ export const ModalAforoPotrero: React.FC<ModalAforoPotreroProps> = ({
         setPorcentajeMS(preset.porcentajeMS);
         setDiasDescansoRequeridos(preset.diasDescansoOptimo);
       }
-      // If paddock already has aforo, seed realistic sample
+      // If paddock already has aforo, seed realistic sample based on current frameAreaM2
       if (paddock.aforoKgM2 > 0) {
         const baseGrams = Math.round(paddock.aforoKgM2 * 1000 * frameAreaM2);
+        setSamplesGrams([
+          Math.round(baseGrams * 0.95),
+          Math.round(baseGrams * 1.05),
+          Math.round(baseGrams * 0.98),
+          Math.round(baseGrams * 1.02)
+        ]);
+      } else {
+        const defaultAforo = preset?.aforoTipicoKgM2 || 1.55;
+        const baseGrams = Math.round(defaultAforo * 1000 * frameAreaM2);
         setSamplesGrams([
           Math.round(baseGrams * 0.95),
           Math.round(baseGrams * 1.05),
@@ -77,8 +88,27 @@ export const ModalAforoPotrero: React.FC<ModalAforoPotreroProps> = ({
       if (preset) {
         setPorcentajeMS(preset.porcentajeMS);
         setDiasDescansoRequeridos(preset.diasDescansoOptimo);
+        const baseGrams = Math.round(preset.aforoTipicoKgM2 * 1000 * frameAreaM2);
+        setSamplesGrams([
+          Math.round(baseGrams * 0.95),
+          Math.round(baseGrams * 1.05),
+          Math.round(baseGrams * 0.98),
+          Math.round(baseGrams * 1.02)
+        ]);
       }
     }
+  };
+
+  /**
+   * Corrección de Escala en Marco de Muestreo (Parche 2):
+   * Al cambiar de 1.0 m² a 0.25 m² (o viceversa), se normalizan dinámicamente las
+   * submuestras existentes por la relación de áreas para evitar cuadruplicar el aforo por error.
+   */
+  const handleFrameAreaChange = (newArea: number) => {
+    if (newArea === frameAreaM2) return;
+    const ratio = newArea / frameAreaM2;
+    setFrameAreaM2(newArea);
+    setSamplesGrams(prev => prev.map(g => Math.max(10, Math.round(g * ratio))));
   };
 
   const handleSampleChange = (index: number, value: number) => {
@@ -91,7 +121,7 @@ export const ModalAforoPotrero: React.FC<ModalAforoPotreroProps> = ({
     if (samplesGrams.length < 8) {
       const avg = samplesGrams.length > 0
         ? Math.round(samplesGrams.reduce((a, b) => a + b, 0) / samplesGrams.length)
-        : 2800;
+        : Math.round(1550 * frameAreaM2);
       setSamplesGrams([...samplesGrams, avg]);
     }
   };
@@ -102,12 +132,13 @@ export const ModalAforoPotrero: React.FC<ModalAforoPotreroProps> = ({
     }
   };
 
-  const handleApplyPreset = (grams: number) => {
+  const handleApplyPreset = (gramsM2: number) => {
+    const sampleTarget = Math.round(gramsM2 * frameAreaM2);
     setSamplesGrams([
-      Math.round(grams * 0.95),
-      Math.round(grams * 1.05),
-      Math.round(grams * 0.98),
-      Math.round(grams * 1.02)
+      Math.round(sampleTarget * 0.95),
+      Math.round(sampleTarget * 1.05),
+      Math.round(sampleTarget * 0.98),
+      Math.round(sampleTarget * 1.02)
     ]);
   };
 
@@ -120,6 +151,11 @@ export const ModalAforoPotrero: React.FC<ModalAforoPotreroProps> = ({
     areaHa: activePaddock ? activePaddock.areaHa : 40,
     diasDescansoRequeridos
   });
+
+  // Cálculo de Consumo Dual (Materia Seca vs Forraje Verde Fresco - Parche 2)
+  // Consumo base UGG (450 kg PV al 2.8%): 12.6 kg MS/día
+  const consumoMsUggDia = 12.6;
+  const consumoMvUggDia = Number((consumoMsUggDia / (porcentajeMS / 100)).toFixed(1));
 
   if (!isOpen) return null;
 
@@ -222,13 +258,13 @@ export const ModalAforoPotrero: React.FC<ModalAforoPotreroProps> = ({
               <div>
                 <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span>Dimensiones del Marco de Aforo</span>
-                  <HelpCircle size={14} color="#64748b" title="Área del marco físico lanzado en el potrero" />
+                  <HelpCircle size={14} color="#64748b" title="Área del marco físico lanzado en el potrero. La normalización ajusta automáticamente los gramos." />
                 </label>
                 <div style={{ display: 'flex', gap: 10 }}>
                   <button
                     type="button"
                     className={`aforo-frame-choice ${frameAreaM2 === 1.0 ? 'active' : ''}`}
-                    onClick={() => setFrameAreaM2(1.0)}
+                    onClick={() => handleFrameAreaChange(1.0)}
                   >
                     <div style={{ fontWeight: 700, fontSize: 14 }}>1.0 m × 1.0 m</div>
                     <div style={{ fontSize: 11, opacity: 0.8 }}>Área: 1.00 m² (Factor ×1)</div>
@@ -236,7 +272,7 @@ export const ModalAforoPotrero: React.FC<ModalAforoPotreroProps> = ({
                   <button
                     type="button"
                     className={`aforo-frame-choice ${frameAreaM2 === 0.25 ? 'active' : ''}`}
-                    onClick={() => setFrameAreaM2(0.25)}
+                    onClick={() => handleFrameAreaChange(0.25)}
                   >
                     <div style={{ fontWeight: 700, fontSize: 14 }}>0.5 m × 0.5 m</div>
                     <div style={{ fontSize: 11, opacity: 0.8 }}>Área: 0.25 m² (Factor ×4)</div>
@@ -245,28 +281,39 @@ export const ModalAforoPotrero: React.FC<ModalAforoPotreroProps> = ({
               </div>
 
               <div>
-                <label className="form-label">Preajustes Rápidos de Biomasa</label>
+                <label className="form-label">Preajustes Botánicos Calibrados</label>
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                   <button
                     type="button"
                     className="btn-preset"
-                    onClick={() => handleApplyPreset(Math.round(3500 * frameAreaM2))}
+                    onClick={() => handleApplyPreset(2100)}
+                    title="Panicum maximum Mombaza (2.10 kg/m²)"
                   >
-                    🌿 Alta (3.5 kg/m²)
+                    🌿 Mombaza (2.1 kg/m²)
                   </button>
                   <button
                     type="button"
                     className="btn-preset"
-                    onClick={() => handleApplyPreset(Math.round(2800 * frameAreaM2))}
+                    onClick={() => handleApplyPreset(1550)}
+                    title="Brachiaria brizantha Marandú (1.55 kg/m²)"
                   >
-                    🌾 Media (2.8 kg/m²)
+                    🌾 Brizantha (1.55 kg/m²)
                   </button>
                   <button
                     type="button"
                     className="btn-preset"
-                    onClick={() => handleApplyPreset(Math.round(1800 * frameAreaM2))}
+                    onClick={() => handleApplyPreset(1150)}
+                    title="Brachiaria decumbens (1.15 kg/m²)"
                   >
-                    🍂 Baja (1.8 kg/m²)
+                    🌱 Decumbens (1.15 kg/m²)
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-preset"
+                    onClick={() => handleApplyPreset(950)}
+                    title="Brachiaria humidicola (0.95 kg/m²)"
+                  >
+                    🍂 Humidicola (0.95 kg/m²)
                   </button>
                 </div>
               </div>
@@ -276,7 +323,7 @@ export const ModalAforoPotrero: React.FC<ModalAforoPotreroProps> = ({
             <div style={{ marginBottom: 20 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                 <label className="form-label" style={{ margin: 0, fontWeight: 600 }}>
-                  Submuestras de Corte en Potrero (Gramos Frescos por Marco)
+                  Submuestras de Corte en Potrero (Gramos Frescos por Marco de {frameAreaM2} m²)
                 </label>
                 <button
                   type="button"
@@ -303,7 +350,7 @@ export const ModalAforoPotrero: React.FC<ModalAforoPotreroProps> = ({
                         <button
                           type="button"
                           onClick={() => handleRemoveSample(idx)}
-                          style={{ color: '#94a3b8', hoverColor: '#ef4444' }}
+                          style={{ color: '#94a3b8' }}
                           title="Eliminar muestra"
                         >
                           <Trash2 size={13} />
@@ -313,8 +360,8 @@ export const ModalAforoPotrero: React.FC<ModalAforoPotreroProps> = ({
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                       <input
                         type="number"
-                        min="50"
-                        step="50"
+                        min="10"
+                        step="20"
                         className="form-input"
                         value={grams}
                         onChange={e => handleSampleChange(idx, parseInt(e.target.value, 10) || 0)}
@@ -357,9 +404,9 @@ export const ModalAforoPotrero: React.FC<ModalAforoPotreroProps> = ({
                   onChange={e => setPorcentajeMS(parseInt(e.target.value, 10))}
                 />
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: '#94a3b8' }}>
-                  <span>15% (Aguado / Lluvias)</span>
-                  <span>22% (Normal)</span>
-                  <span>35% (Lignificado)</span>
+                  <span>15% (Lluvias / Tierno)</span>
+                  <span>22% (Normal PRV)</span>
+                  <span>35% (Seca / Lignificado)</span>
                 </div>
               </div>
 
@@ -382,14 +429,14 @@ export const ModalAforoPotrero: React.FC<ModalAforoPotreroProps> = ({
                   onChange={e => setEficienciaPastoreo(parseInt(e.target.value, 10))}
                 />
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: '#94a3b8' }}>
-                  <span>50% (Poco intensivo)</span>
+                  <span>50% (Extensivo continuo)</span>
                   <span>75% (PRV Estándar)</span>
-                  <span>90% (Alta densidad)</span>
+                  <span>90% (Alta densidad PRV)</span>
                 </div>
               </div>
             </div>
 
-            {/* Step 4: Panel de Resultados Agronómicos Calculados */}
+            {/* Step 4: Panel de Resultados Agronómicos y Consumos Duales */}
             <div style={{
               background: 'linear-gradient(135deg, #1e3a24 0%, #2d6a4f 100%)',
               borderRadius: 12,
@@ -404,71 +451,109 @@ export const ModalAforoPotrero: React.FC<ModalAforoPotreroProps> = ({
                     Resultados Zootécnicos del Aforo
                   </span>
                 </div>
-                <span style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                  padding: '3px 10px',
-                  borderRadius: 20,
-                  fontSize: 11,
-                  fontWeight: 600
-                }}>
-                  Calidad: {results.calidadForraje}
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                    padding: '3px 10px',
+                    borderRadius: 20,
+                    fontSize: 11,
+                    fontWeight: 600
+                  }}>
+                    Calidad: {results.calidadForraje}
+                  </span>
+                  <span style={{
+                    backgroundColor: 'rgba(82, 183, 136, 0.3)',
+                    padding: '3px 10px',
+                    borderRadius: 20,
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: '#86efac'
+                  }}>
+                    Marco {frameAreaM2} m²
+                  </span>
+                </div>
               </div>
 
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
                 gap: 12,
                 borderTop: '1px solid rgba(255, 255, 255, 0.15)',
                 paddingTop: 12
               }}>
                 <div>
                   <div style={{ fontSize: 11, opacity: 0.8 }}>Aforo Materia Verde</div>
-                  <div style={{ fontSize: 20, fontWeight: 800, color: '#ffffff' }}>
-                    {results.pesoFrescoKgM2} <span style={{ fontSize: 12, fontWeight: 500 }}>kg MV/m²</span>
+                  <div style={{ fontSize: 19, fontWeight: 800, color: '#ffffff' }}>
+                    {results.pesoFrescoKgM2} <span style={{ fontSize: 11, fontWeight: 500 }}>kg MV/m²</span>
                   </div>
                 </div>
 
                 <div>
                   <div style={{ fontSize: 11, opacity: 0.8 }}>Producción Bruta MS</div>
-                  <div style={{ fontSize: 20, fontWeight: 800, color: '#86efac' }}>
-                    {results.kgMsHa.toLocaleString('es-VE')} <span style={{ fontSize: 12, fontWeight: 500 }}>kg MS/ha</span>
+                  <div style={{ fontSize: 19, fontWeight: 800, color: '#86efac' }}>
+                    {results.kgMsHa.toLocaleString('es-VE')} <span style={{ fontSize: 11, fontWeight: 500 }}>kg MS/ha</span>
                   </div>
                 </div>
 
                 <div>
                   <div style={{ fontSize: 11, opacity: 0.8 }}>Oferta Neta Aprovechable</div>
-                  <div style={{ fontSize: 20, fontWeight: 800, color: '#fef08a' }}>
-                    {results.kgMsAprovechableHa.toLocaleString('es-VE')} <span style={{ fontSize: 12, fontWeight: 500 }}>kg MS/ha</span>
+                  <div style={{ fontSize: 19, fontWeight: 800, color: '#fef08a' }}>
+                    {results.kgMsAprovechableHa.toLocaleString('es-VE')} <span style={{ fontSize: 11, fontWeight: 500 }}>kg MS/ha</span>
                   </div>
                 </div>
 
                 <div>
                   <div style={{ fontSize: 11, opacity: 0.8 }}>Carga Sostenible PRV</div>
-                  <div style={{ fontSize: 20, fontWeight: 800, color: '#93c5fd' }}>
-                    {results.cargaRecomendadaUggHa} <span style={{ fontSize: 12, fontWeight: 500 }}>UGG/ha</span>
+                  <div style={{ fontSize: 19, fontWeight: 800, color: '#93c5fd' }}>
+                    {results.cargaRecomendadaUggHa} <span style={{ fontSize: 11, fontWeight: 500 }}>UGG/ha</span>
                   </div>
                 </div>
 
                 <div>
                   <div style={{ fontSize: 11, opacity: 0.8 }}>Biomasa Total Parcela</div>
-                  <div style={{ fontSize: 20, fontWeight: 800, color: '#ffffff' }}>
-                    {results.toneladasTotalesMs} <span style={{ fontSize: 12, fontWeight: 500 }}>Ton MS</span>
+                  <div style={{ fontSize: 19, fontWeight: 800, color: '#ffffff' }}>
+                    {results.toneladasTotalesMs} <span style={{ fontSize: 11, fontWeight: 500 }}>Ton MS</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Parche 2: Transparencia de Consumo Dual MS (12.6 kg/d) vs MV (57.3 kg/d a 22% MS) */}
+              <div style={{
+                marginTop: 14,
+                background: 'rgba(0, 0, 0, 0.25)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                borderRadius: 8,
+                padding: '10px 14px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                  <Leaf size={14} color="#86efac" />
+                  <span style={{ fontSize: 11.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em', color: '#86efac' }}>
+                    Demanda Nutricional Dual por UGG (Base 450 kg PV @ 2.8% PV):
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16, fontSize: 12 }}>
+                  <div>
+                    <span style={{ opacity: 0.8 }}>Materia Seca (MS): </span>
+                    <strong style={{ color: '#ffffff' }}>{consumoMsUggDia} kg MS/UGG/día</strong>
+                  </div>
+                  <div>•</div>
+                  <div>
+                    <span style={{ opacity: 0.8 }}>Forraje Fresco (MV): </span>
+                    <strong style={{ color: '#fef08a' }}>{consumoMvUggDia} kg MV/UGG/día</strong>
+                    <span style={{ fontSize: 11, opacity: 0.85 }}> ({porcentajeMS}% MS)</span>
                   </div>
                 </div>
               </div>
 
               <div style={{
-                marginTop: 12,
+                marginTop: 10,
                 fontSize: 11.5,
-                background: 'rgba(0, 0, 0, 0.2)',
-                padding: '8px 12px',
-                borderRadius: 8,
                 display: 'flex',
                 alignItems: 'center',
-                gap: 8
+                gap: 8,
+                opacity: 0.95
               }}>
-                <CheckCircle2 size={15} color="#86efac" />
+                <CheckCircle2 size={15} color="#86efac" style={{ flexShrink: 0 }} />
                 <span>
                   Con {results.cargaRecomendadaUggHa} UGG/ha y un descanso de {diasDescansoRequeridos} días, este potrero soporta rotaciones de 1 a 2 días sin degradar raíces.
                 </span>

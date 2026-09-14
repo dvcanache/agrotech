@@ -9,9 +9,106 @@ import {
   AlertCircle, 
   Stethoscope, 
   CheckCircle2,
-  Syringe
+  Syringe,
+  AlertTriangle
 } from 'lucide-react';
 import { Animal360, EventoGinecologico } from '../../../types/animal';
+
+export interface GestationStageInfo {
+  stage: 'Primer Tercio' | 'Segundo Tercio' | 'Tercer Tercio' | 'Parto Inminente' | 'Fuera de Rango';
+  color: string;
+  badgeBg: string;
+  borderColor: string;
+  indicacionesClinicas: string;
+}
+
+export function getGestationStage(diasGestacion: number, especie: string, subespecie?: string): GestationStageInfo {
+  let duracionTotal = 283;
+
+  switch (especie) {
+    case 'Bovinos':
+      duracionTotal = (subespecie === 'Cebuino' || subespecie === 'Bos indicus') ? 292 : 283;
+      break;
+    case 'Búfalos':
+      duracionTotal = 310;
+      break;
+    case 'Equinos':
+      duracionTotal = 340;
+      break;
+    case 'Porcinos':
+      duracionTotal = 114;
+      break;
+    case 'Caprinos':
+    case 'Ovinos':
+      duracionTotal = 150;
+      break;
+    default:
+      duracionTotal = 283;
+  }
+
+  const porcentaje = (diasGestacion / duracionTotal) * 100;
+
+  if (diasGestacion >= duracionTotal - 7) {
+    return {
+      stage: 'Parto Inminente',
+      color: '#b91c1c',
+      badgeBg: '#fef2f2',
+      borderColor: '#fca5a5',
+      indicacionesClinicas: 'Vigilancia 24h, ubicar en paridero, desinfección de ubre y pezones.'
+    };
+  }
+
+  if (porcentaje <= 33.3) {
+    return {
+      stage: 'Primer Tercio',
+      color: '#0284c7',
+      badgeBg: '#f0f9ff',
+      borderColor: '#bae6fd',
+      indicacionesClinicas: 'Fase de embriogénesis y nidación. Evitar palpación precoz traumática y estrés.'
+    };
+  } else if (porcentaje <= 66.6) {
+    return {
+      stage: 'Segundo Tercio',
+      color: '#16a34a',
+      badgeBg: '#f0fdf4',
+      borderColor: '#bbf7d0',
+      indicacionesClinicas: 'Desarrollo osteo-muscular. Período seguro para desparasitaciones y vacunas inactivadas.'
+    };
+  } else {
+    return {
+      stage: 'Tercer Tercio',
+      color: '#d97706',
+      badgeBg: '#fffbeb',
+      borderColor: '#fde68a',
+      indicacionesClinicas: 'Crecimiento fetal acelerado (70% del peso final). Secado obligatorio y dieta de transición.'
+    };
+  }
+}
+
+export function getSireLabel(especie?: string): { icon: string; label: string } {
+  switch (especie) {
+    case 'Equinos':
+    case 'Caballos':
+      return { icon: '🐎', label: 'Padrón / Semental' };
+    case 'Porcinos':
+    case 'Cerdos':
+      return { icon: '🐖', label: 'Verraco' };
+    case 'Caprinos':
+    case 'Cabras':
+      return { icon: '🐐', label: 'Chivo Reproductor' };
+    case 'Ovinos':
+    case 'Ovejas':
+      return { icon: '🐑', label: 'Carnero' };
+    case 'Búfalos':
+      return { icon: '🐃', label: 'Bucerro Semental' };
+    case 'Aves de corral':
+    case 'Aves':
+      return { icon: '🐓', label: 'Gallo Reproductor' };
+    case 'Bovinos':
+    default:
+      return { icon: '🐂', label: 'Toro' };
+  }
+}
 
 interface TabHistorialReproductivoProps {
   animal: Animal360;
@@ -19,6 +116,60 @@ interface TabHistorialReproductivoProps {
 
 export const TabHistorialReproductivo: React.FC<TabHistorialReproductivoProps> = ({ animal }) => {
   const { kpisReproductivos, timelineGinecologico } = animal;
+
+  const diasGest = kpisReproductivos.diasPrenez || animal.diasGestacion || 0;
+  const stageInfo = getGestationStage(diasGest, animal.especie, animal.subcategoria);
+  const sireInfo = getSireLabel(animal.especie);
+
+  // Semáforo Zootécnico de Días Abiertos (DA)
+  const getSemaforoDiasAbiertos = (da: number) => {
+    if (da <= 115) {
+      return {
+        label: 'Óptimo (Parto al Año)',
+        textColor: '#16a34a',
+        bgColor: '#f0fdf4',
+        borderColor: '#bbf7d0',
+        alerta: 'normal'
+      };
+    } else if (da <= 150) {
+      return {
+        label: 'Aceptable Trópico Bajo',
+        textColor: '#059669',
+        bgColor: '#ecfdf5',
+        borderColor: '#a7f3d0',
+        alerta: 'aceptable'
+      };
+    } else if (da <= 180) {
+      return {
+        label: 'Alerta Moderada (+Retraso)',
+        textColor: '#d97706',
+        bgColor: '#fffbeb',
+        borderColor: '#fde68a',
+        alerta: 'moderada'
+      };
+    } else if (da <= 210) {
+      return {
+        label: 'Problema Clínico Severo',
+        textColor: '#dc2626',
+        bgColor: '#fef2f2',
+        borderColor: '#fca5a5',
+        alerta: 'severa'
+      };
+    } else {
+      return {
+        label: 'Candidata Inmediata a Descarte',
+        textColor: '#991b1b',
+        bgColor: '#fee2e2',
+        borderColor: '#f87171',
+        alerta: 'descarte'
+      };
+    }
+  };
+
+  const semaforoDA = getSemaforoDiasAbiertos(kpisReproductivos.diasAbiertos);
+
+  // Detección de Síndrome de Vaca Repetidora (Repeat Breeder): S/C >= 3.0
+  const esVacaRepetidora = kpisReproductivos.serviciosPorConcepcion >= 3.0;
 
   const getEventIcon = (tipo: EventoGinecologico['tipo']) => {
     switch (tipo) {
@@ -41,7 +192,30 @@ export const TabHistorialReproductivo: React.FC<TabHistorialReproductivoProps> =
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      {/* KPIs Reproductivos */}
+      {/* Alerta de Vaca Repetidora si S/C >= 3.0 */}
+      {esVacaRepetidora && (
+        <div style={{
+          backgroundColor: '#fef2f2',
+          border: '1px solid #fca5a5',
+          borderRadius: 8,
+          padding: '12px 16px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12
+        }}>
+          <AlertTriangle size={24} color="#b91c1c" />
+          <div>
+            <div style={{ fontWeight: 700, fontSize: 13, color: '#991b1b' }}>
+              ⚠️ ALERTA GINECOLÓGICA: SÍNDROME DE HEMBRA REPETIDORA (Repeat Breeder — {kpisReproductivos.serviciosPorConcepcion} S/C)
+            </div>
+            <div style={{ fontSize: 12, color: '#7f1d1d', marginTop: 2, lineHeight: 1.4 }}>
+              El semoviente ha superado el umbral zootécnico de 3 servicios por concepción. Requiere revisión ecográfica ovárica urgente (descarte de quistes foliculares o luteales), frotis/cultivo uterino y <strong>suspensión preventiva de pajuelas de semen élite</strong> hasta recibir alta médica ginecológica.
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* KPIs Reproductivos con Semáforos Zootécnicos */}
       <div className="ficha360-grid-4">
         <div className="ficha360-kpi-card">
           <div className="ficha360-kpi-icon" style={{ backgroundColor: '#e8f5e9', color: '#2d6a4f' }}>
@@ -53,23 +227,33 @@ export const TabHistorialReproductivo: React.FC<TabHistorialReproductivoProps> =
           </div>
         </div>
 
-        <div className="ficha360-kpi-card">
-          <div className="ficha360-kpi-icon" style={{ backgroundColor: '#e0f2fe', color: '#0369a1' }}>
+        {/* Días Abiertos con Semáforo Cromático */}
+        <div className="ficha360-kpi-card" style={{ borderLeft: `4px solid ${semaforoDA.textColor}` }}>
+          <div className="ficha360-kpi-icon" style={{ backgroundColor: semaforoDA.bgColor, color: semaforoDA.textColor }}>
             <Calendar size={22} />
           </div>
           <div>
-            <div className="ficha360-kpi-val">{kpisReproductivos.diasAbiertos} d</div>
-            <div className="ficha360-kpi-lbl">Días Abiertos</div>
+            <div className="ficha360-kpi-val" style={{ color: semaforoDA.textColor }}>
+              {kpisReproductivos.diasAbiertos} d
+            </div>
+            <div className="ficha360-kpi-lbl" style={{ fontWeight: 600 }}>
+              {semaforoDA.label}
+            </div>
           </div>
         </div>
 
-        <div className="ficha360-kpi-card">
-          <div className="ficha360-kpi-icon" style={{ backgroundColor: '#fef3c7', color: '#d97706' }}>
+        {/* Servicios por Concepción con Detección de Vaca Repetidora */}
+        <div className="ficha360-kpi-card" style={{ borderLeft: esVacaRepetidora ? '4px solid #dc2626' : undefined }}>
+          <div className="ficha360-kpi-icon" style={{ backgroundColor: esVacaRepetidora ? '#fee2e2' : '#fef3c7', color: esVacaRepetidora ? '#dc2626' : '#d97706' }}>
             <Syringe size={22} />
           </div>
           <div>
-            <div className="ficha360-kpi-val">{kpisReproductivos.serviciosPorConcepcion}</div>
-            <div className="ficha360-kpi-lbl">Servicios / Concep.</div>
+            <div className="ficha360-kpi-val" style={{ color: esVacaRepetidora ? '#dc2626' : '#1e293b' }}>
+              {kpisReproductivos.serviciosPorConcepcion}
+            </div>
+            <div className="ficha360-kpi-lbl">
+              {esVacaRepetidora ? '⚠️ Vaca Repetidora (≥3)' : 'Servicios / Concep.'}
+            </div>
           </div>
         </div>
 
@@ -79,12 +263,12 @@ export const TabHistorialReproductivo: React.FC<TabHistorialReproductivoProps> =
           </div>
           <div>
             <div className="ficha360-kpi-val">{kpisReproductivos.totalPartos}</div>
-            <div className="ficha360-kpi-lbl">Partos Totales (0 Ab.)</div>
+            <div className="ficha360-kpi-lbl">Partos Totales ({kpisReproductivos.totalAbortos || 0} Ab.)</div>
           </div>
         </div>
       </div>
 
-      {/* Resumen del Estado de Gestación Actual */}
+      {/* Resumen del Estado de Gestación Actual Dinámico */}
       {animal.estatusReproductivo === 'Preñada' && (
         <div style={{
           backgroundColor: '#eff6ff',
@@ -112,7 +296,7 @@ export const TabHistorialReproductivo: React.FC<TabHistorialReproductivoProps> =
             </div>
             <div>
               <div style={{ fontSize: 15, fontWeight: 700, color: '#1e3a8a' }}>
-                Gestación en Curso: {kpisReproductivos.diasPrenez || animal.diasGestacion} Días Confirmados
+                Gestación en Curso: {diasGest} Días Confirmados ({animal.especie})
               </div>
               <div style={{ fontSize: 12.5, color: '#2563eb' }}>
                 Último servicio: {kpisReproductivos.fechaUltimoServicio} • Fecha Probable de Parto (FPP): <strong>{kpisReproductivos.fechaProximoParto}</strong>
@@ -120,25 +304,30 @@ export const TabHistorialReproductivo: React.FC<TabHistorialReproductivoProps> =
             </div>
           </div>
 
-          <div style={{
-            fontSize: 12.5,
-            fontWeight: 700,
-            padding: '6px 14px',
-            backgroundColor: '#ffffff',
-            borderRadius: 8,
-            color: '#1d4ed8',
-            border: '1px solid #93c5fd'
-          }}>
-            Tercio Medio de Gestación
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
+            <div style={{
+              fontSize: 12.5,
+              fontWeight: 700,
+              padding: '6px 14px',
+              backgroundColor: stageInfo.badgeBg,
+              borderRadius: 8,
+              color: stageInfo.color,
+              border: `1px solid ${stageInfo.borderColor}`
+            }}>
+              {stageInfo.stage}
+            </div>
+            <span style={{ fontSize: 11, color: '#475569', maxWidth: 280, textAlign: 'right' }}>
+              {stageInfo.indicacionesClinicas}
+            </span>
           </div>
         </div>
       )}
 
-      {/* Timeline Ginecológico */}
+      {/* Timeline Ginecológico con Terminología de Macho Dinámica */}
       <div className="ficha360-card">
         <div className="ficha360-card-title">
           <Heart size={16} color="#2d6a4f" />
-          Línea de Tiempo Ginecológica & Campañas Reproductivas
+          Línea de Tiempo Ginecológica &amp; Campañas Reproductivas
         </div>
 
         <div className="gyn-timeline">
@@ -176,7 +365,7 @@ export const TabHistorialReproductivo: React.FC<TabHistorialReproductivoProps> =
                   </span>
                   {evento.detalles.toro && (
                     <span className="gyn-tag">
-                      🐂 Toro: {evento.detalles.toro}
+                      {sireInfo.icon} {sireInfo.label}: {evento.detalles.toro}
                     </span>
                   )}
                   {evento.detalles.pajuelaLote && (

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Search, Trash2, Edit2 } from 'lucide-react';
+import { Plus, Search, Trash2, AlertTriangle, ShieldAlert } from 'lucide-react';
 
 interface CatalogItem {
   id: string;
@@ -7,14 +7,26 @@ interface CatalogItem {
   nombre: string;
   detalle: string;
   extra?: string;
+  retiroHuevo?: string;
   colorHex?: string;
+}
+
+interface CatalogTypeConfig {
+  title: string;
+  subtitle: string;
+  col1: string;
+  col2: string;
+  col3: string;
+  col4: string;
+  col5?: string;
+  initialData: CatalogItem[];
 }
 
 interface CatalogViewProps {
   catalogType: 'lotes' | 'colores' | 'propietarios' | 'diagnosticos' | 'tratamientos' | 'clasificaciones';
 }
 
-const CATALOG_CONFIG = {
+const CATALOG_CONFIG: Record<string, CatalogTypeConfig> = {
   lotes: {
     title: 'Catálogo de Lotes de Manejo',
     subtitle: 'Grupos de manejo nutricional, productivo y reproductivo del hato',
@@ -75,17 +87,61 @@ const CATALOG_CONFIG = {
   },
   tratamientos: {
     title: 'Catálogo de Tratamientos Farmacológicos',
-    subtitle: 'Medicamentos, principios activos, vías de administración y tiempos de retiro',
+    subtitle: 'Medicamentos, principios activos, vías de administración y tiempos de retiro (Leche, Carne y Huevo)',
     col1: 'Código',
     col2: 'Principio Activo / Medicamento',
     col3: 'Vía & Dosis Habitual',
-    col4: 'Tiempos de Retiro (Leche / Carne)',
+    col4: 'Retiro Leche / Carne',
+    col5: 'Retiro Huevo Comercial (Aves)',
     initialData: [
-      { id: '1', codigo: 'OXITET-LA', nombre: 'Oxitetraciclina L.A. 20%', detalle: 'Intramuscular profunda (1 ml / 10 kg)', extra: 'Leche: 7 días | Carne: 28 días' },
-      { id: '2', codigo: 'CEFTIO', nombre: 'Ceftiofur Sódico 5%', detalle: 'Subcutánea (1 ml / 50 kg)', extra: 'Leche: 0 días | Carne: 3 días' },
-      { id: '3', codigo: 'IVERM', nombre: 'Ivermectina 1%', detalle: 'Subcutánea (1 ml / 50 kg)', extra: 'Leche: No usar | Carne: 35 días' },
-      { id: '4', codigo: 'FLUNIX', nombre: 'Flunixin Meglumine 5%', detalle: 'Intravenosa (2 ml / 45 kg)', extra: 'Leche: 36 horas | Carne: 4 días' },
-      { id: '5', codigo: 'PEN-ESTR', nombre: 'Penicilina + Estreptomicina', detalle: 'Intramuscular (1 ml / 25 kg)', extra: 'Leche: 72 horas | Carne: 14 días' }
+      {
+        id: '1',
+        codigo: 'OXITET-LA',
+        nombre: 'Oxitetraciclina L.A. 20%',
+        detalle: 'Intramuscular profunda (1 ml / 10 kg)',
+        extra: 'Leche: 7 días (168h) | Carne: 28 días',
+        retiroHuevo: 'No usar en gallinas ponedoras'
+      },
+      {
+        id: '2',
+        codigo: 'CEFTIO',
+        nombre: 'Ceftiofur Sódico 5%',
+        detalle: 'Subcutánea (1 ml / 50 kg)',
+        extra: 'Leche: 0 horas | Carne: 3 días',
+        retiroHuevo: '⛔ PROHIBIDO EN AVES (Uso extra-etiqueta vetado FDA/EFSA - Cefalosporina 3ª Gen / Resistencia BLEE)'
+      },
+      {
+        id: '3',
+        codigo: 'IVERM',
+        nombre: 'Ivermectina 1%',
+        detalle: 'Subcutánea (1 ml / 50 kg)',
+        extra: 'Leche: Prohibido en ordeño | Carne: 35 días',
+        retiroHuevo: 'No autorizado en ponedoras comerciales'
+      },
+      {
+        id: '4',
+        codigo: 'FLUNIX',
+        nombre: 'Flunixin Meglumine 5%',
+        detalle: 'Intravenosa (2 ml / 45 kg)',
+        extra: 'Leche: 36 horas | Carne: 4 días',
+        retiroHuevo: 'No autorizado en aves'
+      },
+      {
+        id: '5',
+        codigo: 'PEN-ESTR',
+        nombre: 'Penicilina + Estreptomicina',
+        detalle: 'Intramuscular (1 ml / 25 kg)',
+        extra: 'Leche: 72 horas | Carne: 14 días',
+        retiroHuevo: 'Retiro: 10 días en postura comercial'
+      },
+      {
+        id: '6',
+        codigo: 'ENRO-10',
+        nombre: 'Enrofloxacina 10% Oral',
+        detalle: 'Oral en agua de bebida (10 mg/kg)',
+        extra: 'Carne: 7 días',
+        retiroHuevo: 'Retiro: 9 días en huevo comercial'
+      }
     ]
   },
   clasificaciones: {
@@ -109,26 +165,36 @@ export const CatalogView: React.FC<CatalogViewProps> = ({ catalogType }) => {
   const [items, setItems] = useState<CatalogItem[]>(config.initialData);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newItem, setNewItem] = useState({ codigo: '', nombre: '', detalle: '', extra: '' });
+  const [newItem, setNewItem] = useState({ codigo: '', nombre: '', detalle: '', extra: '', retiroHuevo: '' });
 
   const filteredItems = items.filter(item =>
     item.codigo.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.detalle.toLowerCase().includes(searchTerm.toLowerCase())
+    item.detalle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (item.retiroHuevo && item.retiroHuevo.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const handleAddItem = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newItem.codigo.trim() || !newItem.nombre.trim()) return;
+
+    // Validación y restricción de uso extra-etiqueta de Ceftiofur en aves
+    const isCeftiofur = newItem.nombre.toLowerCase().includes('ceftiofur') || newItem.codigo.toLowerCase().includes('ceftio');
+    let finalRetiroHuevo = newItem.retiroHuevo.trim();
+    if (isCeftiofur && (!finalRetiroHuevo || !finalRetiroHuevo.includes('PROHIBIDO'))) {
+      finalRetiroHuevo = '⛔ PROHIBIDO EN AVES (Uso extra-etiqueta vetado FDA/EFSA - Cefalosporina 3ª Gen / Resistencia BLEE)';
+    }
+
     const added: CatalogItem = {
       id: String(Date.now()),
       codigo: newItem.codigo.trim(),
       nombre: newItem.nombre.trim(),
       detalle: newItem.detalle.trim(),
-      extra: newItem.extra.trim()
+      extra: newItem.extra.trim(),
+      retiroHuevo: finalRetiroHuevo || undefined
     };
     setItems([...items, added]);
-    setNewItem({ codigo: '', nombre: '', detalle: '', extra: '' });
+    setNewItem({ codigo: '', nombre: '', detalle: '', extra: '', retiroHuevo: '' });
     setIsModalOpen(false);
   };
 
@@ -137,6 +203,8 @@ export const CatalogView: React.FC<CatalogViewProps> = ({ catalogType }) => {
       setItems(items.filter(item => item.id !== id));
     }
   };
+
+  const hasCol5 = Boolean(config.col5);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -161,6 +229,25 @@ export const CatalogView: React.FC<CatalogViewProps> = ({ catalogType }) => {
         </button>
       </div>
 
+      {catalogType === 'tratamientos' && (
+        <div style={{
+          backgroundColor: '#eff6ff',
+          border: '1px solid #bfdbfe',
+          borderRadius: 8,
+          padding: '10px 14px',
+          fontSize: 12.5,
+          color: '#1e40af',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10
+        }}>
+          <ShieldAlert size={20} color="#2563eb" style={{ flexShrink: 0 }} />
+          <div>
+            <strong>Blindaje de Inocuidad Alimentaria (Leche, Carne y Huevo):</strong> Los tiempos de resguardo farmacológico en huevo comercial son de estricto cumplimiento para evitar decomisos y riesgos de resistencia bacteriana (BLEE). Prohibido taxativamente el uso de Cefalosporinas de 3ª generación (Ceftiofur) en avicultura.
+          </div>
+        </div>
+      )}
+
       {/* Search */}
       <div className="search-container" style={{ maxWidth: 360 }}>
         <Search className="search-icon" size={16} />
@@ -174,14 +261,15 @@ export const CatalogView: React.FC<CatalogViewProps> = ({ catalogType }) => {
       </div>
 
       {/* Table */}
-      <div className="table-wrapper" style={{ border: '1px solid var(--border-gray)', borderRadius: 8 }}>
+      <div className="table-wrapper" style={{ border: '1px solid var(--border-gray)', borderRadius: 8, overflowX: 'auto' }}>
         <table className="animals-table">
           <thead>
             <tr>
-              <th style={{ width: '18%' }}>{config.col1}</th>
-              <th style={{ width: '32%' }}>{config.col2}</th>
-              <th style={{ width: '25%' }}>{config.col3}</th>
-              <th style={{ width: '25%' }}>{config.col4}</th>
+              <th style={{ width: hasCol5 ? '12%' : '18%' }}>{config.col1}</th>
+              <th style={{ width: hasCol5 ? '24%' : '32%' }}>{config.col2}</th>
+              <th style={{ width: hasCol5 ? '20%' : '25%' }}>{config.col3}</th>
+              <th style={{ width: hasCol5 ? '20%' : '25%' }}>{config.col4}</th>
+              {hasCol5 && <th style={{ width: '20%' }}>{config.col5}</th>}
               <th style={{ width: 60, textAlign: 'center' }}>Acciones</th>
             </tr>
           </thead>
@@ -212,6 +300,34 @@ export const CatalogView: React.FC<CatalogViewProps> = ({ catalogType }) => {
                 <td style={{ color: 'var(--text-secondary)', fontSize: 12 }}>
                   {item.extra || '-'}
                 </td>
+                {hasCol5 && (
+                  <td>
+                    {item.retiroHuevo?.includes('PROHIBIDO') ? (
+                      <span
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 4,
+                          fontSize: 11,
+                          fontWeight: 700,
+                          color: '#b91c1c',
+                          backgroundColor: '#fef2f2',
+                          padding: '3px 8px',
+                          borderRadius: 4,
+                          border: '1px solid #fecaca'
+                        }}
+                        title="Prohibición zoosanitaria internacional (FDA/EFSA) por riesgo de resistencia antimicrobiana BLEE"
+                      >
+                        <AlertTriangle size={12} />
+                        {item.retiroHuevo}
+                      </span>
+                    ) : (
+                      <span style={{ fontSize: 12, color: item.retiroHuevo ? '#334155' : '#94a3b8' }}>
+                        {item.retiroHuevo || 'No establecido'}
+                      </span>
+                    )}
+                  </td>
+                )}
                 <td style={{ textAlign: 'center' }}>
                   <button
                     type="button"
@@ -227,7 +343,7 @@ export const CatalogView: React.FC<CatalogViewProps> = ({ catalogType }) => {
             ))}
             {filteredItems.length === 0 && (
               <tr>
-                <td colSpan={5} style={{ textAlign: 'center', padding: '24px', color: 'var(--text-secondary)' }}>
+                <td colSpan={hasCol5 ? 6 : 5} style={{ textAlign: 'center', padding: '24px', color: 'var(--text-secondary)' }}>
                   No se encontraron elementos en este catálogo.
                 </td>
               </tr>
@@ -239,7 +355,7 @@ export const CatalogView: React.FC<CatalogViewProps> = ({ catalogType }) => {
       {/* Modal Agregar */}
       {isModalOpen && (
         <div className="report-modal-backdrop" onClick={() => setIsModalOpen(false)}>
-          <div className="report-modal-dialog" onClick={e => e.stopPropagation()} style={{ maxWidth: 500 }}>
+          <div className="report-modal-dialog" onClick={e => e.stopPropagation()} style={{ maxWidth: 520 }}>
             <div className="report-modal-header">
               <h3 className="report-modal-title">Agregar a {config.title}</h3>
               <button type="button" className="report-modal-close-btn" onClick={() => setIsModalOpen(false)}>
@@ -282,10 +398,26 @@ export const CatalogView: React.FC<CatalogViewProps> = ({ catalogType }) => {
                   <input
                     type="text"
                     className="form-input"
+                    placeholder="Ej. Leche: 0 horas | Carne: 3 días"
                     value={newItem.extra}
                     onChange={e => setNewItem({ ...newItem, extra: e.target.value })}
                   />
                 </div>
+                {hasCol5 && (
+                  <div className="form-field">
+                    <label className="form-label">{config.col5}</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      placeholder="Ej. Retiro: 7 días en postura comercial"
+                      value={newItem.retiroHuevo}
+                      onChange={e => setNewItem({ ...newItem, retiroHuevo: e.target.value })}
+                    />
+                    <span className="form-hint">
+                      Para Cefalosporinas de 3ª generación (Ceftiofur), el sistema impondrá restricción automática de prohibición en aves.
+                    </span>
+                  </div>
+                )}
               </div>
               <div className="report-modal-footer">
                 <button type="button" className="btn-secondary" onClick={() => setIsModalOpen(false)}>

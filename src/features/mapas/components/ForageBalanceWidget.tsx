@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { GisPaddock } from '../mapasData';
-import { calculateForageBalance, ForageBalanceResult, SPECIES_EMOJI, getUggFactor } from '../../potreros/prvUtils';
+import {
+  calculateForageBalance,
+  ForageBalanceResult,
+  SPECIES_EMOJI,
+  getUggFactor,
+  FORAGE_SPECIES_PRESETS
+} from '../../potreros/prvUtils';
 import {
   Scale,
   Clock,
@@ -10,7 +16,8 @@ import {
   Warehouse,
   CheckCircle2,
   Activity,
-  Layers
+  Layers,
+  Leaf
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -25,6 +32,12 @@ export const ForageBalanceWidget: React.FC<ForageBalanceWidgetProps> = ({
 }) => {
   const isPastoral = paddock.tipoInstalacion === 'potrero' || paddock.tipoInstalacion === 'sabana';
 
+  // Preset forrajero corregido según la especie botánica del potrero
+  const botanicalPreset = FORAGE_SPECIES_PRESETS[paddock.especieForrajera];
+  const aforoEfectivoKgM2 = paddock.aforoKgM2 > 0 ? paddock.aforoKgM2 : (botanicalPreset?.aforoTipicoKgM2 || 1.55);
+  const porcentajeMSEfectivo = paddock.porcentajeMS > 0 ? paddock.porcentajeMS : (botanicalPreset?.porcentajeMS || 22);
+  const diasDescansoEfectivos = paddock.diasDescansoRequeridos > 0 ? paddock.diasDescansoRequeridos : (botanicalPreset?.diasDescansoOptimo || 30);
+
   // Simulator state with defaults initialized from paddock
   const [simUgg, setSimUgg] = useState<number>(paddock.uggPresentes > 0 ? paddock.uggPresentes : 25);
   const [simConsumoPv, setSimConsumoPv] = useState<number>(2.8);
@@ -38,17 +51,18 @@ export const ForageBalanceWidget: React.FC<ForageBalanceWidgetProps> = ({
 
   const balance: ForageBalanceResult = calculateForageBalance({
     areaHa: paddock.areaHa,
-    aforoKgM2: paddock.aforoKgM2,
-    porcentajeMS: paddock.porcentajeMS,
+    aforoKgM2: aforoEfectivoKgM2,
+    porcentajeMS: porcentajeMSEfectivo,
     eficienciaAprovechamiento: simEficiencia,
     uggPresentes: simUgg,
     consumoPvPorc: simConsumoPv,
     diasOcupacionActual: paddock.diasOcupacionActual,
-    diasDescansoRequeridos: paddock.diasDescansoRequeridos
+    diasDescansoRequeridos: diasDescansoEfectivos
   });
 
+  // Ley 2 de Voisin: Tiempo de Ocupación Máximo <= 2 días
   const isOvergrazed = paddock.diasOcupacionActual > 2;
-  const isOptimalReady = paddock.animales === 0 && paddock.diasDescansoActual >= paddock.diasDescansoRequeridos;
+  const isOptimalReady = paddock.animales === 0 && paddock.diasDescansoActual >= diasDescansoEfectivos;
 
   // Render facility card for intensive housing
   if (!isPastoral) {
@@ -219,6 +233,31 @@ export const ForageBalanceWidget: React.FC<ForageBalanceWidgetProps> = ({
         </button>
       </div>
 
+      {/* Alerta de Sobrepastoreo Crítico (Ley 2 de Voisin: >2 días) */}
+      {isOvergrazed && (
+        <div style={{
+          backgroundColor: '#fef2f2',
+          border: '1px solid #fca5a5',
+          borderRadius: 8,
+          padding: '10px 14px',
+          marginBottom: 12,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          color: '#991b1b',
+          fontSize: 12,
+          boxShadow: '0 2px 6px rgba(220, 38, 38, 0.1)'
+        }}>
+          <AlertTriangle size={18} color="#dc2626" style={{ flexShrink: 0 }} />
+          <div>
+            <div style={{ fontWeight: 800, color: '#b91c1c' }}>¡ALERTA VOISIN: SOBREPASTOREO CRÍTICO!</div>
+            <div style={{ fontSize: 11.5, fontWeight: 500, color: '#7f1d1d', marginTop: 2 }}>
+              El lote acumula <strong>{paddock.diasOcupacionActual} días</strong> de permanencia (límite PRV: 2 días). El ganado está consumiendo los rebrotes tiernos ("diente de fuego"), agotando las reservas radiculares. ¡Rotar el lote de inmediato!
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main KPI Comparisons */}
       <div className="forage-balance-grid">
         <div className="balance-kpi-item">
@@ -227,7 +266,7 @@ export const ForageBalanceWidget: React.FC<ForageBalanceWidgetProps> = ({
             {balance.ofertaTotalKgMs.toLocaleString('es-VE')} <span className="unit">kg MS</span>
           </div>
           <span className="balance-kpi-sub">
-            {balance.ofertaNetaKgMsHa.toLocaleString('es-VE')} kg MS/ha ({paddock.aforoKgM2} kg MV/m²)
+            {balance.ofertaNetaKgMsHa.toLocaleString('es-VE')} kg MS/ha ({aforoEfectivoKgM2.toFixed(2)} kg MV/m² • {paddock.especieForrajera})
           </span>
         </div>
 
@@ -237,7 +276,7 @@ export const ForageBalanceWidget: React.FC<ForageBalanceWidgetProps> = ({
             {balance.demandaDiariaLoteKgMs.toLocaleString('es-VE')} <span className="unit">kg MS/d</span>
           </div>
           <span className="balance-kpi-sub">
-            {simUgg.toFixed(1)} UGG × 450 kg × {simConsumoPv}% PV
+            {simUgg.toFixed(1)} UGG × 450 kg × {simConsumoPv}% PV (12.6 kg MS/UGG)
           </span>
         </div>
       </div>
@@ -297,9 +336,9 @@ export const ForageBalanceWidget: React.FC<ForageBalanceWidgetProps> = ({
             </div>
             <p style={{ fontSize: 11, color: '#475569', margin: '4px 0 0 0', lineHeight: 1.3 }}>
               {isOvergrazed
-                ? 'El lote lleva más de 2 días. Para proteger el rebrote y las raíces, mueva el ganado de inmediato.'
+                ? `El lote lleva ${paddock.diasOcupacionActual} días (>2 días límite). Para proteger el rebrote y la longevidad del pastizal, desaloje el ganado hoy mismo.`
                 : isOptimalReady
-                ? 'El forraje está en punto óptimo (35+ días reposo). Inicie pastoreo despunte de 1 a 2 días.'
+                ? 'El forraje está en punto óptimo de reposo. Inicie pastoreo despunte de 1 a 2 días.'
                 : `Tiempo restante seguro: ${balance.diasRestantesAutonomia} días antes de consumir rebrote.`}
             </p>
           </div>

@@ -16,6 +16,8 @@ interface AppContextType {
   setAnimals: React.Dispatch<React.SetStateAction<Animal[]>>;
   addAnimal: (animal: Animal) => void;
   updateAnimal: (practico: string, updates: Partial<Animal>) => void;
+  deleteAnimal: (practico: string) => void;
+  deleteAnimalsBatch: (practicos: string[]) => void;
 }
 
 const DEFAULT_CONFIG: GeneralConfig = {
@@ -48,6 +50,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setAnimals(prev => prev.map(a => a.practico === practico ? { ...a, ...updates } : a));
   };
 
+  const deleteAnimal = (practico: string) => {
+    setAnimals(prev => prev.filter(a => a.practico !== practico));
+  };
+
+  const deleteAnimalsBatch = (practicos: string[]) => {
+    const set = new Set(practicos);
+    setAnimals(prev => prev.filter(a => !set.has(a.practico)));
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -62,7 +73,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         animals,
         setAnimals,
         addAnimal,
-        updateAnimal
+        updateAnimal,
+        deleteAnimal,
+        deleteAnimalsBatch
       }}
     >
       {children}

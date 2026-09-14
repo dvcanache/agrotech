@@ -1,5 +1,12 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { 
+  Filter, 
+  RotateCw, 
+  FileSpreadsheet, 
+  Plus, 
+  Trash2 
+} from 'lucide-react';
+import { 
   Animal, 
   EspecieAnimal, 
   ESPECIES_TAXONOMY 
@@ -17,6 +24,10 @@ interface AnimalesToolbarProps {
   activeFilterCount?: number;
   allAnimals?: Animal[];
   onResetFilters?: () => void;
+  selectedCount?: number;
+  onDeleteSelected?: () => void;
+  onOpenNuevoAnimalModal?: () => void;
+  onExport?: () => void;
 }
 
 export const AnimalesToolbar: React.FC<AnimalesToolbarProps> = ({
@@ -29,7 +40,11 @@ export const AnimalesToolbar: React.FC<AnimalesToolbarProps> = ({
   onOpenFilterDrawer,
   activeFilterCount = 0,
   allAnimals = [],
-  onResetFilters
+  onResetFilters,
+  selectedCount = 0,
+  onDeleteSelected,
+  onOpenNuevoAnimalModal,
+  onExport
 }) => {
   const [isEspecieOpen, setIsEspecieOpen] = useState(false);
   const [isSubcatOpen, setIsSubcatOpen] = useState(false);
@@ -494,99 +509,145 @@ export const AnimalesToolbar: React.FC<AnimalesToolbarProps> = ({
           </button>
         )}
 
-        {/* Filter Button Group (Blue) */}
-        <div className="filter-btn-group" title="Filtros avanzados">
-          <button
-            className="filter-main-btn"
-            title="Filtros avanzados"
-            type="button"
-            onClick={onOpenFilterDrawer}
-          >
-            {/* Funnel Icon */}
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
-            </svg>
-            {activeFilterCount > 0 && (
-              <span
-                style={{
-                  marginLeft: 6,
-                  backgroundColor: '#2563eb',
-                  color: '#ffffff',
-                  borderRadius: 10,
-                  padding: '1px 6px',
-                  fontSize: 11,
-                  fontWeight: 700,
-                  lineHeight: '14px'
-                }}
-              >
-                {activeFilterCount}
-              </span>
-            )}
-          </button>
-          <button
-            className="filter-chevron-btn"
-            type="button"
-            title="Ver filtros"
-            onClick={onOpenFilterDrawer}
-          >
-            {/* Down Chevron */}
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M6 9l6 6 6-6" />
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <div className="toolbar-right">
-        {/* Action Icons */}
-        <button className="action-icon-btn" title="Nuevo Documento" type="button">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-            <polyline points="14 2 14 8 20 8" />
-          </svg>
-        </button>
-        <button className="action-icon-btn" title="Eliminar" type="button">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <polyline points="3 6 5 6 21 6" />
-            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-          </svg>
-        </button>
-        <button 
-          className="action-icon-btn" 
-          title="Recargar" 
-          type="button" 
-          onClick={() => {
-            onResetFilters?.();
+        {/* Botón de Filtros Unificado */}
+        <button
+          className={`filter-main-btn ${activeFilterCount > 0 ? 'active' : ''}`}
+          title="Filtros avanzados de semovientes"
+          type="button"
+          onClick={onOpenFilterDrawer}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            borderRadius: 6,
+            border: activeFilterCount > 0 ? '1px solid #2563eb' : '1px solid #bfdbfe',
+            padding: '7px 12px',
+            fontWeight: 600,
+            fontSize: 13,
+            cursor: 'pointer',
+            backgroundColor: activeFilterCount > 0 ? '#eff6ff' : '#f8fafc',
+            color: activeFilterCount > 0 ? '#1d4ed8' : '#2563eb',
+            transition: 'all 0.15s ease'
           }}
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
-          </svg>
+          <Filter size={15} />
+          <span>Filtros</span>
+          {activeFilterCount > 0 && (
+            <span
+              style={{
+                marginLeft: 2,
+                backgroundColor: '#2563eb',
+                color: '#ffffff',
+                borderRadius: 10,
+                padding: '1px 6px',
+                fontSize: 11,
+                fontWeight: 700,
+                lineHeight: '14px'
+              }}
+            >
+              {activeFilterCount}
+            </span>
+          )}
         </button>
-        <button className="action-icon-btn" title="Exportar" type="button">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-            <polyline points="14 2 14 8 20 8" />
-            <line x1="16" y1="13" x2="8" y2="13" />
-            <line x1="16" y1="17" x2="8" y2="17" />
-          </svg>
+      </div>
+
+      <div className="toolbar-right" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        {/* Acción Contextual: Eliminar Seleccionados (solo cuando hay animales marcados) */}
+        {selectedCount > 0 && (
+          <button
+            type="button"
+            className="btn-danger-outline"
+            onClick={onDeleteSelected}
+            title={`Eliminar ${selectedCount} semoviente(s) seleccionado(s)`}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '7px 12px',
+              borderRadius: 6,
+              backgroundColor: '#fef2f2',
+              border: '1px solid #fecaca',
+              color: '#dc2626',
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'background-color 0.15s ease'
+            }}
+          >
+            <Trash2 size={15} />
+            <span>Eliminar ({selectedCount})</span>
+          </button>
+        )}
+
+        {/* Botón Recargar / Restablecer */}
+        <button 
+          className="action-icon-btn" 
+          title="Restablecer filtros y recargar" 
+          type="button" 
+          onClick={onResetFilters}
+          style={{
+            width: 36,
+            height: 36,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: 6,
+            border: '1px solid #e2e8f0',
+            backgroundColor: '#ffffff',
+            color: '#64748b',
+            cursor: 'pointer'
+          }}
+        >
+          <RotateCw size={16} />
         </button>
 
-        {/* Green Plus Circle Button */}
-        <button className="add-circle-btn" title="Agregar Animal" type="button" onClick={() => alert('Modal para registrar nuevo semoviente')}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
+        {/* Botón Exportar Reporte a CSV/Excel */}
+        <button 
+          type="button"
+          className="btn-secondary"
+          title="Exportar inventario filtrado a Excel / CSV" 
+          onClick={onExport}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '7px 14px',
+            borderRadius: 6,
+            border: '1px solid #cbd5e1',
+            backgroundColor: '#ffffff',
+            color: '#334155',
+            fontSize: 13,
+            fontWeight: 600,
+            cursor: 'pointer'
+          }}
+        >
+          <FileSpreadsheet size={16} color="#059669" />
+          <span>Exportar</span>
         </button>
 
-        {/* Vertical Options Dots */}
-        <button className="action-icon-btn" title="Opciones" type="button">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="12" cy="5" r="1" />
-            <circle cx="12" cy="12" r="1" />
-            <circle cx="12" cy="19" r="1" />
-          </svg>
+        {/* Botón Primario: Registrar Nuevo Animal */}
+        <button 
+          className="btn-primary" 
+          title="Registrar nuevo semoviente" 
+          type="button" 
+          onClick={onOpenNuevoAnimalModal}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '8px 16px',
+            borderRadius: 6,
+            backgroundColor: 'var(--primary-color)',
+            color: '#ffffff',
+            fontSize: 13,
+            fontWeight: 600,
+            border: 'none',
+            cursor: 'pointer',
+            boxShadow: '0 2px 4px rgba(45,106,79,0.2)'
+          }}
+        >
+          <Plus size={16} strokeWidth={2.5} />
+          <span>Nuevo Animal</span>
         </button>
       </div>
     </div>

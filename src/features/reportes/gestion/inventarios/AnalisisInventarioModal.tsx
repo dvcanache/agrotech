@@ -91,8 +91,8 @@ export const AnalisisInventarioModal: React.FC<AnalisisInventarioModalProps> = (
                 </div>
                 <div className="stat-kpi-card">
                   <span className="stat-kpi-label">Unidades Ganado Mayor</span>
-                  <span className="stat-kpi-value">37.8 UGM</span>
-                  <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>0.84 UGM promedio</span>
+                  <span className="stat-kpi-value">31.7 UGM</span>
+                  <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>0.70 UGM promedio</span>
                 </div>
                 <div className="stat-kpi-card">
                   <span className="stat-kpi-label">Proporción de Vientres</span>
@@ -102,7 +102,12 @@ export const AnalisisInventarioModal: React.FC<AnalisisInventarioModalProps> = (
                 <div className="stat-kpi-card">
                   <span className="stat-kpi-label">Relación Toro / Vaca</span>
                   <span className="stat-kpi-value">1 : 13.5</span>
-                  <span style={{ fontSize: 11, color: '#16a34a' }}>Óptimo para monta/IA</span>
+                  <span
+                    style={{ fontSize: 11, color: '#d97706', fontWeight: 600 }}
+                    title="Subutilización de toros (Óptimo monta natural: 1:20 a 1:30; repaso IATF: 1:40 a 1:50)"
+                  >
+                    Subutilización (Óptimo monta: 1:20-1:30)
+                  </span>
                 </div>
               </div>
 
@@ -139,7 +144,7 @@ export const AnalisisInventarioModal: React.FC<AnalisisInventarioModalProps> = (
           {activeTab === 'ugm' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-                Conversión zootécnica de inventario a Unidades Gran Ganado (1 UGM = 450 kg de peso vivo):
+                Conversión zootécnica de inventario a Unidades Ganado Mayor (1 UGM = 450 kg de peso vivo):
               </p>
               <div className="report-table-wrapper">
                 <table className="report-grid-table">
@@ -198,6 +203,7 @@ export const AnalisisInventarioModal: React.FC<AnalisisInventarioModalProps> = (
                   </tbody>
                 </table>
               </div>
+
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -211,7 +217,7 @@ export const AnalisisInventarioModal: React.FC<AnalisisInventarioModalProps> = (
               }}>
                 <CheckCircle2 size={16} />
                 <span>
-                  <strong>Carga Promedio Recomendada:</strong> 1.25 UGM/ha sobre 30 hectáreas útiles de pasturas disponibles.
+                  <strong>Carga Promedio Recomendada:</strong> 1.06 UGM/ha sobre 30 hectáreas útiles de pasturas disponibles (31.7 UGM / 30 ha).
                 </span>
               </div>
             </div>
@@ -222,7 +228,7 @@ export const AnalisisInventarioModal: React.FC<AnalisisInventarioModalProps> = (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
                 <div style={{ padding: 16, border: '1px solid var(--border-gray)', borderRadius: 8, backgroundColor: '#f9fafb' }}>
                   <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>
-                    0 - 12 Meses (Cría)
+                    0 - 8 Meses (Cría)
                   </div>
                   <div style={{ fontSize: 24, fontWeight: 800, color: '#2d6a4f' }}>15 animales</div>
                   <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>
@@ -231,7 +237,7 @@ export const AnalisisInventarioModal: React.FC<AnalisisInventarioModalProps> = (
                 </div>
                 <div style={{ padding: 16, border: '1px solid var(--border-gray)', borderRadius: 8, backgroundColor: '#f9fafb' }}>
                   <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>
-                    12 - 24 Meses (Levante)
+                    8 - 24 Meses (Levante)
                   </div>
                   <div style={{ fontSize: 24, fontWeight: 800, color: '#0284c7' }}>8 animales</div>
                   <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>
