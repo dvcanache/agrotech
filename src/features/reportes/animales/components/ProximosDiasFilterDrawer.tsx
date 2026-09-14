@@ -17,11 +17,12 @@ interface ProximosDiasFilterDrawerProps {
   onFilterChange: (newFilters: ProximosDiasFilterValues) => void;
   onReset: () => void;
   showCategoryFilter?: boolean;
+  lotesDisponibles?: string[];
 }
 
 const ALL_CATEGORIAS: ('Novilla' | 'Vaca')[] = ['Novilla', 'Vaca'];
 const ALL_ESTATUS: EstatusAnimal[] = ['Activo', 'Inactivo', 'Referencia'];
-const ALL_LOTES = ['01', 'ESCT', 'POT1', 'SEC1'];
+const ALL_LOTES = ['01', 'ESCT', 'POT1', 'SEC1', 'GALP-01', 'GALP-03', 'PIARA-01', 'APR-01', 'BUF-01', 'CAB-01'];
 
 export const ProximosDiasFilterDrawer: React.FC<ProximosDiasFilterDrawerProps> = ({
   isOpen,
@@ -30,8 +31,11 @@ export const ProximosDiasFilterDrawer: React.FC<ProximosDiasFilterDrawerProps> =
   filters,
   onFilterChange,
   onReset,
-  showCategoryFilter = true
+  showCategoryFilter = true,
+  lotesDisponibles
 }) => {
+  const lotesOptions = lotesDisponibles && lotesDisponibles.length > 0 ? lotesDisponibles : ALL_LOTES;
+
   const toggleArrayItem = <T,>(list: T[], item: T): T[] => {
     return list.includes(item) ? list.filter(i => i !== item) : [...list, item];
   };
@@ -116,7 +120,7 @@ export const ProximosDiasFilterDrawer: React.FC<ProximosDiasFilterDrawerProps> =
       <div className="filter-section">
         <div className="filter-section-title">Lotes</div>
         <div className="filter-checkbox-list">
-          {ALL_LOTES.map(lote => (
+          {lotesOptions.map(lote => (
             <label key={lote} className="filter-checkbox-label">
               <input
                 type="checkbox"

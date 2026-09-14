@@ -6,7 +6,7 @@ import { ReportSettingsModal, ColumnSetting } from '../../components/ReportSetti
 import { FichaAnimalModal, AnimalModalData } from '../components/FichaAnimalModal';
 import { VientresFilterDrawer, VientresFilterValues } from '../components/VientresFilterDrawer';
 import { SpeciesSelectorBar, SPECIES_TABS_CONFIG } from '../../components/SpeciesSelectorBar';
-import { exportToCSV } from '../../utils/exportUtils';
+import { exportToCSV, exportToPDF } from '../../utils/exportUtils';
 import { MOCK_VIENTRES } from '../animalesMockData';
 import { VientreEntity } from '../../../../types2/entities';
 import { EstatusAnimal, EstatusReproductivo, EstatusProductivo } from '../../../../types2/common';
@@ -188,6 +188,38 @@ export const VientresView: React.FC = () => {
     exportToCSV('reporte_vientres', headers, rows);
   };
 
+  const handleExportPDF = () => {
+    const headers = [
+      'Práctico',
+      'Único',
+      'Categoría',
+      'Estatus',
+      'Estatus Reproductivo',
+      'Estatus Productivo',
+      'Lote',
+      'Edad (Años)',
+      'Partos',
+      'Último parto/aborto',
+      'Último servicio',
+      'Reproductor'
+    ];
+    const rows = filteredVientres.map(v => [
+      v.practico,
+      v.unico,
+      v.categoria,
+      v.estatus,
+      v.estatusReproductivo,
+      v.estatusProductivo,
+      v.lote,
+      v.edadAnos,
+      v.partos,
+      v.ultimoPartoAborto || '',
+      v.ultimoServicio || '',
+      v.reproductor || ''
+    ]);
+    exportToPDF('reporte_vientres', 'Reporte de Vientres', headers, rows);
+  };
+
   const isColVisible = (key: string) => columns.find(c => c.key === key)?.visible ?? true;
 
   return (
@@ -200,6 +232,7 @@ export const VientresView: React.FC = () => {
         isFilterOpen={isFilterDrawerOpen}
         activeFiltersCount={activeFiltersCount}
         onExportXLSX={handleExportXLSX}
+        onExportPDF={handleExportPDF}
         onSettingsClick={() => setIsSettingsModalOpen(true)}
         extraActions={
           <div className="report-search-bar">
@@ -323,6 +356,7 @@ export const VientresView: React.FC = () => {
                     setSelectedAnimal({
                       practico: v.practico,
                       unico: v.unico,
+                      especie: v.especie,
                       categoria: v.categoria,
                       estatus: v.estatus,
                       lote: v.lote,

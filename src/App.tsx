@@ -42,6 +42,7 @@ import { MultirebanoProduccionDiariaView } from './features/reportes/multirebano
 import { MapasView } from './features/mapas/MapasView';
 import { PotrerosView } from './features/potreros/PotrerosView';
 import { EquipmentView } from './features/equipment/EquipmentView';
+import { DynamicReportViewer } from './features/reportes/dynamic/DynamicReportViewer';
 
 export const App: React.FC = () => {
   return (
@@ -71,6 +72,8 @@ export const App: React.FC = () => {
             {/* Rutas Centro de Reportes */}
             <Route path="reports" element={<ReportesView />} />
             <Route path="reports/allreports" element={<ReportesView />} />
+            <Route path="reports/view/:reportSlug" element={<DynamicReportViewer />} />
+            <Route path="reportes/view/:reportSlug" element={<DynamicReportViewer />} />
 
             {/* Rutas Reportes - Sección Gestión */}
             <Route path="reports/inventories" element={<InventariosView />} />

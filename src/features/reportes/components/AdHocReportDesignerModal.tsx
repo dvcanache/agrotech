@@ -3,25 +3,17 @@ import {
   X,
   ChevronRight,
   ChevronLeft,
-  Check,
   Plus,
   Trash2,
   Download,
   Printer,
   Save,
   Filter,
-  Layers,
-  ArrowUpDown,
   Calculator,
   Eye,
-  FileSpreadsheet,
-  CheckSquare,
-  Square,
   Sparkles,
   Milk,
   Activity,
-  MapPin,
-  ListFilter,
   Users,
   ClipboardList,
   Egg,
@@ -31,8 +23,7 @@ import {
 } from 'lucide-react';
 import {
   ADHOC_ENTITIES,
-  BaseEntityType,
-  ColumnDefinition
+  BaseEntityType
 } from './adhocData';
 import { exportToCSV, exportToPDF } from '../utils/exportUtils';
 import { ReporteItem } from './NuevoReporteModal';
@@ -44,6 +35,24 @@ export interface FilterRule {
   value: string;
   value2?: string;
   connector: 'AND' | 'OR';
+}
+
+export interface AdHocReportDefinition {
+  id: string;
+  codigo: string;
+  nombre: string;
+  descripcion: string;
+  entityKey: BaseEntityType;
+  selectedColumns: string[];
+  filters: FilterRule[];
+  groupBy: string;
+  sortField: string;
+  sortOrder: 'asc' | 'desc';
+  calculatedMetrics: {
+    totals: { sum: boolean; avg: boolean; min: boolean; max: boolean };
+    calculatedColumns: string[];
+  };
+  fechaCreacion: string;
 }
 
 interface ColumnConfigItem {
@@ -310,8 +319,43 @@ export const AdHocReportDesignerModal: React.FC<AdHocReportDesignerModalProps> =
 
   // Guardar plantilla
   const handleSaveTemplate = () => {
+    const templateId = `adhoc-${Date.now()}`;
+    const currentDate = new Date().toISOString().split('T')[0];
+    const selectedColumns = activeColumns.map(c => c.key);
+
+    const templateDefinition: AdHocReportDefinition = {
+      id: templateId,
+      codigo: templateCode,
+      nombre: templateName,
+      descripcion: templateDesc,
+      entityKey: selectedEntity,
+      selectedColumns,
+      filters: filterRules,
+      groupBy,
+      sortField,
+      sortOrder,
+      calculatedMetrics: {
+        totals: summaryTotals,
+        calculatedColumns: activeColumns.filter(c => c.isCalculated).map(c => c.key)
+      },
+      fechaCreacion: currentDate
+    };
+
+    try {
+      // 1. Persistir individualmente bajo la clave agrotech_adhoc_template_${templateId}
+      localStorage.setItem(`agrotech_adhoc_template_${templateId}`, JSON.stringify(templateDefinition));
+
+      // 2. Persistir dentro de la colección global agrotech_adhoc_templates
+      const existingRaw = localStorage.getItem('agrotech_adhoc_templates');
+      const existingList: AdHocReportDefinition[] = existingRaw ? JSON.parse(existingRaw) : [];
+      const updatedList = [templateDefinition, ...existingList.filter(item => item.id !== templateId)];
+      localStorage.setItem('agrotech_adhoc_templates', JSON.stringify(updatedList));
+    } catch (err) {
+      console.error('Error al persistir la plantilla Ad-Hoc en localStorage:', err);
+    }
+
     const newReportItem: ReporteItem = {
-      id: `adhoc-${Date.now()}`,
+      id: templateId,
       codigo: templateCode,
       nombre: templateName,
       descripcion: templateDesc,
@@ -319,7 +363,8 @@ export const AdHocReportDesignerModal: React.FC<AdHocReportDesignerModalProps> =
       plantillaBase: currentEntityConfig.title,
       formato: 'Diseñador BI (Ad-Hoc)',
       frecuencia: templateFrequency,
-      fechaCreacion: new Date().toISOString().split('T')[0]
+      rutaAsociada: `/reports/view/${templateId}`,
+      fechaCreacion: currentDate
     };
 
     if (onSaveReport) {

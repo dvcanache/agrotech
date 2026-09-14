@@ -102,7 +102,7 @@ export const FichaTecnicoModal: React.FC<FichaTecnicoModalProps> = ({
                 <div style={{ fontSize: 11.5, color: 'var(--text-secondary)' }}>1er Servicio</div>
                 <div style={{ fontSize: 18, fontWeight: 700, color: '#16a34a' }}>{tecnico.primerServicio}</div>
                 <div style={{ fontSize: 11, color: '#64748b' }}>
-                  {((tecnico.primerServicio / tecnico.totalServicios) * 100).toFixed(1)}% del total
+                  {tecnico.totalServicios > 0 ? ((tecnico.primerServicio / tecnico.totalServicios) * 100).toFixed(1) : '0.0'}% del total
                 </div>
               </div>
 
@@ -110,7 +110,7 @@ export const FichaTecnicoModal: React.FC<FichaTecnicoModalProps> = ({
                 <div style={{ fontSize: 11.5, color: 'var(--text-secondary)' }}>2do Servicio</div>
                 <div style={{ fontSize: 18, fontWeight: 700, color: '#0284c7' }}>{tecnico.segundoServicio}</div>
                 <div style={{ fontSize: 11, color: '#64748b' }}>
-                  {((tecnico.segundoServicio / tecnico.totalServicios) * 100).toFixed(1)}% del total
+                  {tecnico.totalServicios > 0 ? ((tecnico.segundoServicio / tecnico.totalServicios) * 100).toFixed(1) : '0.0'}% del total
                 </div>
               </div>
 
@@ -118,7 +118,7 @@ export const FichaTecnicoModal: React.FC<FichaTecnicoModalProps> = ({
                 <div style={{ fontSize: 11.5, color: 'var(--text-secondary)' }}>3er Servicio</div>
                 <div style={{ fontSize: 18, fontWeight: 700, color: '#d97706' }}>{tecnico.tercerServicio}</div>
                 <div style={{ fontSize: 11, color: '#64748b' }}>
-                  {((tecnico.tercerServicio / tecnico.totalServicios) * 100).toFixed(1)}% del total
+                  {tecnico.totalServicios > 0 ? ((tecnico.tercerServicio / tecnico.totalServicios) * 100).toFixed(1) : '0.0'}% del total
                 </div>
               </div>
 

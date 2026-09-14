@@ -5,7 +5,7 @@ import { ReportPagination } from '../../components/ReportPagination';
 import { ReportSettingsModal, ColumnSetting } from '../../components/ReportSettingsModal';
 import { FichaHistoricoModal, HistoricoModalData } from '../components/FichaHistoricoModal';
 import { ReproduccionesFilterDrawer, ReproduccionesFilterValues } from '../components/ReproduccionesFilterDrawer';
-import { exportToCSV } from '../../utils/exportUtils';
+import { exportToCSV, exportToPDF } from '../../utils/exportUtils';
 import { MOCK_HISTORIA_REPRODUCCIONES } from '../historicosMockData';
 import { ReproduccionHistoricoEntity } from '../../../../types2/entities';
 import { EstatusAnimal, TipoEventoReproductivo } from '../../../../types2/common';
@@ -173,6 +173,46 @@ export const HistoriaReproduccionesView: React.FC = () => {
     exportToCSV('reporte_historia_reproducciones', headers, rows);
   };
 
+  const handleExportPDF = () => {
+    const headers = [
+      'Práctico',
+      'Único',
+      'Categoría',
+      'Estatus',
+      'Lote',
+      'Evento N°',
+      'Tipo Evento',
+      'Subtipo',
+      'Fecha Evento',
+      'Técnico',
+      'Machos',
+      'Hembras',
+      'Reproductor',
+      'Diagnóstico',
+      'Tratamiento',
+      'Rebaño'
+    ];
+    const rows = filteredEventos.map(e => [
+      e.practico,
+      e.unico,
+      e.categoria,
+      e.estatus,
+      e.loteActual,
+      e.eventoNumero,
+      e.tipoEvento,
+      e.subtipoEvento || '',
+      e.fechaEvento,
+      e.tecnicoResponsable,
+      e.machosVivos,
+      e.hembrasVivas,
+      e.reproductor || '',
+      e.diagnostico || '',
+      e.tratamiento || '',
+      e.rebano
+    ]);
+    exportToPDF('reporte_historia_reproducciones', 'Historial Reproductivo', headers, rows);
+  };
+
   const isColVisible = (key: string) => columns.find(c => c.key === key)?.visible ?? true;
 
   const getTipoEventoColor = (tipo: TipoEventoReproductivo) => {
@@ -204,6 +244,7 @@ export const HistoriaReproduccionesView: React.FC = () => {
         isFilterOpen={isFilterDrawerOpen}
         activeFiltersCount={activeFiltersCount}
         onExportXLSX={handleExportXLSX}
+        onExportPDF={handleExportPDF}
         onSettingsClick={() => setIsSettingsModalOpen(true)}
         extraActions={
           <div className="report-search-bar">

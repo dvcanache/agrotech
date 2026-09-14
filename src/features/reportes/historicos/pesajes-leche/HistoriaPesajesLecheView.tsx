@@ -5,7 +5,7 @@ import { ReportPagination } from '../../components/ReportPagination';
 import { ReportSettingsModal, ColumnSetting } from '../../components/ReportSettingsModal';
 import { FichaHistoricoModal, HistoricoModalData } from '../components/FichaHistoricoModal';
 import { PesajesLecheFilterDrawer, PesajesLecheFilterValues } from '../components/PesajesLecheFilterDrawer';
-import { exportToCSV } from '../../utils/exportUtils';
+import { exportToCSV, exportToPDF } from '../../utils/exportUtils';
 import { MOCK_HISTORIA_PESAJES_LECHE } from '../historicosMockData';
 import { PesajeLecheHistoricoEntity } from '../../../../types2/entities';
 import { EstatusAnimal } from '../../../../types2/common';
@@ -175,6 +175,40 @@ export const HistoriaPesajesLecheView: React.FC = () => {
     exportToCSV('reporte_historia_pesajes_leche', headers, rows);
   };
 
+  const handleExportPDF = () => {
+    const headers = [
+      'Práctico',
+      'Único',
+      'Categoría',
+      'Estatus',
+      'Lote',
+      'Fecha',
+      'Lactancia N°',
+      'Tipo Pesaje',
+      'Pesaje 1 (Kg)',
+      'Pesaje 2 (Kg)',
+      'Pesaje 3 (Kg)',
+      'Total (Kg)',
+      'Comentario'
+    ];
+    const rows = filteredPesajes.map(p => [
+      p.practico,
+      p.unico,
+      p.categoria,
+      p.estatus,
+      p.loteActual,
+      p.fecha,
+      p.lactanciaNumero,
+      p.tipoPesaje,
+      p.pesaje1Kg || 0,
+      p.pesaje2Kg || 0,
+      p.pesaje3Kg || 0,
+      p.pesajeTotalKg,
+      p.comentario || ''
+    ]);
+    exportToPDF('reporte_historia_pesajes_leche', 'Historial de Controles y Pesajes de Leche', headers, rows);
+  };
+
   const isColVisible = (key: string) => columns.find(c => c.key === key)?.visible ?? true;
 
   return (
@@ -187,6 +221,7 @@ export const HistoriaPesajesLecheView: React.FC = () => {
         isFilterOpen={isFilterDrawerOpen}
         activeFiltersCount={activeFiltersCount}
         onExportXLSX={handleExportXLSX}
+        onExportPDF={handleExportPDF}
         onSettingsClick={() => setIsSettingsModalOpen(true)}
         extraActions={
           <div className="report-search-bar">

@@ -6,7 +6,10 @@ import { ReportSettingsModal, ColumnSetting } from '../../components/ReportSetti
 import { FichaAnimalModal, AnimalModalData } from '../components/FichaAnimalModal';
 import { ProximosDiasFilterDrawer, ProximosDiasFilterValues } from '../components/ProximosDiasFilterDrawer';
 import { SpeciesSelectorBar, SPECIES_TABS_CONFIG } from '../../components/SpeciesSelectorBar';
-import { exportToCSV } from '../../utils/exportUtils';
+import { exportToCSV, exportToPDF } from '../../utils/exportUtils';
+import { calculateDiasRestantes } from '../../utils/dateUtils';
+import { getBiologicalGestationDays } from '../../../animales/utils/gestationCalculator';
+import { EspecieAnimal } from '../../../../types/animal';
 import { MOCK_PROXIMAS_PARIR } from '../animalesMockData';
 import { ProximaParirEntity } from '../../../../types2/entities';
 import { EstatusAnimal } from '../../../../types2/common';
@@ -61,19 +64,21 @@ export const ProximasParirView: React.FC = () => {
     { key: 'diasSeca', label: 'Días seca', visible: true }
   ]);
 
-  const [filters, setFilters] = useState<ProximosDiasFilterValues>({
+  const allLotes = useMemo(() => Array.from(new Set(animales.map(a => a.lote))), [animales]);
+
+  const [filters, setFilters] = useState<ProximosDiasFilterValues>(() => ({
     proximosDiasMaximo: 90,
     estatus: ['Activo'] as EstatusAnimal[],
-    lotes: ['01', 'ESCT', 'POT1', 'SEC1', 'GALP-01', 'GALP-03', 'PIARA-01', 'APR-01', 'BUF-01', 'CAB-01']
-  });
+    lotes: Array.from(new Set(MOCK_PROXIMAS_PARIR.map(a => a.lote)))
+  }));
 
   const activeFiltersCount = useMemo(() => {
     let count = 0;
     if (filters.proximosDiasMaximo < 90) count++;
     if (filters.estatus.length < 3) count++;
-    if (filters.lotes.length < 10) count++;
+    if (filters.lotes.length < allLotes.length) count++;
     return count;
-  }, [filters]);
+  }, [filters, allLotes]);
 
   const toggleColumn = (key: string) => {
     setColumns(prev =>
@@ -113,11 +118,22 @@ export const ProximasParirView: React.FC = () => {
 
         if (!filters.estatus.includes(item.estatus)) return false;
         if (filters.lotes.length > 0 && !filters.lotes.includes(item.lote)) return false;
-        if (item.diasProximoParto > filters.proximosDiasMaximo) return false;
+        const diasRestantes = calculateDiasRestantes(item.fechaProximoParto);
+        if (diasRestantes > filters.proximosDiasMaximo) return false;
 
         return true;
       })
       .sort((a, b) => {
+        if (sortField === 'diasProximoParto') {
+          const valA = calculateDiasRestantes(a.fechaProximoParto);
+          const valB = calculateDiasRestantes(b.fechaProximoParto);
+          return sortAsc ? valA - valB : valB - valA;
+        }
+        if (sortField === 'duracionGestacionDias') {
+          const valA = getBiologicalGestationDays((a.especie as EspecieAnimal) || 'Bovinos', a.reproductor || a.categoria);
+          const valB = getBiologicalGestationDays((b.especie as EspecieAnimal) || 'Bovinos', b.reproductor || b.categoria);
+          return sortAsc ? valA - valB : valB - valA;
+        }
         const valA = a[sortField];
         const valB = b[sortField];
         if (typeof valA === 'number' && typeof valB === 'number') {
@@ -144,6 +160,8 @@ export const ProximasParirView: React.FC = () => {
     const headers = [
       'Práctico',
       'Único',
+      'Especie',
+      'Duración Gestación (Días)',
       'Categoría',
       'Estatus',
       'Lote',
@@ -164,6 +182,8 @@ export const ProximasParirView: React.FC = () => {
     const rows = filteredAnimales.map(a => [
       a.practico,
       a.unico,
+      a.especie || 'Bovinos',
+      getBiologicalGestationDays((a.especie as EspecieAnimal) || 'Bovinos', a.reproductor || a.categoria),
       a.categoria,
       a.estatus,
       a.lote,
@@ -175,13 +195,61 @@ export const ProximasParirView: React.FC = () => {
       a.ultimoServicio || '',
       a.reproductor || '',
       a.fechaProximoParto,
-      a.diasProximoParto,
+      calculateDiasRestantes(a.fechaProximoParto),
       a.ultimoPesoKg || '',
       a.fechaUltimoPeso || '',
       a.fechaSecado || '',
       a.diasSeca !== undefined ? a.diasSeca : ''
     ]);
     exportToCSV('reporte_proximas_a_parir', headers, rows);
+  };
+
+  const handleExportPDF = () => {
+    const headers = [
+      'Práctico',
+      'Único',
+      'Especie',
+      'Gestación (d)',
+      'Categoría',
+      'Estatus',
+      'Lote',
+      'Último Parto/Aborto',
+      'Partos',
+      'Montas',
+      'Insem.',
+      'Transpl.',
+      'Último Servicio',
+      'Reproductor',
+      'Próximo Parto',
+      'Días Próximo Parto',
+      'Último Peso (Kg)',
+      'Fecha Último Peso',
+      'Fecha de Secado',
+      'Días Seca'
+    ];
+    const rows = filteredAnimales.map(a => [
+      a.practico,
+      a.unico,
+      a.especie || 'Bovinos',
+      getBiologicalGestationDays((a.especie as EspecieAnimal) || 'Bovinos', a.reproductor || a.categoria),
+      a.categoria,
+      a.estatus,
+      a.lote,
+      a.ultimoPartoAborto || '',
+      a.partos,
+      a.montas,
+      a.inseminaciones,
+      a.transplantes,
+      a.ultimoServicio || '',
+      a.reproductor || '',
+      a.fechaProximoParto,
+      calculateDiasRestantes(a.fechaProximoParto),
+      a.ultimoPesoKg || '',
+      a.fechaUltimoPeso || '',
+      a.fechaSecado || '',
+      a.diasSeca !== undefined ? a.diasSeca : ''
+    ]);
+    exportToPDF('reporte_proximas_a_parir', 'Reporte de Animales Próximas a Parir', headers, rows);
   };
 
   const isColVisible = (key: string) => columns.find(c => c.key === key)?.visible ?? true;
@@ -196,6 +264,7 @@ export const ProximasParirView: React.FC = () => {
         isFilterOpen={isFilterDrawerOpen}
         activeFiltersCount={activeFiltersCount}
         onExportXLSX={handleExportXLSX}
+        onExportPDF={handleExportPDF}
         onSettingsClick={() => setIsSettingsModalOpen(true)}
         extraActions={
           <div className="report-search-bar">
@@ -326,6 +395,7 @@ export const ProximasParirView: React.FC = () => {
                     setSelectedAnimal({
                       practico: a.practico,
                       unico: a.unico,
+                      especie: a.especie,
                       categoria: a.categoria,
                       estatus: a.estatus,
                       lote: a.lote,
@@ -365,7 +435,7 @@ export const ProximasParirView: React.FC = () => {
                           fontSize: 11.5
                         }}
                       >
-                        {a.duracionGestacionDias || (a.especie === 'Porcinos' ? 114 : a.especie === 'Caprinos' ? 150 : a.especie === 'Búfalos' ? 310 : a.especie === 'Equinos' ? 340 : a.especie === 'Aves de corral' ? 21 : 283)} días ({a.especie === 'Aves de corral' ? 'Incubación' : 'Gestación'})
+                        {getBiologicalGestationDays((a.especie as EspecieAnimal) || 'Bovinos', a.reproductor || a.categoria)} días ({a.especie === 'Aves de corral' ? 'Incubación' : 'Gestación'})
                       </span>
                     </td>
                   )}
@@ -393,13 +463,16 @@ export const ProximasParirView: React.FC = () => {
                   {isColVisible('fechaProximoParto') && (
                     <td style={{ fontWeight: 600, color: '#2563eb' }}>{a.fechaProximoParto}</td>
                   )}
-                  {isColVisible('diasProximoParto') && (
-                    <td>
-                      <span className={`badge-efficiency ${a.diasProximoParto <= 15 ? 'high' : 'medium'}`}>
-                        {a.diasProximoParto} días
-                      </span>
-                    </td>
-                  )}
+                  {isColVisible('diasProximoParto') && (() => {
+                    const diasRest = calculateDiasRestantes(a.fechaProximoParto);
+                    return (
+                      <td>
+                        <span className={`badge-efficiency ${diasRest <= 15 ? 'high' : 'medium'}`}>
+                          {diasRest} días
+                        </span>
+                      </td>
+                    );
+                  })()}
                   {isColVisible('ultimoPesoKg') && (
                     <td style={{ fontWeight: 600 }}>{a.ultimoPesoKg ? `${a.ultimoPesoKg} Kg` : '-'}</td>
                   )}
@@ -441,10 +514,11 @@ export const ProximasParirView: React.FC = () => {
           setFilters({
             proximosDiasMaximo: 90,
             estatus: ['Activo'] as EstatusAnimal[],
-            lotes: ['01', 'ESCT', 'POT1', 'SEC1']
+            lotes: Array.from(new Set(animales.map(a => a.lote)))
           })
         }
         showCategoryFilter={false}
+        lotesDisponibles={allLotes}
       />
 
       {/* Modal Configuración Columnas */}

@@ -147,7 +147,17 @@ export const FichaCabecera: React.FC<FichaCabeceraProps> = ({
           </span>
           {animal.especie && (
             <span className="ficha360-badge" style={{ backgroundColor: '#f1f5f9', color: '#475569', fontWeight: 600 }}>
-              {animal.especie}
+              {animal.especie === 'Aves de corral' ? 'Especie Avícola' : animal.especie}
+            </span>
+          )}
+          {(animal.especie === 'Caprinos' || animal.especie === 'Equinos') && (
+            <span className="ficha360-badge" style={{ backgroundColor: '#ecfdf5', color: '#047857', fontWeight: 600 }}>
+              2 Mamas (Bipapilar)
+            </span>
+          )}
+          {animal.especie === 'Porcinos' && (
+            <span className="ficha360-badge" style={{ backgroundColor: '#fdf2f8', color: '#be185d', fontWeight: 600 }}>
+              Líneas Mamarias (Multípara)
             </span>
           )}
           <span className="ficha360-badge ficha360-badge-active">

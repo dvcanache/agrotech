@@ -258,7 +258,9 @@ export const ModalAforoPotrero: React.FC<ModalAforoPotreroProps> = ({
               <div>
                 <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span>Dimensiones del Marco de Aforo</span>
-                  <HelpCircle size={14} color="#64748b" title="Área del marco físico lanzado en el potrero. La normalización ajusta automáticamente los gramos." />
+                  <span title="Área del marco físico lanzado en el potrero. La normalización ajusta automáticamente los gramos.">
+                    <HelpCircle size={14} color="#64748b" />
+                  </span>
                 </label>
                 <div style={{ display: 'flex', gap: 10 }}>
                   <button

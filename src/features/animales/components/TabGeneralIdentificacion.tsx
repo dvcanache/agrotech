@@ -38,13 +38,13 @@ export const TabGeneralIdentificacion: React.FC<TabGeneralIdentificacionProps> =
             overflow: 'hidden',
             flexShrink: 0
           }}>
-            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#2d6a4f" strokeWidth="1.5">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" opacity="0.2" fill="#52b788" />
-              <path d="M7 9a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V9z" />
-              <circle cx="10" cy="11" r="1" fill="#2d6a4f" />
-              <circle cx="14" cy="11" r="1" fill="#2d6a4f" />
-              <path d="M10 14h4" strokeLinecap="round" />
-            </svg>
+            <span style={{ fontSize: 38 }}>
+              {animal.especie === 'Aves de corral' ? '🐔' :
+               animal.especie === 'Porcinos' ? '🐷' :
+               animal.especie === 'Búfalos' ? '🐃' :
+               animal.especie === 'Caprinos' ? '🐐' :
+               animal.especie === 'Equinos' ? '🐴' : '🐮'}
+            </span>
             <span style={{ fontSize: 10, fontWeight: 800, color: '#1b4332', marginTop: 4 }}>
               {animal.practico}
             </span>
@@ -150,7 +150,9 @@ export const TabGeneralIdentificacion: React.FC<TabGeneralIdentificacionProps> =
             </div>
             <div className="ficha360-field">
               <span className="ficha360-field-label">Especie Zootécnica</span>
-              <span className="ficha360-field-value">{animal.especie}</span>
+              <span className="ficha360-field-value" style={{ fontWeight: 700, color: animal.especie === 'Aves de corral' ? '#b45309' : '#1e293b' }}>
+                {animal.especie === 'Aves de corral' ? 'Especie Avícola (Aves de corral)' : animal.especie}
+              </span>
             </div>
             <div className="ficha360-field">
               <span className="ficha360-field-label">Aptitud Productiva</span>
@@ -193,6 +195,15 @@ export const TabGeneralIdentificacion: React.FC<TabGeneralIdentificacionProps> =
             <div className="ficha360-field">
               <span className="ficha360-field-label">Potrero Asignado</span>
               <span className="ficha360-field-value">{animal.potrero}</span>
+            </div>
+            <div className="ficha360-field">
+              <span className="ficha360-field-label">Conformación Mamaria</span>
+              <span className="ficha360-field-value" style={{ fontWeight: 600 }}>
+                {animal.especie === 'Aves de corral' ? 'No aplica (Especie avícola ovípara)' :
+                 animal.especie === 'Porcinos' ? 'Dos líneas mamarias (12-14 pezones funcionales)' :
+                 (animal.especie === 'Caprinos' || animal.especie === 'Equinos') ? '2 Mamas (Bipapilar)' :
+                 'Ubre de 4 Cuartos (Tetrapapilar)'}
+              </span>
             </div>
           </div>
         </div>

@@ -7,13 +7,10 @@ import {
   Search,
   ExternalLink,
   Trash2,
-  FileText,
-  CheckCircle2,
   Calculator,
-  Truck,
-  Sparkles
+  Truck
 } from 'lucide-react';
-import { REPORT_CATEGORIES, REPORT_METADATA_MAP } from './reportesData';
+import { REPORT_CATEGORIES, REPORT_METADATA_MAP, INITIAL_REPORTS } from './reportesData';
 import { ReportCategory, ReportSpecies } from '../../types/reports';
 import { ReportCategoryCard } from './components/ReportCategoryCard';
 import { NuevoReporteModal, ReporteItem } from './components/NuevoReporteModal';
@@ -36,108 +33,6 @@ const SPECIES_TOOLBAR_OPTIONS: SpeciesToolbarOption[] = [
   { id: 'bufalos', label: 'Búfalos', icon: '🐃', badgeColor: '#334155' },
   { id: 'caprinos', label: 'Caprinos', icon: '🐐', badgeColor: '#059669' },
   { id: 'equinos', label: 'Equinos', icon: '🐴', badgeColor: '#7c2d12' }
-];
-
-const INITIAL_REPORTS: ReporteItem[] = [
-  {
-    id: 'rep-1',
-    codigo: 'RPT-001',
-    nombre: 'Censo e Inventario General del Hato',
-    descripcion: 'Consolidado de animales clasificados por categoría zootécnica, edad y lote actual.',
-    categoria: 'Gestión',
-    especie: 'todos',
-    plantillaBase: 'Inventarios (Hato general y lotes)',
-    formato: 'Tabla interactiva (XLSX / PDF)',
-    frecuencia: 'Semanal (Lunes)',
-    rutaAsociada: '/reports/inventories',
-    fechaCreacion: '2026-09-01'
-  },
-  {
-    id: 'rep-2',
-    codigo: 'RPT-002',
-    nombre: 'Vientres en Lactancia y Eficiencia Lechera',
-    descripcion: 'Vacas en producción lechera activa con días en leche (DEL) y promedios diarios.',
-    categoria: 'Animales',
-    especie: 'bovinos',
-    plantillaBase: 'Animales Lactando (En Ordeño)',
-    formato: 'Resumen ejecutivo con KPIs',
-    frecuencia: 'Diario (Automático)',
-    rutaAsociada: '/reports/cowsinproduction',
-    fechaCreacion: '2026-09-05'
-  },
-  {
-    id: 'rep-3',
-    codigo: 'RPT-003',
-    nombre: 'Cronograma de Próximos Partos y Secados',
-    descripcion: 'Programación de traslados a potrero de maternidad según fecha probable de parto.',
-    categoria: 'Animales',
-    especie: 'bovinos',
-    plantillaBase: 'Próximas a Parir (FPP)',
-    formato: 'Ficha analítica detallada',
-    frecuencia: 'Bajo demanda (Manual)',
-    rutaAsociada: '/reports/nexttobirth',
-    fechaCreacion: '2026-09-10'
-  },
-  {
-    id: 'rep-4',
-    codigo: 'RPT-004',
-    nombre: 'Balance de Postura Avícola y Curva Hy-Line',
-    descripcion: 'Producción diaria de huevos comerciales AAA/AA/A, fértiles y rotos con % postura vs guía genética.',
-    categoria: 'Producción',
-    especie: 'aves',
-    plantillaBase: 'Control Diario de Postura y Huevos',
-    formato: 'Curva comparativa + Matriz diaria',
-    frecuencia: 'Diario (Cierre 18:00)',
-    fechaCreacion: '2026-09-11'
-  },
-  {
-    id: 'rep-5',
-    codigo: 'RPT-005',
-    nombre: 'Eficiencia Reproductiva de Cerdas y Balance de Camadas',
-    descripcion: 'Distribución de partos en maternidad: nacidos vivos (LNV), mortinatos, momias y peso promedio de camada al destete.',
-    categoria: 'Reproducción',
-    especie: 'porcinos',
-    plantillaBase: 'Eficiencia Reproductiva de Cerdas',
-    formato: 'Matriz zootécnica porcina',
-    frecuencia: 'Semanal (Viernes)',
-    fechaCreacion: '2026-09-11'
-  },
-  {
-    id: 'rep-6',
-    codigo: 'RPT-006',
-    nombre: 'Control Lechero Búfalas y Sólidos Totales 270d',
-    descripcion: 'Pesajes de ordeño bufalino con determinación de grasa butirométrica (7-9%), proteína y aptitud quesera.',
-    categoria: 'Producción',
-    especie: 'bufalos',
-    plantillaBase: 'Control Lechero Bufalino y Sólidos Totales',
-    formato: 'Ficha de rendimiento quesero',
-    frecuencia: 'Quincenal',
-    fechaCreacion: '2026-09-12'
-  },
-  {
-    id: 'rep-7',
-    codigo: 'RPT-007',
-    nombre: 'Control Sanitario FAMACHA Caprino y Evaluación Podal',
-    descripcion: 'Evaluación de conjuntiva ocular contra Haemonchus contortus, desparasitación selectiva y recorte de pezuñas.',
-    categoria: 'Sanidad',
-    especie: 'caprinos',
-    plantillaBase: 'Evaluación FAMACHA de Anemia Parasitaria',
-    formato: 'Semáforo clínico y prescripción',
-    frecuencia: 'Mensual',
-    fechaCreacion: '2026-09-12'
-  },
-  {
-    id: 'rep-8',
-    codigo: 'RPT-008',
-    nombre: 'Libro de Registro y Pasaporte Equino Oficial',
-    descripcion: 'Genealogía, reseñas por microchip, vigencia de Test de Coggins oficial AIE y cronograma de herraje.',
-    categoria: 'Registro Oficial',
-    especie: 'equinos',
-    plantillaBase: 'Libro de Registro y Pasaporte Equino',
-    formato: 'Pasaporte oficial exportable (PDF)',
-    frecuencia: 'Permanente',
-    fechaCreacion: '2026-09-12'
-  }
 ];
 
 export const ReportesView: React.FC = () => {

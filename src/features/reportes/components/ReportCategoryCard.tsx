@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ReportCategory } from '../../../types/reports';
+import { REPORT_METADATA_MAP } from '../reportesData';
 
 interface ReportCategoryCardProps {
   category: ReportCategory;
@@ -51,7 +52,7 @@ export const ReportCategoryCard: React.FC<ReportCategoryCardProps> = ({
   const navigate = useNavigate();
 
   const handleReportClick = (rep: string) => {
-    const route = REPORT_ROUTES_MAP[rep];
+    const route = REPORT_ROUTES_MAP[rep] || REPORT_METADATA_MAP[rep]?.ruta;
     if (route) {
       navigate(route);
     } else if (onSelectReport) {

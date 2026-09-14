@@ -121,7 +121,13 @@ export const MapasView: React.FC = () => {
 
   // PRV breakdown counts
   const prvCounts = useMemo(() => {
-    const counts = { optimo: 0, pastoreo: 0, sobrepastoreo: 0, descanso: 0 };
+    const counts: { optimo: number; pastoreo: number; sobrepastoreo: number; descanso: number; subpastoreo: number } = {
+      optimo: 0,
+      pastoreo: 0,
+      sobrepastoreo: 0,
+      descanso: 0,
+      subpastoreo: 0
+    };
     activeSectorPaddocks.forEach(p => {
       const info = getPrvStatusInfo(
         p.animales,

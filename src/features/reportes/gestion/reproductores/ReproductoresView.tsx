@@ -6,7 +6,7 @@ import { ReportSettingsModal, ColumnSetting } from '../../components/ReportSetti
 import { FichaReproductorModal } from './FichaReproductorModal';
 import { NuevoReproductorModal } from './NuevoReproductorModal';
 import { ReproductoresFilterDrawer, ReproductoresFilterValues } from './ReproductoresFilterDrawer';
-import { exportToCSV } from '../../utils/exportUtils';
+import { exportToCSV, exportToPDF } from '../../utils/exportUtils';
 import { MOCK_REPRODUCTORES, ReproductorDetalladoEntity } from '../gestionMockData';
 
 export const ReproductoresView: React.FC = () => {
@@ -53,6 +53,7 @@ export const ReproductoresView: React.FC = () => {
   const activeFiltersCount = useMemo(() => {
     let count = 0;
     if (filters.categorias.length < 3) count++;
+    if (filters.estatus.length < 2) count++;
     if (filters.lotes.length < 4) count++;
     if (filters.minEficiencia > 0) count++;
     return count;
@@ -98,6 +99,7 @@ export const ReproductoresView: React.FC = () => {
 
         // Filtro de drawer
         if (!filters.categorias.includes(r.categoriaActual)) return false;
+        if (!filters.estatus.includes(r.estatusActual as ('Activo' | 'Inactivo'))) return false;
         if (!filters.lotes.includes(r.loteActual)) return false;
         if (filters.minEficiencia > 0 && (r.eficiencia === undefined || r.eficiencia < filters.minEficiencia)) return false;
 
@@ -157,6 +159,34 @@ export const ReproductoresView: React.FC = () => {
     exportToCSV('reporte_reproductores', headers, rows);
   };
 
+  const handleExportPDF = () => {
+    const headers = [
+      'Práctico',
+      'Único',
+      'Nombre',
+      'Categoría',
+      'Estatus',
+      'Eficiencia (%)',
+      'Serv. / Conc.',
+      'Lote',
+      'Stock',
+      'Raza'
+    ];
+    const rows = filteredReproductores.map(r => [
+      r.practico,
+      r.unico,
+      r.nombre,
+      r.categoriaActual,
+      r.estatusActual,
+      r.eficiencia ? `${r.eficiencia}%` : '',
+      r.serviciosPorConcepcion || '',
+      r.loteActual,
+      `${r.stockActual} ${r.stockUnidad}`,
+      r.raza
+    ]);
+    exportToPDF('reporte_reproductores', 'Reporte de Reproductores y Material Genético', headers, rows);
+  };
+
   const isColVisible = (key: string) => columns.find(c => c.key === key)?.visible ?? true;
 
   const handleAddNewReproductor = (nuevo: ReproductorDetalladoEntity) => {
@@ -183,6 +213,7 @@ export const ReproductoresView: React.FC = () => {
         isFilterOpen={isFilterDrawerOpen}
         activeFiltersCount={activeFiltersCount}
         onExportXLSX={handleExportXLSX}
+        onExportPDF={handleExportPDF}
         onSettingsClick={() => setIsSettingsModalOpen(true)}
         extraActions={
           <div className="report-search-bar">

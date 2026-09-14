@@ -5,7 +5,7 @@ import { ReportPagination } from '../../components/ReportPagination';
 import { ReportSettingsModal, ColumnSetting } from '../../components/ReportSettingsModal';
 import { ReportFilterDrawer } from '../../components/ReportFilterDrawer';
 import { FichaAnimalModal, AnimalModalData } from '../components/FichaAnimalModal';
-import { exportToCSV } from '../../utils/exportUtils';
+import { exportToCSV, exportToPDF } from '../../utils/exportUtils';
 import { MOCK_ANIMALES_CRIANDO } from '../animalesMockData';
 import { AnimalCriandoEntity } from '../../../../types2/entities';
 import { EstatusAnimal } from '../../../../types2/common';
@@ -129,6 +129,30 @@ export const AnimalesCriandoView: React.FC = () => {
     exportToCSV('reporte_animales_criando', headers, rows);
   };
 
+  const handleExportPDF = () => {
+    const headers = [
+      'Práctico',
+      'Único',
+      'Categoría',
+      'Estatus',
+      'Lote',
+      'Último Parto',
+      'Códigos Crías Último Parto',
+      'Días Parida Actual'
+    ];
+    const rows = filteredAnimales.map(a => [
+      a.practico,
+      a.unico,
+      a.categoria,
+      a.estatus,
+      a.lote,
+      a.ultimoParto,
+      a.codigosCriasUltimoParto,
+      a.diasParidaActual
+    ]);
+    exportToPDF('reporte_animales_criando', 'Reporte de Animales Criando', headers, rows);
+  };
+
   const isColVisible = (key: string) => columns.find(c => c.key === key)?.visible ?? true;
 
   const toggleArrayItem = <T,>(list: T[], item: T): T[] => {
@@ -145,6 +169,7 @@ export const AnimalesCriandoView: React.FC = () => {
         isFilterOpen={isFilterDrawerOpen}
         activeFiltersCount={activeFiltersCount}
         onExportXLSX={handleExportXLSX}
+        onExportPDF={handleExportPDF}
         onSettingsClick={() => setIsSettingsModalOpen(true)}
         extraActions={
           <div className="report-search-bar">
@@ -235,6 +260,7 @@ export const AnimalesCriandoView: React.FC = () => {
                     setSelectedAnimal({
                       practico: a.practico,
                       unico: a.unico,
+                      especie: a.especie,
                       categoria: a.categoria,
                       estatus: a.estatus,
                       lote: a.lote,

@@ -5,6 +5,7 @@ import {
   Settings,
   Filter,
   FileSpreadsheet,
+  Printer,
   ChevronDown
 } from 'lucide-react';
 
@@ -15,6 +16,7 @@ export interface ReportViewHeaderProps {
   isFilterOpen?: boolean;
   activeFiltersCount?: number;
   onExportXLSX?: () => void;
+  onExportPDF?: () => void;
   onSettingsClick?: () => void;
   exportDisabled?: boolean;
   extraActions?: React.ReactNode;
@@ -32,6 +34,7 @@ export const ReportViewHeader: React.FC<ReportViewHeaderProps> = ({
   isFilterOpen = false,
   activeFiltersCount = 0,
   onExportXLSX,
+  onExportPDF,
   onSettingsClick,
   exportDisabled = false,
   extraActions,
@@ -96,6 +99,20 @@ export const ReportViewHeader: React.FC<ReportViewHeaderProps> = ({
             {activeFiltersCount > 0 && (
               <span className="badge-active-filter">{activeFiltersCount}</span>
             )}
+          </button>
+        )}
+
+        {/* Export PDF Button */}
+        {onExportPDF && (
+          <button
+            type="button"
+            className="btn-pdf-export"
+            onClick={onExportPDF}
+            disabled={exportDisabled}
+            title="Exportar reporte en formato PDF / Imprimir"
+          >
+            <Printer size={16} />
+            <span>Exportar PDF</span>
           </button>
         )}
 

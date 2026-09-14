@@ -23,7 +23,8 @@ const ALL_TIPOS = [
   'Cambio de Categoría',
   'Entrada por Nacimiento',
   'Entrada por Compra',
-  'Salida por Venta'
+  'Salida por Venta',
+  'Salida por Descarte'
 ];
 
 const ALL_LOTES = ['ESCT', 'POT1', 'SEC1', '01'];

@@ -7,7 +7,7 @@ import { SeleccionarRebanosModal } from '../components/SeleccionarRebanosModal';
 import { MultirebanoFilterDrawer, MultirebanoFilterValues } from '../components/MultirebanoFilterDrawer';
 import { GuiaMovilizacionModal } from '../../components/GuiaMovilizacionModal';
 import { exportToCSV } from '../../utils/exportUtils';
-import { MOCK_MULTIREBANO_TRANSACCIONES } from '../multirebanosMockData';
+import { MOCK_MULTIREBANO_TRANSACCIONES, MOCK_REBANOS_CATALOGO } from '../multirebanosMockData';
 import { MultirebanoTransaccionEntity } from '../../../../types2/entities';
 
 export const MultirebanoTransaccionesView: React.FC = () => {
@@ -76,8 +76,20 @@ export const MultirebanoTransaccionesView: React.FC = () => {
   };
 
   const filteredTransacciones = useMemo(() => {
+    const selectedHerdNames = new Set(
+      MOCK_REBANOS_CATALOGO.filter(r => selectedHerds.includes(r.id)).map(r => r.nombre)
+    );
+
     return transacciones
       .filter(item => {
+        if (selectedHerds.length > 0) {
+          const matchOriginId = item.rebanoOrigenId ? selectedHerds.includes(item.rebanoOrigenId) : false;
+          const matchOriginName = item.rebanoOrigen
+            ? selectedHerds.includes(item.rebanoOrigen) || selectedHerdNames.has(item.rebanoOrigen)
+            : false;
+          if (!matchOriginId && !matchOriginName) return false;
+        }
+
         if (searchQuery.trim()) {
           const q = searchQuery.toLowerCase();
           const matchId = item.id.toLowerCase().includes(q);
@@ -102,7 +114,7 @@ export const MultirebanoTransaccionesView: React.FC = () => {
           ? String(valA || '').localeCompare(String(valB || ''))
           : String(valB || '').localeCompare(String(valA || ''));
       });
-  }, [transacciones, searchQuery, filters, sortField, sortAsc]);
+  }, [transacciones, selectedHerds, searchQuery, filters, sortField, sortAsc]);
 
   const totals = useMemo(() => {
     const totalCount = filteredTransacciones.length;
@@ -115,7 +127,7 @@ export const MultirebanoTransaccionesView: React.FC = () => {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [filters, searchQuery]);
+  }, [filters, searchQuery, selectedHerds]);
 
   const totalPages = Math.ceil(filteredTransacciones.length / pageSize) || 1;
   const paginatedTransacciones = useMemo(() => {

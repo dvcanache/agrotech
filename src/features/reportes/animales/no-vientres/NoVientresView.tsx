@@ -4,8 +4,8 @@ import { ReportViewHeader } from '../../components/ReportViewHeader';
 import { ReportPagination } from '../../components/ReportPagination';
 import { ReportSettingsModal, ColumnSetting } from '../../components/ReportSettingsModal';
 import { FichaAnimalModal, AnimalModalData } from '../components/FichaAnimalModal';
-import { NoVientresFilterDrawer, NoVientresFilterValues } from '../components/NoVientresFilterDrawer';
-import { exportToCSV } from '../../utils/exportUtils';
+import { NoVientresFilterDrawer, NoVientresFilterValues, ALL_CATEGORIAS } from '../components/NoVientresFilterDrawer';
+import { exportToCSV, exportToPDF } from '../../utils/exportUtils';
 import { MOCK_NO_VIENTRES } from '../animalesMockData';
 import { NoVientreEntity } from '../../../../types2/entities';
 import { EstatusAnimal } from '../../../../types2/common';
@@ -42,19 +42,21 @@ export const NoVientresView: React.FC = () => {
     { key: 'fechaPesoIngreso', label: 'Fecha peso ingreso', visible: true }
   ]);
 
-  const [filters, setFilters] = useState<NoVientresFilterValues>({
-    categorias: ['Becerra', 'Mauta', 'Becerro', 'Maute', 'Novillo'],
+  const allLotes = useMemo(() => Array.from(new Set(animales.map(a => a.lote))), [animales]);
+
+  const [filters, setFilters] = useState<NoVientresFilterValues>(() => ({
+    categorias: [...ALL_CATEGORIAS],
     estatus: ['Activo'] as EstatusAnimal[],
-    lotes: ['01', 'ESCT', 'POT1', 'SEC1']
-  });
+    lotes: Array.from(new Set(MOCK_NO_VIENTRES.map(a => a.lote)))
+  }));
 
   const activeFiltersCount = useMemo(() => {
     let count = 0;
-    if (filters.categorias.length < 5) count++;
+    if (filters.categorias.length < ALL_CATEGORIAS.length) count++;
     if (filters.estatus.length < 3) count++;
-    if (filters.lotes.length < 4) count++;
+    if (filters.lotes.length < allLotes.length) count++;
     return count;
-  }, [filters]);
+  }, [filters, allLotes]);
 
   const toggleColumn = (key: string) => {
     setColumns(prev =>
@@ -86,7 +88,10 @@ export const NoVientresView: React.FC = () => {
           if (!matchCode && !matchComp && !matchLot) return false;
         }
 
-        if (!filters.categorias.includes(item.categoria)) return false;
+        const matchesCategory =
+          filters.categorias.includes(item.categoria) ||
+          (filters.categorias.includes('Pollo de engorde') && item.categoria === 'Pollos de Engorde');
+        if (!matchesCategory) return false;
         if (!filters.estatus.includes(item.estatus)) return false;
         if (!filters.lotes.includes(item.lote)) return false;
 
@@ -155,6 +160,46 @@ export const NoVientresView: React.FC = () => {
     exportToCSV('reporte_no_vientres', headers, rows);
   };
 
+  const handleExportPDF = () => {
+    const headers = [
+      'Práctico',
+      'Único',
+      'Categoría',
+      'Estatus',
+      'Lote',
+      'Fecha Nac.',
+      'Edad (Meses)',
+      'Composición',
+      'Penúltimo Peso (Kg)',
+      'Fecha Penúltimo',
+      'Último Peso (Kg)',
+      'Fecha Último',
+      'GDP Parcial (g/d)',
+      'GDP Global (g/d)',
+      'Peso Ingreso (Kg)',
+      'Fecha Ingreso'
+    ];
+    const rows = filteredAnimales.map(a => [
+      a.practico,
+      a.unico,
+      a.categoria,
+      a.estatus,
+      a.lote,
+      a.fechaNacimiento,
+      a.edadMeses,
+      a.composicion,
+      a.penultimoPesoKg || '',
+      a.fechaPenultimoPeso || '',
+      a.ultimoPesoKg || '',
+      a.fechaUltimoPeso || '',
+      a.gananciaParcialGramosDia || '',
+      a.gananciaGlobalGramosDia || '',
+      a.pesoIngresoKg || '',
+      a.fechaPesoIngreso || ''
+    ]);
+    exportToPDF('reporte_no_vientres', 'Reporte de No Vientres (Levante y Ceba)', headers, rows);
+  };
+
   const isColVisible = (key: string) => columns.find(c => c.key === key)?.visible ?? true;
 
   return (
@@ -167,6 +212,7 @@ export const NoVientresView: React.FC = () => {
         isFilterOpen={isFilterDrawerOpen}
         activeFiltersCount={activeFiltersCount}
         onExportXLSX={handleExportXLSX}
+        onExportPDF={handleExportPDF}
         onSettingsClick={() => setIsSettingsModalOpen(true)}
         extraActions={
           <div className="report-search-bar">
@@ -286,6 +332,7 @@ export const NoVientresView: React.FC = () => {
                     setSelectedAnimal({
                       practico: a.practico,
                       unico: a.unico,
+                      especie: a.especie,
                       categoria: a.categoria,
                       estatus: a.estatus,
                       lote: a.lote,
@@ -393,11 +440,12 @@ export const NoVientresView: React.FC = () => {
         onFilterChange={setFilters}
         onReset={() =>
           setFilters({
-            categorias: ['Becerra', 'Mauta', 'Becerro', 'Maute', 'Novillo'],
+            categorias: [...ALL_CATEGORIAS],
             estatus: ['Activo'] as EstatusAnimal[],
-            lotes: ['01', 'ESCT', 'POT1', 'SEC1']
+            lotes: Array.from(new Set(animales.map(a => a.lote)))
           })
         }
+        lotesDisponibles={allLotes}
       />
 
       {/* Modal Configuración Columnas */}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, FileText, ExternalLink, Calendar, Layers, Clock, FileSpreadsheet, CheckCircle2 } from 'lucide-react';
+import { X, FileText, ExternalLink, CheckCircle2 } from 'lucide-react';
 import { ReporteItem } from './NuevoReporteModal';
 
 interface DetalleReporteModalProps {
@@ -23,7 +23,14 @@ export const DetalleReporteModal: React.FC<DetalleReporteModalProps> = ({
       navigate(reporte.rutaAsociada);
       onClose();
     } else {
-      alert(`Generando reporte '${reporte.nombre}' con los filtros configurados.`);
+      const slug = reporte.nombre
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)+/g, '');
+      navigate(`/reports/view/${slug}`);
+      onClose();
     }
   };
 
@@ -110,31 +117,29 @@ export const DetalleReporteModal: React.FC<DetalleReporteModalProps> = ({
             </div>
           </div>
 
-          {reporte.rutaAsociada && (
-            <div style={{
-              padding: '12px 16px',
-              backgroundColor: '#ecfdf5',
-              borderRadius: 8,
-              border: '1px solid #a7f3d0',
-              color: '#065f46',
-              fontSize: 12.5,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 10
-            }}>
-              <span>Este reporte está sincronizado con la vista de datos en vivo de AgroGan.</span>
-              <button
-                type="button"
-                className="btn-primary"
-                onClick={handleOpenLiveReport}
-                style={{ fontSize: 12, padding: '6px 12px', flexShrink: 0 }}
-              >
-                <ExternalLink size={14} />
-                <span>Abrir Vista en Vivo</span>
-              </button>
-            </div>
-          )}
+          <div style={{
+            padding: '12px 16px',
+            backgroundColor: '#ecfdf5',
+            borderRadius: 8,
+            border: '1px solid #a7f3d0',
+            color: '#065f46',
+            fontSize: 12.5,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 10
+          }}>
+            <span>Este reporte está sincronizado con el visor interactivo de datos en vivo de AgroGan.</span>
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={handleOpenLiveReport}
+              style={{ fontSize: 12, padding: '6px 12px', flexShrink: 0 }}
+            >
+              <ExternalLink size={14} />
+              <span>Abrir Vista en Vivo</span>
+            </button>
+          </div>
         </div>
 
         {/* Footer */}

@@ -6,7 +6,7 @@ import { ReportSettingsModal, ColumnSetting } from '../../components/ReportSetti
 import { SpeciesSelectorBar, SPECIES_TABS_CONFIG } from '../../components/SpeciesSelectorBar';
 import { AnalisisInventarioModal } from './AnalisisInventarioModal';
 import { InventariosFilterDrawer, InventariosFilterValues } from './InventariosFilterDrawer';
-import { exportToCSV } from '../../utils/exportUtils';
+import { exportToCSV, exportToPDF } from '../../utils/exportUtils';
 import { EstatusAnimal } from '../../../../types2/common';
 
 /* =========================================================================
@@ -609,6 +609,40 @@ export const InventariosView: React.FC = () => {
     exportToCSV(`reporte_inventarios_${selectedSpecies.toLowerCase().replace(/\s+/g, '_')}`, headers, rows);
   };
 
+  const handleExportPDF = () => {
+    const visibleSubcategories = activeConfig.subcategories.filter(s => isColVisible(s.key));
+    const headers = [
+      activeConfig.loteLabel,
+      ...visibleSubcategories.map(s => s.label),
+      'Total'
+    ];
+
+    const rows: (string | number)[][] = filteredRows.map(r => [
+      r.loteNombre,
+      ...visibleSubcategories.map(s => (filters.categorias.includes(s.key) ? (r.values[s.key] || 0) : 0)),
+      getRowTotal(r)
+    ]);
+
+    rows.push([
+      'Total activos',
+      ...visibleSubcategories.map(s => totals.subTotals[s.key] || 0),
+      totals.total
+    ]);
+
+    rows.push([
+      'Total',
+      ...visibleSubcategories.map(s => totals.subTotals[s.key] || 0),
+      totals.total
+    ]);
+
+    exportToPDF(
+      `reporte_inventarios_${selectedSpecies.toLowerCase().replace(/\s+/g, '_')}`,
+      `Reporte de Inventarios - ${selectedSpecies}`,
+      headers,
+      rows
+    );
+  };
+
   return (
     <div className="report-view-container">
       {/* Encabezado con botones */}
@@ -619,6 +653,7 @@ export const InventariosView: React.FC = () => {
         isFilterOpen={isFilterDrawerOpen}
         activeFiltersCount={activeFiltersCount}
         onExportXLSX={handleExportXLSX}
+        onExportPDF={handleExportPDF}
         onSettingsClick={() => setIsSettingsModalOpen(true)}
         extraActions={
           <button

@@ -351,19 +351,11 @@ export const DistribucionNormalView: React.FC = () => {
         isFilterOpen={isFilterDrawerOpen}
         activeFiltersCount={filters.min || filters.max || filters.raza !== 'Todas las Razas' ? 1 : 0}
         onExportXLSX={handleExportXLSX}
+        onExportPDF={handleExportPDF}
         exportDisabled={!isProcessed}
         onSettingsClick={() => setIsSettingsModalOpen(true)}
         extraActions={
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={handleExportPDF}
-              title="Descargar Ficha en PDF"
-              style={{ fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px' }}
-            >
-              <span>PDF Zootécnico</span>
-            </button>
             <button
               type="button"
               className="btn-amber-action"

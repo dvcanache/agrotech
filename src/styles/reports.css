@@ -124,6 +124,33 @@
   box-shadow: none;
 }
 
+.btn-pdf-export {
+  background-color: #b91c1c;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-size: 13.5px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(185, 28, 28, 0.25);
+  transition: all var(--transition-speed) ease;
+}
+
+.btn-pdf-export:hover:not(:disabled) {
+  background-color: #991b1b;
+  transform: translateY(-1px);
+}
+
+.btn-pdf-export:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
 .badge-active-filter {
   position: absolute;
   top: -5px;

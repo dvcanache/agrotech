@@ -5,7 +5,7 @@ import { ReportPagination } from '../../components/ReportPagination';
 import { ReportSettingsModal, ColumnSetting } from '../../components/ReportSettingsModal';
 import { FichaAnimalModal, AnimalModalData } from '../components/FichaAnimalModal';
 import { SecosFilterDrawer, SecosFilterValues } from '../components/SecosFilterDrawer';
-import { exportToCSV } from '../../utils/exportUtils';
+import { exportToCSV, exportToPDF } from '../../utils/exportUtils';
 import { MOCK_ANIMALES_SECOS } from '../animalesMockData';
 import { AnimalSecoEntity } from '../../../../types2/entities';
 import { EstatusAnimal, EstatusReproductivo } from '../../../../types2/common';
@@ -145,6 +145,40 @@ export const AnimalesSecosView: React.FC = () => {
     exportToCSV('reporte_animales_secos', headers, rows);
   };
 
+  const handleExportPDF = () => {
+    const headers = [
+      'Práctico',
+      'Único',
+      'Categoría',
+      'Estatus',
+      'Sit. Reproductiva',
+      'Sit. Productiva',
+      'Lote',
+      'Último Parto',
+      'Último Servicio',
+      'Días Servida',
+      'Próximo Parto',
+      'Días Seca',
+      'Días en Producción'
+    ];
+    const rows = filteredAnimales.map(a => [
+      a.practico,
+      a.unico,
+      a.categoria,
+      a.estatus,
+      a.estatusReproductivo,
+      a.estatusProductivo,
+      a.lote,
+      a.ultimoParto || '',
+      a.ultimoServicio || '',
+      a.diasServidaActual !== undefined ? a.diasServidaActual : '',
+      a.fechaProximoParto || '',
+      a.diasSeca,
+      a.diasEnProduccion
+    ]);
+    exportToPDF('reporte_animales_secos', 'Reporte de Animales Secos', headers, rows);
+  };
+
   const isColVisible = (key: string) => columns.find(c => c.key === key)?.visible ?? true;
 
   return (
@@ -157,6 +191,7 @@ export const AnimalesSecosView: React.FC = () => {
         isFilterOpen={isFilterDrawerOpen}
         activeFiltersCount={activeFiltersCount}
         onExportXLSX={handleExportXLSX}
+        onExportPDF={handleExportPDF}
         onSettingsClick={() => setIsSettingsModalOpen(true)}
         extraActions={
           <div className="report-search-bar">
@@ -266,6 +301,7 @@ export const AnimalesSecosView: React.FC = () => {
                     setSelectedAnimal({
                       practico: a.practico,
                       unico: a.unico,
+                      especie: a.especie,
                       categoria: a.categoria,
                       estatus: a.estatus,
                       lote: a.lote,

@@ -132,7 +132,7 @@ export const MOCK_VIENTRES: VientreEntity[] = [
     unico: 'CW008',
     categoria: 'Vaca',
     estatus: 'Activo',
-    estatusReproductivo: 'Vacía',
+    estatusReproductivo: 'Preñada',
     estatusProductivo: 'Ordeño',
     lote: 'ESCT',
     edadAnos: 12.39,
@@ -1016,7 +1016,7 @@ export const MOCK_ANIMALES_LACTANDO: AnimalLactandoEntity[] = [
     unico: 'CW008',
     categoria: 'Vaca',
     estatus: 'Activo',
-    situacionReproductivaActual: 'Vacía',
+    situacionReproductivaActual: 'Preñada',
     situacionProductivaActual: 'Ordeño',
     lote: 'ESCT',
     ultimoParto: '2025-10-08',
@@ -1026,8 +1026,8 @@ export const MOCK_ANIMALES_LACTANDO: AnimalLactandoEntity[] = [
     diasEnProduccion: 338,
     diasParida: 338,
     diasServida: 71,
-    proximoParto: undefined,
-    fechaProximoSecado: '2026-11-01'
+    proximoParto: '2027-04-11',
+    fechaProximoSecado: '2027-02-10'
   },
   {
     practico: 'CW009',
@@ -1622,7 +1622,7 @@ export const MOCK_NO_VIENTRES: NoVientreEntity[] = [
   {
     practico: 'AVE-ENG01',
     unico: 'AVE-2026-E01',
-    categoria: 'Pollos de Engorde',
+    categoria: 'Pollo de engorde',
     especie: 'Aves de corral',
     estatus: 'Activo',
     lote: 'GALP-04',

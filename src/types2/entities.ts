@@ -499,7 +499,9 @@ export interface MultirebanoTransaccionEntity {
   id: string;
   fecha: string;
   tipoTransaccion: 'Traslado' | 'Compra' | 'Venta' | 'Muerte' | 'Descarte';
+  rebanoOrigenId?: string;
   rebanoOrigen?: string;
+  rebanoDestinoId?: string;
   rebanoDestino?: string;
   cantidadAnimales: number;
   montoTotal?: number;

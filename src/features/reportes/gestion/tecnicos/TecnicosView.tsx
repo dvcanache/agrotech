@@ -6,7 +6,7 @@ import { ReportSettingsModal, ColumnSetting } from '../../components/ReportSetti
 import { FichaTecnicoModal } from './FichaTecnicoModal';
 import { NuevoTecnicoModal } from './NuevoTecnicoModal';
 import { TecnicosFilterDrawer, TecnicosFilterValues } from './TecnicosFilterDrawer';
-import { exportToCSV } from '../../utils/exportUtils';
+import { exportToCSV, exportToPDF } from '../../utils/exportUtils';
 import { MOCK_TECNICOS } from '../gestionMockData';
 import { TecnicoEntity } from '../../../../types2/entities';
 
@@ -173,6 +173,44 @@ export const TecnicosView: React.FC = () => {
     exportToCSV('reporte_tecnicos', headers, rows);
   };
 
+  const handleExportPDF = () => {
+    const headers = [
+      'Código',
+      'Nombre',
+      'Servicios',
+      '1er Serv.',
+      '2do Serv.',
+      '3er Serv.',
+      '4+ Serv.',
+      'Partos',
+      'Abortos',
+      'Preñadas',
+      'Eficiencia (%)',
+      'Serv./Conc.',
+      'Machos',
+      'Hembras',
+      'Embriones'
+    ];
+    const rows = filteredTecnicos.map(t => [
+      t.codigo,
+      t.nombre,
+      t.totalServicios,
+      t.primerServicio,
+      t.segundoServicio,
+      t.tercerServicio,
+      t.cuatroOMasServicios,
+      t.partos,
+      t.abortos,
+      t.aunPrenadas,
+      `${t.eficienciaPorcentaje}%`,
+      t.serviciosPorConcepcion,
+      t.machosNacidos,
+      t.hembrasNacidas,
+      t.embrionesColocados || 0
+    ]);
+    exportToPDF('reporte_tecnicos', 'Reporte de Desempeño de Técnicos Inseminadores', headers, rows);
+  };
+
   const isColVisible = (key: string) => columns.find(c => c.key === key)?.visible ?? true;
 
   const handleAddNewTecnico = (nuevo: TecnicoEntity) => {
@@ -189,6 +227,7 @@ export const TecnicosView: React.FC = () => {
         isFilterOpen={isFilterDrawerOpen}
         activeFiltersCount={activeFiltersCount}
         onExportXLSX={handleExportXLSX}
+        onExportPDF={handleExportPDF}
         onSettingsClick={() => setIsSettingsModalOpen(true)}
         extraActions={
           <div className="report-search-bar">

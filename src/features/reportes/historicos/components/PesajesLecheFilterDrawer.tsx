@@ -69,6 +69,47 @@ export const PesajesLecheFilterDrawer: React.FC<PesajesLecheFilterDrawerProps> =
         </div>
       </div>
 
+      {/* Rango de Número de Lactancia */}
+      <div className="filter-section">
+        <div className="filter-section-title">Número de Lactancia</div>
+        <div className="filter-date-row">
+          <div className="form-group" style={{ flex: 1 }}>
+            <label style={{ fontSize: 11.5, color: 'var(--text-secondary)' }}>Mínimo</label>
+            <input
+              type="number"
+              min="1"
+              max="20"
+              className="form-control"
+              placeholder="1"
+              value={filters.lactanciaMin || ''}
+              onChange={e =>
+                onFilterChange({
+                  ...filters,
+                  lactanciaMin: e.target.value ? Number(e.target.value) : undefined
+                })
+              }
+            />
+          </div>
+          <div className="form-group" style={{ flex: 1 }}>
+            <label style={{ fontSize: 11.5, color: 'var(--text-secondary)' }}>Máximo</label>
+            <input
+              type="number"
+              min="1"
+              max="20"
+              className="form-control"
+              placeholder="10"
+              value={filters.lactanciaMax || ''}
+              onChange={e =>
+                onFilterChange({
+                  ...filters,
+                  lactanciaMax: e.target.value ? Number(e.target.value) : undefined
+                })
+              }
+            />
+          </div>
+        </div>
+      </div>
+
       {/* Tipo de Pesaje */}
       <div className="filter-section">
         <div className="filter-section-title">Tipo de Pesaje</div>

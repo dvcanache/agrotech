@@ -6,10 +6,49 @@ import { ReportSettingsModal, ColumnSetting } from '../../components/ReportSetti
 import { FichaAnimalModal, AnimalModalData } from '../components/FichaAnimalModal';
 import { LactandoFilterDrawer, LactandoFilterValues } from '../components/LactandoFilterDrawer';
 import { SpeciesSelectorBar, SPECIES_TABS_CONFIG } from '../../components/SpeciesSelectorBar';
-import { exportToCSV } from '../../utils/exportUtils';
+import { exportToCSV, exportToPDF } from '../../utils/exportUtils';
 import { MOCK_ANIMALES_LACTANDO } from '../animalesMockData';
 import { AnimalLactandoEntity } from '../../../../types2/entities';
 import { EstatusAnimal } from '../../../../types2/common';
+
+/**
+ * Calcula los Días Abiertos zootécnicos del semoviente.
+ * - Si está gestante: días desde el último parto hasta la concepción (servicio fertilizante).
+ * - Si está vacía: DEL (Días En Leche) o días transcurridos desde el último parto hasta hoy.
+ */
+export function calculateDiasAbiertos(animal: AnimalLactandoEntity): number {
+  const isGestante = animal.situacionReproductivaActual === 'Preñada' || 
+                     animal.situacionReproductivaActual === 'Gestante';
+
+  if (isGestante) {
+    if (animal.ultimoParto && animal.ultimoServicio) {
+      const dParto = new Date(animal.ultimoParto).getTime();
+      const dServicio = new Date(animal.ultimoServicio).getTime();
+      if (!isNaN(dParto) && !isNaN(dServicio) && dServicio >= dParto) {
+        return Math.round((dServicio - dParto) / (1000 * 60 * 60 * 24));
+      }
+    }
+    if (animal.diasParida !== undefined && animal.diasServida !== undefined && animal.diasParida >= animal.diasServida) {
+      return animal.diasParida - animal.diasServida;
+    }
+    return animal.diasParida || animal.diasEnProduccion || 0;
+  } else {
+    if (animal.diasEnProduccion) {
+      return animal.diasEnProduccion;
+    }
+    if (animal.diasParida) {
+      return animal.diasParida;
+    }
+    if (animal.ultimoParto) {
+      const dParto = new Date(animal.ultimoParto).getTime();
+      const now = new Date().getTime();
+      if (!isNaN(dParto) && now >= dParto) {
+        return Math.round((now - dParto) / (1000 * 60 * 60 * 24));
+      }
+    }
+    return 0;
+  }
+}
 
 export const AnimalesLactandoView: React.FC = () => {
   const [animales] = useState<AnimalLactandoEntity[]>(MOCK_ANIMALES_LACTANDO);
@@ -24,7 +63,7 @@ export const AnimalesLactandoView: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [sortField, setSortField] = useState<keyof AnimalLactandoEntity>('diasEnProduccion');
+  const [sortField, setSortField] = useState<keyof AnimalLactandoEntity | 'diasAbiertos'>('diasEnProduccion');
   const [sortAsc, setSortAsc] = useState(true);
 
   // Conteo dinámico por especie
@@ -52,6 +91,7 @@ export const AnimalesLactandoView: React.FC = () => {
     { key: 'ultimoServicio', label: 'Último servicio', visible: true },
     { key: 'reproductor', label: 'Reproductor', visible: true },
     { key: 'diasParida', label: 'Días parida', visible: true },
+    { key: 'diasAbiertos', label: 'Días Abiertos', visible: true },
     { key: 'diasServida', label: 'Días servida', visible: true },
     { key: 'proximoParto', label: 'Próximo parto', visible: true },
     { key: 'fechaProximoSecado', label: 'Fecha próximo secado', visible: true },
@@ -59,19 +99,21 @@ export const AnimalesLactandoView: React.FC = () => {
     { key: 'diasSeca', label: 'Días seca', visible: true }
   ]);
 
-  const [filters, setFilters] = useState<LactandoFilterValues>({
+  const allLotes = useMemo(() => Array.from(new Set(animales.map(a => a.lote))), [animales]);
+
+  const [filters, setFilters] = useState<LactandoFilterValues>(() => ({
     diasProduccionMaximo: undefined,
     estatus: ['Activo'] as EstatusAnimal[],
-    lotes: ['01', 'ESCT', 'POT1', 'SEC1', 'GALP-01', 'GALP-02', 'PIARA-01', 'APR-01', 'BUF-01', 'CAB-01']
-  });
+    lotes: Array.from(new Set(MOCK_ANIMALES_LACTANDO.map(a => a.lote)))
+  }));
 
   const activeFiltersCount = useMemo(() => {
     let count = 0;
     if (filters.diasProduccionMaximo !== undefined) count++;
     if (filters.estatus.length < 3) count++;
-    if (filters.lotes.length < 10) count++;
+    if (filters.lotes.length < allLotes.length) count++;
     return count;
-  }, [filters]);
+  }, [filters, allLotes]);
 
   const toggleColumn = (key: string) => {
     setColumns(prev =>
@@ -83,7 +125,7 @@ export const AnimalesLactandoView: React.FC = () => {
     setColumns(prev => prev.map(col => ({ ...col, visible: true })));
   };
 
-  const handleSort = (field: keyof AnimalLactandoEntity) => {
+  const handleSort = (field: keyof AnimalLactandoEntity | 'diasAbiertos') => {
     if (sortField === field) {
       setSortAsc(!sortAsc);
     } else {
@@ -121,8 +163,13 @@ export const AnimalesLactandoView: React.FC = () => {
         return true;
       })
       .sort((a, b) => {
-        const valA = a[sortField];
-        const valB = b[sortField];
+        if (sortField === 'diasAbiertos') {
+          const valA = calculateDiasAbiertos(a);
+          const valB = calculateDiasAbiertos(b);
+          return sortAsc ? valA - valB : valB - valA;
+        }
+        const valA = a[sortField as keyof AnimalLactandoEntity];
+        const valB = b[sortField as keyof AnimalLactandoEntity];
         if (typeof valA === 'number' && typeof valB === 'number') {
           return sortAsc ? valA - valB : valB - valA;
         }
@@ -143,10 +190,58 @@ export const AnimalesLactandoView: React.FC = () => {
     return filteredAnimales.slice(start, start + pageSize);
   }, [filteredAnimales, currentPage, totalPages, pageSize]);
 
+  // Indicadores Clave de Rendimiento (KPIs Zootécnicos)
+  const kpiStats = useMemo(() => {
+    const count = filteredAnimales.length;
+    if (count === 0) {
+      return {
+        totalLactando: 0,
+        avgDiasAbiertos: 0,
+        totalPrenadas: 0,
+        pctPrenadas: 0,
+        avgDEL: 0,
+        subtextDiasAbiertos: 'Sin registros'
+      };
+    }
+
+    const sumDEL = filteredAnimales.reduce((acc, a) => acc + (a.diasEnProduccion || a.diasParida || 0), 0);
+    const avgDEL = Math.round(sumDEL / count);
+
+    let sumDiasAbiertos = 0;
+    let countPrenadas = 0;
+
+    filteredAnimales.forEach(a => {
+      const isGestante = a.situacionReproductivaActual === 'Preñada' || a.situacionReproductivaActual === 'Gestante';
+      if (isGestante) {
+        countPrenadas++;
+      }
+      sumDiasAbiertos += calculateDiasAbiertos(a);
+    });
+
+    const avgDiasAbiertos = Math.round(sumDiasAbiertos / count);
+    const pctPrenadas = Math.round((countPrenadas / count) * 100);
+
+    const subtextDiasAbiertos = avgDiasAbiertos <= 110 
+      ? 'Eficiencia Óptima (< 110 d)' 
+      : avgDiasAbiertos <= 140 
+      ? 'Aceptable (110-140 d)' 
+      : 'Alerta Reproductiva (> 140 d)';
+
+    return {
+      totalLactando: count,
+      avgDiasAbiertos,
+      totalPrenadas: countPrenadas,
+      pctPrenadas,
+      avgDEL,
+      subtextDiasAbiertos
+    };
+  }, [filteredAnimales]);
+
   const handleExportXLSX = () => {
     const headers = [
       'Práctico',
       'Único',
+      'Especie',
       'Categoría',
       'Estatus',
       'Situación Reproductiva',
@@ -157,6 +252,7 @@ export const AnimalesLactandoView: React.FC = () => {
       'Último Servicio',
       'Reproductor',
       'Días Parida',
+      'Días Abiertos',
       'Días Servida',
       'Próximo Parto',
       'Fecha Próximo Secado',
@@ -166,6 +262,7 @@ export const AnimalesLactandoView: React.FC = () => {
     const rows = filteredAnimales.map(a => [
       a.practico,
       a.unico,
+      a.especie || 'Bovinos',
       a.categoria,
       a.estatus,
       a.situacionReproductivaActual,
@@ -176,6 +273,7 @@ export const AnimalesLactandoView: React.FC = () => {
       a.ultimoServicio || '',
       a.reproductor || '',
       a.diasParida,
+      calculateDiasAbiertos(a),
       a.diasServida !== undefined ? a.diasServida : '',
       a.proximoParto || '',
       a.fechaProximoSecado || '',
@@ -183,6 +281,52 @@ export const AnimalesLactandoView: React.FC = () => {
       a.diasSeca !== undefined ? a.diasSeca : ''
     ]);
     exportToCSV('reporte_animales_lactando', headers, rows);
+  };
+
+  const handleExportPDF = () => {
+    const headers = [
+      'Práctico',
+      'Único',
+      'Especie',
+      'Categoría',
+      'Estatus',
+      'Sit. Reproductiva',
+      'Sit. Productiva',
+      'Lote',
+      'Último Parto',
+      'N° Parto',
+      'Último Servicio',
+      'Reproductor',
+      'Días Parida',
+      'Días Abiertos',
+      'Días Servida',
+      'Próximo Parto',
+      'Fecha Próximo Secado',
+      'Días en Producción',
+      'Días Seca'
+    ];
+    const rows = filteredAnimales.map(a => [
+      a.practico,
+      a.unico,
+      a.especie || 'Bovinos',
+      a.categoria,
+      a.estatus,
+      a.situacionReproductivaActual,
+      a.situacionProductivaActual,
+      a.lote,
+      a.ultimoParto,
+      a.numeroParto,
+      a.ultimoServicio || '',
+      a.reproductor || '',
+      a.diasParida,
+      calculateDiasAbiertos(a),
+      a.diasServida !== undefined ? a.diasServida : '',
+      a.proximoParto || '',
+      a.fechaProximoSecado || '',
+      a.diasEnProduccion,
+      a.diasSeca !== undefined ? a.diasSeca : ''
+    ]);
+    exportToPDF('reporte_animales_lactando', 'Reporte de Animales Lactando', headers, rows);
   };
 
   const isColVisible = (key: string) => columns.find(c => c.key === key)?.visible ?? true;
@@ -197,6 +341,7 @@ export const AnimalesLactandoView: React.FC = () => {
         isFilterOpen={isFilterDrawerOpen}
         activeFiltersCount={activeFiltersCount}
         onExportXLSX={handleExportXLSX}
+        onExportPDF={handleExportPDF}
         onSettingsClick={() => setIsSettingsModalOpen(true)}
         extraActions={
           <div className="report-search-bar">
@@ -221,6 +366,38 @@ export const AnimalesLactandoView: React.FC = () => {
         onSelectSpecies={setSelectedSpecies}
         speciesCounts={speciesCounts}
       />
+
+      {/* KPI Cards */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: 16,
+          marginBottom: 16
+        }}
+      >
+        <div style={{ backgroundColor: '#fff', border: '1px solid var(--border-color)', borderRadius: 8, padding: '14px 18px' }}>
+          <div style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 600 }}>Total en Lactancia</div>
+          <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', marginTop: 4 }}>{kpiStats.totalLactando} cabezas</div>
+        </div>
+        <div style={{ backgroundColor: '#fff', border: '1px solid var(--border-color)', borderRadius: 8, padding: '14px 18px' }}>
+          <div style={{ fontSize: 12, color: '#2563eb', fontWeight: 600 }}>Promedio Días Abiertos</div>
+          <div style={{ fontSize: 24, fontWeight: 800, color: '#2563eb', marginTop: 4 }}>{kpiStats.avgDiasAbiertos} días</div>
+          <div style={{ fontSize: 11, color: kpiStats.avgDiasAbiertos <= 110 ? '#16a34a' : kpiStats.avgDiasAbiertos <= 140 ? '#d97706' : '#dc2626', fontWeight: 600, marginTop: 2 }}>
+            {kpiStats.subtextDiasAbiertos}
+          </div>
+        </div>
+        <div style={{ backgroundColor: '#fff', border: '1px solid var(--border-color)', borderRadius: 8, padding: '14px 18px' }}>
+          <div style={{ fontSize: 12, color: '#15803d', fontWeight: 600 }}>Gestantes en Ordeño</div>
+          <div style={{ fontSize: 24, fontWeight: 800, color: '#15803d', marginTop: 4 }}>{kpiStats.totalPrenadas} ({kpiStats.pctPrenadas}%)</div>
+          <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 2 }}>Confirmadas preñadas</div>
+        </div>
+        <div style={{ backgroundColor: '#fff', border: '1px solid var(--border-color)', borderRadius: 8, padding: '14px 18px' }}>
+          <div style={{ fontSize: 12, color: '#d97706', fontWeight: 600 }}>Promedio DEL (Días en Leche)</div>
+          <div style={{ fontSize: 24, fontWeight: 800, color: '#d97706', marginTop: 4 }}>{kpiStats.avgDEL} días</div>
+          <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 2 }}>Días en producción</div>
+        </div>
+      </div>
 
       {/* Tabla */}
       <div className="report-table-wrapper">
@@ -296,6 +473,14 @@ export const AnimalesLactandoView: React.FC = () => {
                   </div>
                 </th>
               )}
+              {isColVisible('diasAbiertos') && (
+                <th onClick={() => handleSort('diasAbiertos')}>
+                  <div className="th-content">
+                    <span>Días abiertos</span>
+                    <ArrowUpDown size={12} />
+                  </div>
+                </th>
+              )}
               {isColVisible('diasServida') && <th>Días servida</th>}
               {isColVisible('proximoParto') && <th>Próximo parto</th>}
               {isColVisible('fechaProximoSecado') && <th>Fecha próximo secado</th>}
@@ -313,7 +498,7 @@ export const AnimalesLactandoView: React.FC = () => {
           <tbody>
             {paginatedAnimales.length === 0 ? (
               <tr>
-                <td colSpan={17} style={{ textAlign: 'center', padding: '36px 0', color: 'var(--text-secondary)' }}>
+                <td colSpan={18} style={{ textAlign: 'center', padding: '36px 0', color: 'var(--text-secondary)' }}>
                   Ningún registro encontrado
                 </td>
               </tr>
@@ -325,6 +510,7 @@ export const AnimalesLactandoView: React.FC = () => {
                     setSelectedAnimal({
                       practico: a.practico,
                       unico: a.unico,
+                      especie: a.especie,
                       categoria: a.categoria,
                       estatus: a.estatus,
                       lote: a.lote,
@@ -334,7 +520,8 @@ export const AnimalesLactandoView: React.FC = () => {
                       ultimoServicio: a.ultimoServicio,
                       reproductor: a.reproductor,
                       fechaProximoParto: a.proximoParto,
-                      fechaProximoSecado: a.fechaProximoSecado
+                      fechaProximoSecado: a.fechaProximoSecado,
+                      diasParida: a.diasParida
                     })
                   }
                   title="Haga click para ver la ficha del animal"
@@ -387,6 +574,13 @@ export const AnimalesLactandoView: React.FC = () => {
                   {isColVisible('ultimoServicio') && <td>{a.ultimoServicio || '-'}</td>}
                   {isColVisible('reproductor') && <td>{a.reproductor || '-'}</td>}
                   {isColVisible('diasParida') && <td>{a.diasParida} días</td>}
+                  {isColVisible('diasAbiertos') && (
+                    <td>
+                      <span className={`badge-efficiency ${calculateDiasAbiertos(a) <= 110 ? 'high' : calculateDiasAbiertos(a) <= 150 ? 'medium' : 'low'}`}>
+                        {calculateDiasAbiertos(a)} días
+                      </span>
+                    </td>
+                  )}
                   {isColVisible('diasServida') && <td>{a.diasServida !== undefined ? `${a.diasServida} días` : '-'}</td>}
                   {isColVisible('proximoParto') && (
                     <td style={{ fontWeight: 600, color: a.proximoParto ? '#2563eb' : 'inherit' }}>
@@ -436,9 +630,10 @@ export const AnimalesLactandoView: React.FC = () => {
           setFilters({
             diasProduccionMaximo: undefined,
             estatus: ['Activo'] as EstatusAnimal[],
-            lotes: ['01', 'ESCT', 'POT1', 'SEC1']
+            lotes: Array.from(new Set(animales.map(a => a.lote)))
           })
         }
+        lotesDisponibles={allLotes}
       />
 
       {/* Modal Configuración Columnas */}

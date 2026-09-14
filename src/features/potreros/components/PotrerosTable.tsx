@@ -284,7 +284,9 @@ export const PotrerosTable: React.FC<PotrerosTableProps> = ({
                             {potrero.diasOcupacionActual} d ocupado
                           </span>
                           {potrero.diasOcupacionActual > 2 && (potrero.tipoInstalacion === 'potrero' || potrero.tipoInstalacion === 'sabana') && (
-                            <AlertTriangle size={12} color="#dc2626" title="¡Sobrepastoreo! Superó los 2 días máximos recomendados por la 2da Ley de Voisin" />
+                            <span title="¡Sobrepastoreo! Superó los 2 días máximos recomendados por la 2da Ley de Voisin">
+                              <AlertTriangle size={12} color="#dc2626" />
+                            </span>
                           )}
                         </>
                       ) : (

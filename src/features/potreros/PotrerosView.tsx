@@ -220,7 +220,13 @@ export const PotrerosView: React.FC = () => {
 
   // PRV Count breakdown for active sector
   const prvCounts = useMemo(() => {
-    const counts = { optimo: 0, pastoreo: 0, sobrepastoreo: 0, descanso: 0 };
+    const counts: { optimo: number; pastoreo: number; sobrepastoreo: number; descanso: number; subpastoreo: number } = {
+      optimo: 0,
+      pastoreo: 0,
+      sobrepastoreo: 0,
+      descanso: 0,
+      subpastoreo: 0
+    };
     activeItemsForKpi.forEach(p => {
       const info = getPrvStatusInfo(
         p.animalesPresentes,

@@ -14,18 +14,22 @@ interface LactandoFilterDrawerProps {
   filters: LactandoFilterValues;
   onFilterChange: (newFilters: LactandoFilterValues) => void;
   onReset: () => void;
+  lotesDisponibles?: string[];
 }
 
 const ALL_ESTATUS: EstatusAnimal[] = ['Activo', 'Inactivo', 'Referencia'];
-const ALL_LOTES = ['01', 'ESCT', 'POT1', 'SEC1'];
+const ALL_LOTES = ['01', 'ESCT', 'POT1', 'SEC1', 'GALP-01', 'GALP-02', 'PIARA-01', 'APR-01', 'BUF-01', 'CAB-01'];
 
 export const LactandoFilterDrawer: React.FC<LactandoFilterDrawerProps> = ({
   isOpen,
   onClose,
   filters,
   onFilterChange,
-  onReset
+  onReset,
+  lotesDisponibles
 }) => {
+  const lotesOptions = lotesDisponibles && lotesDisponibles.length > 0 ? lotesDisponibles : ALL_LOTES;
+
   const toggleArrayItem = <T,>(list: T[], item: T): T[] => {
     return list.includes(item) ? list.filter(i => i !== item) : [...list, item];
   };
@@ -87,7 +91,7 @@ export const LactandoFilterDrawer: React.FC<LactandoFilterDrawerProps> = ({
       <div className="filter-section">
         <div className="filter-section-title">Lotes</div>
         <div className="filter-checkbox-list">
-          {ALL_LOTES.map(lote => (
+          {lotesOptions.map(lote => (
             <label key={lote} className="filter-checkbox-label">
               <input
                 type="checkbox"

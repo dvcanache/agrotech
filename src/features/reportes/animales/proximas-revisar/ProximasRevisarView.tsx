@@ -5,7 +5,8 @@ import { ReportPagination } from '../../components/ReportPagination';
 import { ReportSettingsModal, ColumnSetting } from '../../components/ReportSettingsModal';
 import { FichaAnimalModal, AnimalModalData } from '../components/FichaAnimalModal';
 import { ProximosDiasFilterDrawer, ProximosDiasFilterValues } from '../components/ProximosDiasFilterDrawer';
-import { exportToCSV } from '../../utils/exportUtils';
+import { exportToCSV, exportToPDF } from '../../utils/exportUtils';
+import { calculateDiasRestantes } from '../../utils/dateUtils';
 import { MOCK_PROXIMAS_REVISAR } from '../animalesMockData';
 import { ProximaRevisarEntity } from '../../../../types2/entities';
 import { EstatusAnimal } from '../../../../types2/common';
@@ -89,13 +90,18 @@ export const ProximasRevisarView: React.FC = () => {
 
         if (!filters.estatus.includes(item.estatus)) return false;
         if (!filters.lotes.includes(item.lote)) return false;
-        if (item.diasProximaRevision > filters.proximosDiasMaximo) return false;
+        const diasRestRevision = calculateDiasRestantes(item.proximaRevision);
+        if (diasRestRevision > filters.proximosDiasMaximo) return false;
 
         return true;
       })
       .sort((a, b) => {
-        const valA = a[sortField];
-        const valB = b[sortField];
+        let valA: any = a[sortField];
+        let valB: any = b[sortField];
+        if (sortField === 'diasProximaRevision') {
+          valA = calculateDiasRestantes(a.proximaRevision);
+          valB = calculateDiasRestantes(b.proximaRevision);
+        }
         if (typeof valA === 'number' && typeof valB === 'number') {
           return sortAsc ? valA - valB : valB - valA;
         }
@@ -155,9 +161,53 @@ export const ProximasRevisarView: React.FC = () => {
       a.ultimoDiagnostico || '',
       a.ultimoTratamiento || '',
       a.proximaRevision,
-      a.diasProximaRevision
+      calculateDiasRestantes(a.proximaRevision)
     ]);
     exportToCSV('reporte_proximas_a_revisar', headers, rows);
+  };
+
+  const handleExportPDF = () => {
+    const headers = [
+      'Práctico',
+      'Único',
+      'Categoría',
+      'Estatus',
+      'Lote',
+      'Último Parto/Aborto',
+      'Partos',
+      'Montas',
+      'Insem.',
+      'Transpl.',
+      'Último Servicio',
+      'Reproductor',
+      'Última Revisión',
+      'Revisiones',
+      'Último Diagnóstico',
+      'Último Tratamiento',
+      'Próxima Revisión',
+      'Días Próx. Revisión'
+    ];
+    const rows = filteredAnimales.map(a => [
+      a.practico,
+      a.unico,
+      a.categoria,
+      a.estatus,
+      a.lote,
+      a.ultimoPartoAborto || '',
+      a.partos,
+      a.montas,
+      a.inseminaciones,
+      a.transplantes,
+      a.ultimoServicio || '',
+      a.reproductor || '',
+      a.ultimaRevision || '',
+      a.revisiones,
+      a.ultimoDiagnostico || '',
+      a.ultimoTratamiento || '',
+      a.proximaRevision,
+      calculateDiasRestantes(a.proximaRevision)
+    ]);
+    exportToPDF('reporte_proximas_a_revisar', 'Reporte de Animales Próximas a Revisar', headers, rows);
   };
 
   const isColVisible = (key: string) => columns.find(c => c.key === key)?.visible ?? true;
@@ -172,6 +222,7 @@ export const ProximasRevisarView: React.FC = () => {
         isFilterOpen={isFilterDrawerOpen}
         activeFiltersCount={activeFiltersCount}
         onExportXLSX={handleExportXLSX}
+        onExportPDF={handleExportPDF}
         onSettingsClick={() => setIsSettingsModalOpen(true)}
         extraActions={
           <div className="report-search-bar">
@@ -279,6 +330,7 @@ export const ProximasRevisarView: React.FC = () => {
                     setSelectedAnimal({
                       practico: a.practico,
                       unico: a.unico,
+                      especie: a.especie,
                       categoria: a.categoria,
                       estatus: a.estatus,
                       lote: a.lote,
@@ -322,13 +374,16 @@ export const ProximasRevisarView: React.FC = () => {
                   {isColVisible('proximaRevision') && (
                     <td style={{ fontWeight: 600, color: '#0d9488' }}>{a.proximaRevision}</td>
                   )}
-                  {isColVisible('diasProximaRevision') && (
-                    <td>
-                      <span className={`badge-efficiency ${a.diasProximaRevision <= 7 ? 'high' : 'medium'}`}>
-                        {a.diasProximaRevision} días
-                      </span>
-                    </td>
-                  )}
+                  {isColVisible('diasProximaRevision') && (() => {
+                    const diasRest = calculateDiasRestantes(a.proximaRevision);
+                    return (
+                      <td>
+                        <span className={`badge-efficiency ${diasRest <= 7 ? 'high' : 'medium'}`}>
+                          {diasRest} días
+                        </span>
+                      </td>
+                    );
+                  })()}
                 </tr>
               ))
             )}

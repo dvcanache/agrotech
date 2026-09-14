@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, FileText, Check, Layers, Clock, Filter, Eye } from 'lucide-react';
+import { X, FileText, Check } from 'lucide-react';
 
 export interface ReporteItem {
   id: string;
@@ -135,78 +135,91 @@ export const REPORT_TEMPLATES: { nombre: string; categoria: string; especie?: 't
     nombre: 'Control Diario de Postura y Huevos',
     categoria: 'Aves de corral',
     especie: 'aves',
+    ruta: '/reports/view/aves-postura-galpon',
     descripcionDefecto: 'Recolección diaria clasificada de huevos comerciales, fértiles y porcentaje de postura.'
   },
   {
     nombre: 'Curva de Postura vs Guía Genética',
     categoria: 'Aves de corral',
     especie: 'aves',
+    ruta: '/reports/view/aves-curva-postura',
     descripcionDefecto: 'Comparativo real vs estándar genético Hy-Line Brown / Lohmann Brown.'
   },
   {
     nombre: 'Conversión Alimenticia e ICA Broilers',
     categoria: 'Aves de corral',
     especie: 'aves',
+    ruta: '/reports/view/aves-conversion-alimenticia',
     descripcionDefecto: 'Índice de Conversión Alimenticia (ICA) y ganancia media diaria en pollos.'
   },
   {
     nombre: 'Eficiencia Reproductiva de Cerdas',
     categoria: 'Porcinos',
     especie: 'porcinos',
+    ruta: '/reports/view/porcinos-eficiencia-reproductoras',
     descripcionDefecto: 'Tasa de concepción, lechones destetados/cerda/año (LDCA) e intervalo destete-cubrición.'
   },
   {
     nombre: 'Balance de Camadas (LNV / LNM / Momias)',
     categoria: 'Porcinos',
     especie: 'porcinos',
+    ruta: '/reports/view/porcinos-camadas-prolificidad',
     descripcionDefecto: 'Distribución de partos: nacidos vivos, mortinatos, momias y peso camada.'
   },
   {
     nombre: 'Curva de Crecimiento y Ceba Porcina',
     categoria: 'Porcinos',
     especie: 'porcinos',
+    ruta: '/reports/view/porcinos-cebo-engorde',
     descripcionDefecto: 'Evolución ponderal de lotes en precebo y ceba hasta peso final de beneficio.'
   },
   {
     nombre: 'Control Lechero Bufalino y Sólidos Totales',
     categoria: 'Búfalos',
     especie: 'bufalos',
+    ruta: '/reports/view/bufalos-produccion-grasa',
     descripcionDefecto: 'Pesajes de ordeño bufalino con grasa (7-9%), proteína y aptitud quesera Mozzarella.'
   },
   {
     nombre: 'Crecimiento y Destete de Bucerros',
     categoria: 'Búfalos',
     especie: 'bufalos',
+    ruta: '/reports/view/bufalos-crecimiento-destete',
     descripcionDefecto: 'Desarrollo ponderal de bucerros al pie de la madre hasta el destete a los 240 días.'
   },
   {
     nombre: 'Control Lechero Caprino en Tarima',
     categoria: 'Caprinos',
     especie: 'caprinos',
+    ruta: '/reports/view/caprinos-calidad-leche',
     descripcionDefecto: 'Pesajes individuales en tarima con grasa (3.8-4.5%) y sólidos totales.'
   },
   {
     nombre: 'Evaluación FAMACHA de Anemia Parasitaria',
     categoria: 'Caprinos',
     especie: 'caprinos',
+    ruta: '/reports/view/caprinos-famacha',
     descripcionDefecto: 'Clasificación clínica conjuntiva ocular (1 a 5) para desparasitación selectiva.'
   },
   {
     nombre: 'Libro de Registro y Pasaporte Equino',
     categoria: 'Equinos',
     especie: 'equinos',
+    ruta: '/reports/view/equinos-pasaporte-genealogia',
     descripcionDefecto: 'Ficha oficial con identificación por microchip, señas y genealogía equina.'
   },
   {
     nombre: 'Cronograma de Herraje y Desvasado',
     categoria: 'Equinos',
     especie: 'equinos',
+    ruta: '/reports/view/equinos-herraje-desvasado',
     descripcionDefecto: 'Control de aplomos, herrador responsable y alertas de vencimiento (35-45 días).'
   },
   {
     nombre: 'Certificación Oficial AIE (Test Coggins)',
     categoria: 'Equinos',
     especie: 'equinos',
+    ruta: '/reports/view/equinos-coggins',
     descripcionDefecto: 'Vigencia de diagnósticos oficiales de Anemia Infecciosa Equina.'
   },
   {
@@ -285,6 +298,15 @@ export const NuevoReporteModal: React.FC<NuevoReporteModalProps> = ({
 
     const templateMatch = REPORT_TEMPLATES.find(t => t.nombre === formData.plantillaBase);
 
+    const fallbackSlug = (templateMatch?.nombre || formData.nombre)
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)+/g, '');
+
+    const rutaAsociada = templateMatch?.ruta || `/reports/view/${fallbackSlug}`;
+
     const nuevo: ReporteItem = {
       id: `rep-${Date.now()}`,
       codigo: formData.codigo.trim().toUpperCase(),
@@ -294,7 +316,7 @@ export const NuevoReporteModal: React.FC<NuevoReporteModalProps> = ({
       formato: formData.formato,
       frecuencia: formData.frecuencia,
       descripcion: formData.descripcion.trim() || `Reporte de ${formData.nombre} en formato ${formData.formato}`,
-      rutaAsociada: templateMatch?.ruta,
+      rutaAsociada,
       fechaCreacion: new Date().toISOString().split('T')[0]
     };
 

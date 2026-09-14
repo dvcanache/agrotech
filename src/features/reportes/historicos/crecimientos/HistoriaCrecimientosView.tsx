@@ -5,7 +5,7 @@ import { ReportPagination } from '../../components/ReportPagination';
 import { ReportSettingsModal, ColumnSetting } from '../../components/ReportSettingsModal';
 import { FichaHistoricoModal, HistoricoModalData } from '../components/FichaHistoricoModal';
 import { CrecimientosFilterDrawer, CrecimientosFilterValues } from '../components/CrecimientosFilterDrawer';
-import { exportToCSV } from '../../utils/exportUtils';
+import { exportToCSV, exportToPDF } from '../../utils/exportUtils';
 import { MOCK_HISTORIA_CRECIMIENTOS } from '../historicosMockData';
 import { CrecimientoHistoricoEntity } from '../../../../types2/entities';
 import { EstatusAnimal } from '../../../../types2/common';
@@ -186,6 +186,40 @@ export const HistoriaCrecimientosView: React.FC = () => {
     exportToCSV('reporte_historia_crecimientos', headers, rows);
   };
 
+  const handleExportPDF = () => {
+    const headers = [
+      'Práctico',
+      'Único',
+      'Categoría',
+      'Estatus',
+      'Lote',
+      'Fecha',
+      'Tipo Pesaje',
+      'Peso (Kg)',
+      'GDP (g/d)',
+      'Altura (m)',
+      'G. Altura (cm/d)',
+      'Días Intervalo',
+      'Técnico'
+    ];
+    const rows = filteredPesajes.map(p => [
+      p.practico,
+      p.unico,
+      p.categoria,
+      p.estatus,
+      p.loteActual,
+      p.fecha,
+      p.tipoPesaje,
+      p.pesoKg,
+      p.gananciaGramosDia || 0,
+      p.alturaMetros || '',
+      p.gananciaCmDia || '',
+      p.diasEntreFechas !== undefined ? p.diasEntreFechas : '',
+      p.tecnicoResponsable || ''
+    ]);
+    exportToPDF('reporte_historia_crecimientos', 'Historial de Pesajes Ponderales y Crecimiento', headers, rows);
+  };
+
   const isColVisible = (key: string) => columns.find(c => c.key === key)?.visible ?? true;
 
   return (
@@ -198,6 +232,7 @@ export const HistoriaCrecimientosView: React.FC = () => {
         isFilterOpen={isFilterDrawerOpen}
         activeFiltersCount={activeFiltersCount}
         onExportXLSX={handleExportXLSX}
+        onExportPDF={handleExportPDF}
         onSettingsClick={() => setIsSettingsModalOpen(true)}
         extraActions={
           <div className="report-search-bar">

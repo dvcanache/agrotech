@@ -5,7 +5,7 @@ import { ReportPagination } from '../../components/ReportPagination';
 import { ReportSettingsModal, ColumnSetting } from '../../components/ReportSettingsModal';
 import { FichaHistoricoModal, HistoricoModalData } from '../components/FichaHistoricoModal';
 import { LactanciasFilterDrawer, LactanciasFilterValues } from '../components/LactanciasFilterDrawer';
-import { exportToCSV } from '../../utils/exportUtils';
+import { exportToCSV, exportToPDF } from '../../utils/exportUtils';
 import { MOCK_HISTORIA_LACTANCIAS } from '../historicosMockData';
 import { LactanciaHistoricoEntity } from '../../../../types2/entities';
 import { EstatusAnimal } from '../../../../types2/common';
@@ -172,6 +172,40 @@ export const HistoriaLactanciasView: React.FC = () => {
     exportToCSV('reporte_historia_lactancias', headers, rows);
   };
 
+  const handleExportPDF = () => {
+    const headers = [
+      'Práctico',
+      'Único',
+      'Categoría',
+      'Estatus',
+      'Lote',
+      'Fecha',
+      'Lactancia N°',
+      'Días Lactancia',
+      'P244 (Kg)',
+      'P270 (Kg)',
+      'P305 (Kg)',
+      'Prod. Total (Kg)',
+      'Rebaño'
+    ];
+    const rows = filteredLactancias.map(l => [
+      l.practico,
+      l.unico,
+      l.categoria,
+      l.estatus,
+      l.loteActual,
+      l.fecha,
+      l.lactanciaNumero,
+      l.diasLactancia,
+      l.p244Kg,
+      l.p270Kg,
+      l.p305Kg,
+      l.produccionTotalKg,
+      l.rebano
+    ]);
+    exportToPDF('reporte_historia_lactancias', 'Historial de Lactancias y Curvas de Producción', headers, rows);
+  };
+
   const isColVisible = (key: string) => columns.find(c => c.key === key)?.visible ?? true;
 
   return (
@@ -184,6 +218,7 @@ export const HistoriaLactanciasView: React.FC = () => {
         isFilterOpen={isFilterDrawerOpen}
         activeFiltersCount={activeFiltersCount}
         onExportXLSX={handleExportXLSX}
+        onExportPDF={handleExportPDF}
         onSettingsClick={() => setIsSettingsModalOpen(true)}
         extraActions={
           <div className="report-search-bar">

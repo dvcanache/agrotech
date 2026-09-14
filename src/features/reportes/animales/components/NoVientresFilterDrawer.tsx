@@ -2,8 +2,19 @@ import React from 'react';
 import { ReportFilterDrawer } from '../../components/ReportFilterDrawer';
 import { EstatusAnimal } from '../../../../types2/common';
 
+export type CategoriaNoVientres =
+  | 'Becerra'
+  | 'Mauta'
+  | 'Becerro'
+  | 'Maute'
+  | 'Novillo'
+  | 'Lechón'
+  | 'Bucerro'
+  | 'Cabrito'
+  | 'Pollo de engorde';
+
 export interface NoVientresFilterValues {
-  categorias: ('Becerra' | 'Mauta' | 'Becerro' | 'Maute' | 'Novillo')[];
+  categorias: (CategoriaNoVientres | string)[];
   estatus: EstatusAnimal[];
   lotes: string[];
 }
@@ -14,26 +25,34 @@ interface NoVientresFilterDrawerProps {
   filters: NoVientresFilterValues;
   onFilterChange: (newFilters: NoVientresFilterValues) => void;
   onReset: () => void;
+  lotesDisponibles?: string[];
 }
 
-const ALL_CATEGORIAS: ('Becerra' | 'Mauta' | 'Becerro' | 'Maute' | 'Novillo')[] = [
+export const ALL_CATEGORIAS: CategoriaNoVientres[] = [
   'Becerra',
   'Mauta',
   'Becerro',
   'Maute',
-  'Novillo'
+  'Novillo',
+  'Lechón',
+  'Bucerro',
+  'Cabrito',
+  'Pollo de engorde'
 ];
 
 const ALL_ESTATUS: EstatusAnimal[] = ['Activo', 'Inactivo', 'Referencia'];
-const ALL_LOTES = ['01', 'ESCT', 'POT1', 'SEC1'];
+const ALL_LOTES = ['01', 'ESCT', 'POT1', 'SEC1', 'BUF-01', 'PIARA-01', 'APR-01', 'CAB-01', 'GALP-04', 'GALP-05'];
 
 export const NoVientresFilterDrawer: React.FC<NoVientresFilterDrawerProps> = ({
   isOpen,
   onClose,
   filters,
   onFilterChange,
-  onReset
+  onReset,
+  lotesDisponibles
 }) => {
+  const lotesOptions = lotesDisponibles && lotesDisponibles.length > 0 ? lotesDisponibles : ALL_LOTES;
+
   const toggleArrayItem = <T,>(list: T[], item: T): T[] => {
     return list.includes(item) ? list.filter(i => i !== item) : [...list, item];
   };
@@ -93,7 +112,7 @@ export const NoVientresFilterDrawer: React.FC<NoVientresFilterDrawerProps> = ({
       <div className="filter-section">
         <div className="filter-section-title">Lotes</div>
         <div className="filter-checkbox-list">
-          {ALL_LOTES.map(lote => (
+          {lotesOptions.map(lote => (
             <label key={lote} className="filter-checkbox-label">
               <input
                 type="checkbox"

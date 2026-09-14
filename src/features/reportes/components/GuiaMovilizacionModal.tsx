@@ -33,7 +33,7 @@ export interface LivestockTransitItem {
   retiroFarmacoActivo: boolean;
   diasRetiroRestantes?: number;
   farmaco?: string;
-  tipoRetiro?: 'Carne' | 'Leche' | 'Carne y Huevo';
+  tipoRetiro?: 'Carne' | 'Leche' | 'Carne y Huevo' | 'Carne y Leche';
   sanitarioExtra?: string;
 }
 

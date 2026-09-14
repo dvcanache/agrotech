@@ -5,7 +5,8 @@ import { ReportPagination } from '../../components/ReportPagination';
 import { ReportSettingsModal, ColumnSetting } from '../../components/ReportSettingsModal';
 import { FichaAnimalModal, AnimalModalData } from '../components/FichaAnimalModal';
 import { ProximosDiasFilterDrawer, ProximosDiasFilterValues } from '../components/ProximosDiasFilterDrawer';
-import { exportToCSV } from '../../utils/exportUtils';
+import { exportToCSV, exportToPDF } from '../../utils/exportUtils';
+import { calculateDiasRestantes } from '../../utils/dateUtils';
 import { MOCK_PROXIMAS_SECAR } from '../animalesMockData';
 import { ProximaSecarEntity } from '../../../../types2/entities';
 import { EstatusAnimal } from '../../../../types2/common';
@@ -86,13 +87,21 @@ export const ProximasSecarView: React.FC = () => {
 
         if (!filters.estatus.includes(item.estatus)) return false;
         if (!filters.lotes.includes(item.lote)) return false;
-        if (item.diasProximoSecado > filters.proximosDiasMaximo) return false;
+        const diasRestSecado = calculateDiasRestantes(item.fechaProximoSecado);
+        if (diasRestSecado > filters.proximosDiasMaximo) return false;
 
         return true;
       })
       .sort((a, b) => {
-        const valA = a[sortField];
-        const valB = b[sortField];
+        let valA: any = a[sortField];
+        let valB: any = b[sortField];
+        if (sortField === 'diasProximoSecado') {
+          valA = calculateDiasRestantes(a.fechaProximoSecado);
+          valB = calculateDiasRestantes(b.fechaProximoSecado);
+        } else if (sortField === 'diasProximoParto') {
+          valA = a.fechaProximoParto ? calculateDiasRestantes(a.fechaProximoParto) : 9999;
+          valB = b.fechaProximoParto ? calculateDiasRestantes(b.fechaProximoParto) : 9999;
+        }
         if (typeof valA === 'number' && typeof valB === 'number') {
           return sortAsc ? valA - valB : valB - valA;
         }
@@ -143,12 +152,50 @@ export const ProximasSecarView: React.FC = () => {
       a.reproductor || '',
       a.fechaProximoSecado,
       a.fechaProximoParto || '',
-      a.diasProximoSecado,
-      a.diasProximoParto || '',
+      calculateDiasRestantes(a.fechaProximoSecado),
+      a.fechaProximoParto ? calculateDiasRestantes(a.fechaProximoParto) : '',
       a.ultimoPesajeLecheKg || '',
       a.fechaUltimoPesajeLeche || ''
     ]);
     exportToCSV('reporte_proximas_a_secar', headers, rows);
+  };
+
+  const handleExportPDF = () => {
+    const headers = [
+      'Práctico',
+      'Único',
+      'Categoría',
+      'Estatus',
+      'Lote',
+      'Último Parto/Aborto',
+      'Tipo Parto/Aborto',
+      'Último Servicio',
+      'Reproductor',
+      'Próximo Secado',
+      'Próximo Parto',
+      'Días Próx. Secado',
+      'Días Próx. Parto',
+      'Último Pesaje Leche (Kg)',
+      'Fecha Último Pesaje Leche'
+    ];
+    const rows = filteredAnimales.map(a => [
+      a.practico,
+      a.unico,
+      a.categoria,
+      a.estatus,
+      a.lote,
+      a.ultimoPartoAborto || '',
+      a.ultimoTipoPartoAborto || '',
+      a.ultimoServicio || '',
+      a.reproductor || '',
+      a.fechaProximoSecado,
+      a.fechaProximoParto || '',
+      calculateDiasRestantes(a.fechaProximoSecado),
+      a.fechaProximoParto ? calculateDiasRestantes(a.fechaProximoParto) : '',
+      a.ultimoPesajeLecheKg || '',
+      a.fechaUltimoPesajeLeche || ''
+    ]);
+    exportToPDF('reporte_proximas_a_secar', 'Reporte de Animales Próximas a Secar', headers, rows);
   };
 
   const isColVisible = (key: string) => columns.find(c => c.key === key)?.visible ?? true;
@@ -163,6 +210,7 @@ export const ProximasSecarView: React.FC = () => {
         isFilterOpen={isFilterDrawerOpen}
         activeFiltersCount={activeFiltersCount}
         onExportXLSX={handleExportXLSX}
+        onExportPDF={handleExportPDF}
         onSettingsClick={() => setIsSettingsModalOpen(true)}
         extraActions={
           <div className="report-search-bar">
@@ -267,6 +315,7 @@ export const ProximasSecarView: React.FC = () => {
                     setSelectedAnimal({
                       practico: a.practico,
                       unico: a.unico,
+                      especie: a.especie,
                       categoria: a.categoria,
                       estatus: a.estatus,
                       lote: a.lote,
@@ -304,12 +353,19 @@ export const ProximasSecarView: React.FC = () => {
                     <td style={{ fontWeight: 600, color: '#d97706' }}>{a.fechaProximoSecado}</td>
                   )}
                   {isColVisible('fechaProximoParto') && <td>{a.fechaProximoParto || '-'}</td>}
-                  {isColVisible('diasProximoSecado') && (
-                    <td>
-                      <span className="badge-efficiency medium">{a.diasProximoSecado} días</span>
-                    </td>
+                  {isColVisible('diasProximoSecado') && (() => {
+                    const diasSec = calculateDiasRestantes(a.fechaProximoSecado);
+                    return (
+                      <td>
+                        <span className={`badge-efficiency ${diasSec <= 15 ? 'high' : 'medium'}`}>
+                          {diasSec} días
+                        </span>
+                      </td>
+                    );
+                  })()}
+                  {isColVisible('diasProximoParto') && (
+                    <td>{a.fechaProximoParto ? `${calculateDiasRestantes(a.fechaProximoParto)} días` : '-'}</td>
                   )}
-                  {isColVisible('diasProximoParto') && <td>{a.diasProximoParto ? `${a.diasProximoParto} días` : '-'}</td>}
                   {isColVisible('ultimoPesajeLecheKg') && (
                     <td style={{ fontWeight: 600 }}>{a.ultimoPesajeLecheKg ? `${a.ultimoPesajeLecheKg} Kg` : '-'}</td>
                   )}

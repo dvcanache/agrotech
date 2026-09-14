@@ -20,6 +20,7 @@ export const TabSanidadUbre: React.FC<TabSanidadUbreProps> = ({ animal }) => {
   const isPoultry = animal.especie === 'Aves de corral' || (animal.categoria && ['Gallina', 'Pollo', 'Gallo', 'Pava', 'Pato', 'Pavito', 'Patito'].some(c => animal.categoria.includes(c)));
   const isCaprine = animal.especie === 'Caprinos' || animal.especie === 'Cabras';
   const isEquine = animal.especie === 'Equinos' || animal.especie === 'Caballos';
+  const isPorcine = animal.especie === 'Porcinos' || (animal.categoria && ['Cerda', 'Verraco', 'Lechón', 'Lechona', 'Cerdos'].some(c => animal.categoria.includes(c)));
   const isBipapilar = isCaprine || isEquine; // 2 mamas/mitades en cabras y yeguas
 
   const handleUpdateCMT = (codigo: 'AD' | 'AI' | 'PD' | 'PI', newCmt: GradoCMT) => {
@@ -55,11 +56,108 @@ export const TabSanidadUbre: React.FC<TabSanidadUbreProps> = ({ animal }) => {
     { id: 'vac-av-2', enfermedad: 'Gumboro (Bursitis Infecciosa)', producto: 'Bursine Plus (Agua de bebida)', laboratorio: 'Zoetis', lote: 'GUM-098', fechaAplicacion: '2026-08-20', fechaProximaDosis: '2026-12-20', estado: 'Vigente', veterinario: 'Ing. Agr. Marcos Solís' },
     { id: 'vac-av-3', enfermedad: 'Bronquitis Infecciosa', producto: 'H120 Liofilizada (Aspersión gota gruesa)', laboratorio: 'MSD Salud Animal', lote: 'BRO-112', fechaAplicacion: '2026-08-10', fechaProximaDosis: '2026-12-10', estado: 'Vigente', veterinario: 'Ing. Agr. Marcos Solís' },
     { id: 'vac-av-4', enfermedad: 'Viruela Aviar', producto: 'Pox-Vac (Punción alar)', laboratorio: 'Boehringer Ingelheim', lote: 'POX-44', fechaAplicacion: '2026-07-05', fechaProximaDosis: '2027-07-05', estado: 'Vigente', veterinario: 'Ing. Agr. Marcos Solís' },
+  ] : isPorcine ? [
+    { id: 'vac-po-1', enfermedad: 'Parvovirus Porcino & Erisipela', producto: 'Parvosuin-MR (Vía IM profunda)', laboratorio: 'Hipra', lote: 'PARV-2026-A', fechaAplicacion: '2026-08-10', fechaProximaDosis: '2026-11-10', estado: 'Vigente', veterinario: 'Dr. Zoot. Andrés Gil' },
+    { id: 'vac-po-2', enfermedad: 'Colibacilosis y Clostridiosis Neonatal', producto: 'Suiseng (Profilaxis MMA / Lechones)', laboratorio: 'Hipra', lote: 'SUI-887', fechaAplicacion: '2026-08-18', fechaProximaDosis: '2026-12-18', estado: 'Vigente', veterinario: 'Dr. Zoot. Andrés Gil' },
+    { id: 'vac-po-3', enfermedad: 'Neumonía Enzoótica (Mycoplasma)', producto: 'M+Pac Inactivada', laboratorio: 'MSD Salud Animal', lote: 'MYC-501', fechaAplicacion: '2026-07-20', fechaProximaDosis: '2027-01-20', estado: 'Vigente', veterinario: 'Dr. Zoot. Andrés Gil' },
+    { id: 'vac-po-4', enfermedad: 'Circovirus Porcino Tipo 2 (PCV2)', producto: 'CircoFLEX', laboratorio: 'Boehringer Ingelheim', lote: 'CIR-330', fechaAplicacion: '2026-06-15', fechaProximaDosis: '2027-06-15', estado: 'Vigente', veterinario: 'Dr. Zoot. Andrés Gil' },
   ] : planVacunacion;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      {isPoultry ? (
+      {isPorcine ? (
+        /* 1. Sanidad y Complejo Mamario Porcino (MMA y SDP) */
+        <div className="ficha360-card">
+          <div className="ficha360-card-title" style={{ justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <ShieldCheck size={16} color="#db2777" />
+              <span>Evaluación del Complejo Mamario &amp; Prevención Síndrome MMA</span>
+            </div>
+            <span style={{ fontSize: 12, color: '#db2777', fontWeight: 700, backgroundColor: '#fdf2f8', padding: '2px 8px', borderRadius: 10 }}>
+              Estatus: 14 Pezones Funcionales
+            </span>
+          </div>
+
+          <div style={{
+            backgroundColor: '#fdf2f8',
+            border: '1px solid #fbcfe8',
+            borderRadius: 8,
+            padding: '12px 16px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            marginBottom: 16
+          }}>
+            <span style={{ fontSize: 24 }}>🐷</span>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: 13, color: '#9d174d' }}>
+                Fisiología Porcina: Especie Multípara (Líneas Mamarias Bilaterales)
+              </div>
+              <div style={{ fontSize: 12, color: '#831843', lineHeight: 1.4 }}>
+                La cerda reproductora no posee ubre ni cuartos de rumiante (no aplica California Mastitis Test CMT bovino). Su aparato mamario está formado por <strong>dos cadenas mamarias paralelas (12 a 16 pezones)</strong> distribuidas en regiones torácica, abdominal e inguinal. El control sanitario se enfoca en la prevención del <strong>Síndrome MMA</strong> (Mastitis, Metritis, Agalactia) y la viabilidad de la camada.
+              </div>
+            </div>
+          </div>
+
+          {/* Diagrama de Líneas Mamarias Porcinas */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, marginBottom: 16 }}>
+            <div style={{ padding: 14, borderRadius: 8, backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: '#db2777', textTransform: 'uppercase', marginBottom: 8 }}>
+                Línea Mamaria Izquierda (7 Pezones)
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {['T1 (Torácico Ant.)', 'T2 (Torácico Post.)', 'A1 (Abdominal Ant.)', 'A2 (Abdominal Medio)', 'A3 (Abdominal Post.)', 'I1 (Inguinal Ant.)', 'I2 (Inguinal Post.)'].map((p, idx) => (
+                  <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '4px 8px', backgroundColor: '#fff', borderRadius: 4, border: '1px solid #f1f5f9' }}>
+                    <span style={{ fontWeight: 600, color: '#334155' }}>L-0{idx+1} {p}</span>
+                    <span style={{ color: '#16a34a', fontWeight: 700 }}>✓ Funcional / Calostro OK</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ padding: 14, borderRadius: 8, backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: '#db2777', textTransform: 'uppercase', marginBottom: 8 }}>
+                Línea Mamaria Derecha (7 Pezones)
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {['T1 (Torácico Ant.)', 'T2 (Torácico Post.)', 'A1 (Abdominal Ant.)', 'A2 (Abdominal Medio)', 'A3 (Abdominal Post.)', 'I1 (Inguinal Ant.)', 'I2 (Inguinal Post.)'].map((p, idx) => (
+                  <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '4px 8px', backgroundColor: '#fff', borderRadius: 4, border: '1px solid #f1f5f9' }}>
+                    <span style={{ fontWeight: 600, color: '#334155' }}>R-0{idx+1} {p}</span>
+                    <span style={{ color: '#16a34a', fontWeight: 700 }}>✓ Funcional / Calostro OK</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Indicadores Clínicos del Complejo Puerperal / MMA */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+            <div style={{ padding: 12, borderRadius: 8, backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Temperatura Rectal Postparto</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#16a34a', marginTop: 4 }}>38.8 °C (Normal &lt; 39.5°C)</div>
+              <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>Sin pico febril de MMA</div>
+            </div>
+
+            <div style={{ padding: 12, borderRadius: 8, backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Palpación de Glándulas</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#1e293b', marginTop: 4 }}>Blandas, Turgentes y Simétricas</div>
+              <div style={{ fontSize: 12, color: '#16a34a', marginTop: 2 }}>Sin induraciones ni calor localizado</div>
+            </div>
+
+            <div style={{ padding: 12, borderRadius: 8, backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Descarga Vulvar / Metritis</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#16a34a', marginTop: 4 }}>Fisiológica Transparente</div>
+              <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>Sin loquios purulentos o fétidos</div>
+            </div>
+
+            <div style={{ padding: 12, borderRadius: 8, backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Comportamiento de Camada</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#1e293b', marginTop: 4 }}>Lechones Saciados y Calmados</div>
+              <div style={{ fontSize: 12, color: '#16a34a', marginTop: 2 }}>Amamantamiento cada 50-60 min</div>
+            </div>
+          </div>
+        </div>
+      ) : isPoultry ? (
         /* 1. Sanidad y Bioseguridad Aviar */
         <div className="ficha360-card">
           <div className="ficha360-card-title" style={{ justifyContent: 'space-between' }}>
@@ -151,6 +249,25 @@ export const TabSanidadUbre: React.FC<TabSanidadUbreProps> = ({ animal }) => {
               <Info size={18} color="#059669" />
               <div style={{ fontSize: 12, color: '#065f46', lineHeight: 1.4 }}>
                 <strong>Fisiología Caprina (Secreción Apocrina):</strong> La leche de cabra contiene de forma fisiológica partículas celulares y restos citoplasmáticos no leucocitarios. El umbral clínico de alerta para RCS en caprinos es de <strong>1,000,000 cel/ml</strong> (a diferencia del estándar bovino merocrino de 200,000 cel/ml).
+              </div>
+            </div>
+          )}
+
+          {/* Aviso Fisiológico para Equinos */}
+          {isEquine && (
+            <div style={{
+              backgroundColor: '#eff6ff',
+              border: '1px solid #bfdbfe',
+              borderRadius: 8,
+              padding: '10px 14px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              marginBottom: 16
+            }}>
+              <Info size={18} color="#2563eb" />
+              <div style={{ fontSize: 12, color: '#1e40af', lineHeight: 1.4 }}>
+                <strong>Fisiología Equina (2 Mamas Inguinales):</strong> La yegua posee dos glándulas mamarias independientes en la región inguinal (mitad derecha e izquierda), cada una con dos conductos por pezón. La producción láctea está orientada al rápido crecimiento del potro al pie y no se ordeña convencionalmente con copas de rumiante.
               </div>
             </div>
           )}

@@ -6,7 +6,7 @@ import { ReportSettingsModal, ColumnSetting } from '../../components/ReportSetti
 import { NuevoMovimientoModal } from './NuevoMovimientoModal';
 import { DetalleMovimientoModal } from './DetalleMovimientoModal';
 import { MovimientosFilterDrawer, MovimientosFilterValues } from './MovimientosFilterDrawer';
-import { exportToCSV } from '../../utils/exportUtils';
+import { exportToCSV, exportToPDF } from '../../utils/exportUtils';
 import { MOCK_MOVIMIENTOS } from '../gestionMockData';
 import { MovimientoEntity } from '../../../../types2/entities';
 
@@ -165,6 +165,40 @@ export const MovimientosView: React.FC = () => {
     exportToCSV('reporte_movimientos', headers, rows);
   };
 
+  const handleExportPDF = () => {
+    const headers = [
+      'Fecha',
+      'Tipo de Movimiento',
+      'ID Práctico',
+      'ID Único',
+      'Rebaño Origen',
+      'Categoría Origen',
+      'Rebaño Destino',
+      'Categoría Destino',
+      'Técnico',
+      'Estatus Actual',
+      'Categoría Actual',
+      'Lote Actual',
+      'Comentario'
+    ];
+    const rows = filteredMovimientos.map(m => [
+      m.fecha,
+      m.tipo,
+      m.practico,
+      m.unico,
+      m.rebanoOrigen,
+      m.categoriaOrigen,
+      m.rebanoDestino,
+      m.categoriaDestino,
+      m.tecnico,
+      m.estatusActual,
+      m.categoriaActual,
+      m.loteActual,
+      m.comentario || ''
+    ]);
+    exportToPDF('reporte_movimientos', 'Reporte de Movimientos de Ganado', headers, rows);
+  };
+
   const isColVisible = (key: string) => columns.find(c => c.key === key)?.visible ?? true;
 
   const handleAddNewMovimiento = (nuevo: MovimientoEntity) => {
@@ -181,6 +215,7 @@ export const MovimientosView: React.FC = () => {
         isFilterOpen={isFilterDrawerOpen}
         activeFiltersCount={activeFiltersCount}
         onExportXLSX={handleExportXLSX}
+        onExportPDF={handleExportPDF}
         onSettingsClick={() => setIsSettingsModalOpen(true)}
         extraActions={
           <div className="report-search-bar">
