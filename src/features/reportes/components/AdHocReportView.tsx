@@ -1,13 +1,11 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  FileText,
   Calendar,
   Layers,
   ArrowLeft,
   AlertCircle,
   Database,
-  Hash,
   Table as TableIcon
 } from 'lucide-react';
 import { ReportViewHeader } from './ReportViewHeader';

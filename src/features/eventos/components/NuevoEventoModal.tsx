@@ -291,6 +291,7 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
   const [muerteEmbrionaria, setMuerteEmbrionaria] = useState(4);
   const [salaIncubacion, setSalaIncubacion] = useState('INC-01');
   const [calidadPollito, setCalidadPollito] = useState('Grado 1 Élite (Pasgar Score 9+)');
+  const porcentajeEclosion = huevosFertilesIncubados > 0 ? (pollitosVivos / huevosFertilesIncubados) * 100 : 0;
 
   // Equinos: Foliculometría & Parto Equino
   const [diametroFolículoMm, setDiametroFolículoMm] = useState(42);
@@ -662,11 +663,11 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
 
           // Atomic newborn registration
           if (crearCriaAtomics && condicionCria === 'Viva') {
-            const categoriaCria = currentSpecies === 'Búfalos' 
+            const categoriaCria = ((currentSpecies as string) === 'Búfalos')
               ? (criaSexo === 'Hembra' ? 'Bucerra' : 'Bucerro')
-              : currentSpecies === 'Caprinos'
+              : ((currentSpecies as string) === 'Caprinos')
               ? (criaSexo === 'Hembra' ? 'Cabrita' : 'Cabrito')
-              : currentSpecies === 'Equinos'
+              : ((currentSpecies as string) === 'Equinos')
               ? (criaSexo === 'Hembra' ? 'Potranca' : 'Potro')
               : (criaSexo === 'Hembra' ? 'Becerra' : 'Becerro');
 
@@ -1607,7 +1608,7 @@ export const NuevoEventoModal: React.FC<NuevoEventoModalProps> = ({
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, color: '#1e293b', fontSize: 13 }}>
                                 <Baby size={18} color="#2d6a4f" />
-                                <span>Alta Atómica de la Cría ({currentSpecies === 'Búfalos' ? 'Bucerro/a' : currentSpecies === 'Caprinos' ? 'Cabrito/a' : currentSpecies === 'Equinos' ? 'Potro/a' : 'Becerro/a'})</span>
+                                <span>Alta Atómica de la Cría ({((currentSpecies as string) === 'Búfalos') ? 'Bucerro/a' : ((currentSpecies as string) === 'Caprinos') ? 'Cabrito/a' : ((currentSpecies as string) === 'Equinos') ? 'Potro/a' : 'Becerro/a'})</span>
                               </div>
                               <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, cursor: 'pointer', color: '#2d6a4f', fontWeight: 600 }}>
                                 <input

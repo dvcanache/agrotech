@@ -1,7 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   X,
-  FileCheck2,
   Truck,
   ShieldCheck,
   AlertTriangle,
@@ -14,8 +13,7 @@ import {
   User,
   Hash,
   Scale,
-  BadgeAlert,
-  Info
+  BadgeAlert
 } from 'lucide-react';
 import { exportToPDF } from '../utils/exportUtils';
 import { EspecieAnimal } from '../../../types/animal';
@@ -778,6 +776,24 @@ export const GuiaMovilizacionModal: React.FC<GuiaMovilizacionModalProps> = ({
     );
     onClose();
   };
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = 'unset';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 

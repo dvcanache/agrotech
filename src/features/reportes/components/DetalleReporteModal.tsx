@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, FileText, ExternalLink, CheckCircle2 } from 'lucide-react';
 import { ReporteItem } from './NuevoReporteModal';
@@ -15,6 +15,24 @@ export const DetalleReporteModal: React.FC<DetalleReporteModalProps> = ({
   reporte
 }) => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = 'unset';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
 
   if (!isOpen || !reporte) return null;
 

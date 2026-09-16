@@ -1,6 +1,6 @@
 import React from 'react';
 import { ReportFilterDrawer } from '../../components/ReportFilterDrawer';
-import { CategoriaAnimal, EstatusAnimal } from '../../../../types2/common';
+import { EstatusAnimal } from '../../../../types2/common';
 
 export interface InventariosFilterValues {
   lotes: string[];

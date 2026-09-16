@@ -47,7 +47,7 @@ export const ReportesView: React.FC = () => {
       const saved = localStorage.getItem('agrogan_saved_reports_v2');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length >= 6) {
+        if (Array.isArray(parsed)) {
           return parsed;
         }
       }
@@ -89,6 +89,11 @@ export const ReportesView: React.FC = () => {
     }
   };
 
+  // Restablecer reportes iniciales predeterminados
+  const handleResetDefaults = () => {
+    setReportes(INITIAL_REPORTS);
+  };
+
   // Ejecutar reporte
   const handleExecuteReport = (rep: ReporteItem) => {
     if (rep.rutaAsociada) {
@@ -119,8 +124,14 @@ export const ReportesView: React.FC = () => {
     setIsDetailModalOpen(true);
   };
 
+  // Función auxiliar de normalización para búsquedas insensibles a tildes y diacríticos
+  const normalizeText = (str: string) =>
+    str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+
   // Filtrado de reportes guardados por especie y término de búsqueda
   const filteredReports = useMemo(() => {
+    const term = normalizeText(searchTerm);
+
     return reportes.filter(rep => {
       // Filtro por especie
       if (selectedSpecies !== 'todos') {
@@ -131,14 +142,13 @@ export const ReportesView: React.FC = () => {
       }
 
       // Filtro por término de búsqueda
-      if (searchTerm.trim()) {
-        const term = searchTerm.toLowerCase();
+      if (term) {
         return (
-          rep.codigo.toLowerCase().includes(term) ||
-          rep.nombre.toLowerCase().includes(term) ||
-          rep.descripcion.toLowerCase().includes(term) ||
-          rep.categoria.toLowerCase().includes(term) ||
-          (rep.especie && rep.especie.toLowerCase().includes(term))
+          normalizeText(rep.codigo).includes(term) ||
+          normalizeText(rep.nombre).includes(term) ||
+          normalizeText(rep.descripcion).includes(term) ||
+          normalizeText(rep.categoria).includes(term) ||
+          (rep.especie ? normalizeText(rep.especie).includes(term) : false)
         );
       }
 
@@ -569,15 +579,49 @@ export const ReportesView: React.FC = () => {
                         ? `No se encontraron reportes que coincidan con "${searchTerm}".`
                         : `No hay reportes configurados para la especie seleccionada.`}
                     </p>
-                    <button
-                      type="button"
-                      className="btn-primary"
-                      onClick={() => setIsNewModalOpen(true)}
-                      style={{ marginTop: 12, display: 'inline-flex', alignItems: 'center', gap: 6 }}
-                    >
-                      <Plus size={15} />
-                      <span>Configurar Primer Reporte</span>
-                    </button>
+                    {searchTerm ? (
+                      <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 12 }}>
+                        <button
+                          type="button"
+                          className="btn-secondary"
+                          onClick={() => setSearchTerm('')}
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '6px 14px' }}
+                        >
+                          <span>Limpiar búsqueda</span>
+                        </button>
+                        <button
+                          type="button"
+                          className="btn-primary"
+                          onClick={() => setIsNewModalOpen(true)}
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '6px 14px' }}
+                        >
+                          <Plus size={15} />
+                          <span>Configurar Nuevo Reporte</span>
+                        </button>
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 12 }}>
+                        {reportes.length === 0 && (
+                          <button
+                            type="button"
+                            className="btn-secondary"
+                            onClick={handleResetDefaults}
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '6px 14px' }}
+                          >
+                            <span>Restablecer Predeterminados</span>
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          className="btn-primary"
+                          onClick={() => setIsNewModalOpen(true)}
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '6px 14px' }}
+                        >
+                          <Plus size={15} />
+                          <span>Configurar Primer Reporte</span>
+                        </button>
+                      </div>
+                    )}
                   </td>
                 </tr>
               )}
